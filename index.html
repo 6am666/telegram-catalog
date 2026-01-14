@@ -5,49 +5,46 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Chronicle Chains</title>
 
+<!-- TELEGRAM API -->
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
 <style>
-/* ===== RESET ===== */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-/* ===== BODY + BACKGROUND ===== */
 body {
   font-family: Arial, sans-serif;
   background-color: #1e1e1e;
 }
 
-/* ОДИН ФОН, КОТОРЫЙ ДВИГАЕТСЯ */
+/* ФОН */
 .background {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   background-image: url("https://i.pinimg.com/736x/49/e1/06/49e106d8647da6e653de71f2d7df3d60.jpg");
   background-size: cover;
   background-position: center;
   z-index: -1;
 }
 
-/* ===== CONTENT ===== */
+/* КОНТЕЙНЕР */
 .container {
   max-width: 420px;
   margin: 0 auto;
   padding: 16px;
 }
 
-/* ===== TITLE ===== */
+/* ЗАГОЛОВОК */
 h1 {
   text-align: center;
   color: #fff;
   margin: 20px 0;
-  font-size: 28px;
 }
 
-/* ===== SEARCH ===== */
+/* ПОИСК */
 .search {
   width: 100%;
   padding: 12px;
@@ -57,14 +54,14 @@ h1 {
   font-size: 16px;
 }
 
-/* ===== GRID ===== */
+/* СЕТКА */
 .products {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 12px;
 }
 
-/* ===== PRODUCT CARD ===== */
+/* КАРТОЧКА */
 .product {
   background: rgba(0,0,0,0.6);
   border: 1px solid rgba(255,255,255,0.25);
@@ -77,15 +74,13 @@ h1 {
   justify-content: space-between;
 }
 
-/* IMAGE */
 .product img {
   width: 100%;
-  height: 65%;
+  height: 60%;
   object-fit: cover;
   border-radius: 10px;
 }
 
-/* TEXT */
 .product h3 {
   color: #fff;
   font-size: 14px;
@@ -95,6 +90,17 @@ h1 {
 .product p {
   color: #ccc;
   font-size: 13px;
+}
+
+/* КНОПКА */
+.add-btn {
+  margin-top: 6px;
+  padding: 8px;
+  border-radius: 10px;
+  border: none;
+  background: #4CAF50;
+  color: white;
+  font-size: 14px;
 }
 </style>
 </head>
@@ -113,30 +119,95 @@ h1 {
     oninput="filterProducts(this.value)"
   >
 
-  <div class="products" id="products">
-
-    <!-- 10 ТОВАРОВ -->
-    <div class="product"><img src="https://via.placeholder.com/300"><h3>Chain 1</h3><p>1 200 ₽</p></div>
-    <div class="product"><img src="https://via.placeholder.com/300"><h3>Chain 2</h3><p>1 350 ₽</p></div>
-    <div class="product"><img src="https://via.placeholder.com/300"><h3>Chain 3</h3><p>1 100 ₽</p></div>
-    <div class="product"><img src="https://via.placeholder.com/300"><h3>Chain 4</h3><p>1 400 ₽</p></div>
-    <div class="product"><img src="https://via.placeholder.com/300"><h3>Chain 5</h3><p>1 600 ₽</p></div>
-    <div class="product"><img src="https://via.placeholder.com/300"><h3>Chain 6</h3><p>1 250 ₽</p></div>
-    <div class="product"><img src="https://via.placeholder.com/300"><h3>Chain 7</h3><p>1 300 ₽</p></div>
-    <div class="product"><img src="https://via.placeholder.com/300"><h3>Chain 8</h3><p>1 500 ₽</p></div>
-    <div class="product"><img src="https://via.placeholder.com/300"><h3>Chain 9</h3><p>1 700 ₽</p></div>
-    <div class="product"><img src="https://via.placeholder.com/300"><h3>Chain 10</h3><p>1 900 ₽</p></div>
-
-  </div>
+  <div class="products" id="products"></div>
 </div>
 
 <script>
-function filterProducts(value) {
-  value = value.toLowerCase();
-  document.querySelectorAll(".product").forEach(p => {
-    p.style.display = p.innerText.toLowerCase().includes(value) ? "flex" : "none";
+const tg = window.Telegram.WebApp;
+tg.expand();
+
+let cart = [];
+
+/* ТОВАРЫ */
+const products = [
+  { id: 1, name: "Chain 1", price: 1200, image: "https://via.placeholder.com/300" },
+  { id: 2, name: "Chain 2", price: 1350, image: "https://via.placeholder.com/300" },
+  { id: 3, name: "Chain 3", price: 1100, image: "https://via.placeholder.com/300" },
+  { id: 4, name: "Chain 4", price: 1400, image: "https://via.placeholder.com/300" },
+  { id: 5, name: "Chain 5", price: 1600, image: "https://via.placeholder.com/300" },
+];
+
+const container = document.getElementById("products");
+
+/* РЕНДЕР */
+function renderProducts(list) {
+  container.innerHTML = "";
+  list.forEach(p => {
+    const card = document.createElement("div");
+    card.className = "product";
+
+    card.innerHTML = `
+      <img src="${p.image}">
+      <h3>${p.name}</h3>
+      <p>${p.price} ₽</p>
+      <button class="add-btn">В корзину</button>
+    `;
+
+    card.querySelector(".add-btn").onclick = (e) => {
+      e.stopPropagation();
+      addToCart(p);
+    };
+
+    container.appendChild(card);
   });
 }
+
+renderProducts(products);
+
+/* ПОИСК */
+function filterProducts(value) {
+  value = value.toLowerCase();
+  const filtered = products.filter(p =>
+    p.name.toLowerCase().includes(value)
+  );
+  renderProducts(filtered);
+}
+
+/* КОРЗИНА */
+function addToCart(product) {
+  cart.push(product);
+  saveCart();
+  updateMainButton();
+}
+
+function saveCart() {
+  tg.CloudStorage.setItem("cart", JSON.stringify(cart));
+}
+
+function updateMainButton() {
+  if (cart.length > 0) {
+    tg.MainButton.setText(`Оформить заказ (${cart.length})`);
+    tg.MainButton.show();
+  } else {
+    tg.MainButton.hide();
+  }
+}
+
+/* КНОПКА ОФОРМЛЕНИЯ */
+tg.MainButton.onClick(() => {
+  tg.sendData(JSON.stringify({
+    action: "order",
+    items: cart
+  }));
+});
+
+/* ЗАГРУЗКА КОРЗИНЫ */
+tg.CloudStorage.getItem("cart", (err, data) => {
+  if (!err && data) {
+    cart = JSON.parse(data);
+    updateMainButton();
+  }
+});
 </script>
 
 </body>

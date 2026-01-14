@@ -5,14 +5,14 @@ body {
 
   /* Фоновая картинка */
   background: url('https://i.pinimg.com/736x/49/e1/06/49e106d8647da6e653de71f2d7df3d60.jpg') no-repeat center center;
-  
+
   /* Размер картинки */
-  background-size: 120% auto;   /* увеличиваем ширину до 120%, высота подстраивается */
-  
-  /* Позиция */
-  background-position: center center; /* центрируем по экрану */
-  
-  /* Фон движется при прокрутке */
+  background-size: 120% auto;   /* увеличиваем ширину, высота подстраивается */
+
+  /* Центрирование */
+  background-position: center center;
+
+  /* Фон двигается при прокрутке */
   background-attachment: scroll;
 
   color: white;

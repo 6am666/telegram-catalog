@@ -1,4 +1,4 @@
-/* Фон за всем контентом */
+/* Фон за всеми товарами */
 body {
   margin: 0;
   padding: 0;
@@ -7,37 +7,37 @@ body {
   /* Фоновая картинка */
   background: url('https://i.pinimg.com/736x/49/e1/06/49e106d8647da6e653de71f2d7df3d60.jpg') no-repeat center center;
   
-  /* Фон растягивается на всю ширину, а высота подстраивается */
-  background-size: 120% auto;   /* можно подправить % для масштабирования */
+  /* Размер и масштабирование */
+  background-size: 120% auto; /* можно подправить % для масштабирования */
   
-  background-attachment: scroll; /* фон двигается с прокруткой */
   background-position: center center;
+  background-attachment: scroll; /* фон движется вместе с прокруткой */
   
-  /* Цветная подложка для затемнения */
-  background-color: #888888;   /* серый фон позади картинки */
-  
+  /* Цветная подложка серого цвета */
+  background-color: #888888;
+
   color: white;
 }
 
-/* Контейнер каталога */
+/* Каталог товаров */
 #catalog {
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
   justify-content: center;
   padding: 20px;
-  position: relative; /* чтобы карточки были выше фона */
+  position: relative; /* карточки поверх фона */
   z-index: 1;
 }
 
 /* Карточки товаров */
 .card {
-  background: rgba(0, 0, 0, 0.6); /* полупрозрачный черный фон */
+  background: rgba(0, 0, 0, 0.6);
   color: white;
   border-radius: 15px;
   padding: 15px;
   text-align: center;
-  width: 180px;
+  width: 45%; /* две карточки в ряд */
   box-shadow: 0 4px 10px rgba(0,0,0,0.3);
   transition: transform 0.2s;
 }
@@ -64,4 +64,11 @@ body {
 
 .card button:hover {
   background: #008fcc;
+}
+
+/* Адаптив для маленьких экранов */
+@media screen and (max-width: 480px) {
+  .card {
+    width: 90%; /* на телефоне по одной карточке в ряд */
+  }
 }

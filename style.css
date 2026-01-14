@@ -1,13 +1,14 @@
+/* Основной фон страницы */
 body {
   margin: 0;
   padding: 0;
   font-family: Arial, sans-serif;
 
-  /* Фоновая картинка */
+  /* Фоновая картинка, двигается при прокрутке */
   background: url('https://i.pinimg.com/736x/49/e1/06/49e106d8647da6e653de71f2d7df3d60.jpg') no-repeat center center;
   background-size: contain;       /* картинка полностью помещается на экране */
   background-position: center;    /* центрирование */
-  background-attachment: scroll;  /* фон двигается при прокрутке */
+  background-attachment: scroll;  /* фон двигается вместе с прокруткой */
 
-  color: white;                   /* текст читаемый */
+  color: white;                  /* чтобы текст был виден */
 }

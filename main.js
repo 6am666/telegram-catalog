@@ -1,5 +1,6 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
+tg.MainButton.setParams({ color: '#000000', textColor: '#FFFFFF' });
 
 let cart = [];
 let inCartScreen = false;
@@ -15,34 +16,48 @@ const products = [
   { id: 8, name: "Кулон с цепочкой Moonlight", price: 2000, image: "https://i.pinimg.com/736x/5a/6d/1b/5a6d1beecdc7b79798705e4da0ef3a5c.jpg" },
 ];
 
-const container = document.getElementById("products");
+const containerEl = document.getElementById("products");
 
-/* Рендер каталога */
+/* РЕНДЕР КАТАЛОГА */
 function renderProducts(list = products) {
   inCartScreen = false;
-  container.innerHTML = "";
+  document.body.style.backgroundColor = '#1e1e1e';
+  tg.MainButton.setParams({ color: '#000000', textColor: '#FFFFFF' });
+  containerEl.innerHTML = "";
+
   list.forEach(p => {
     const card = document.createElement("div");
     card.className = "product";
 
+    const img = new Image();
+    img.src = p.image;
+    img.onerror = () => img.src = "https://via.placeholder.com/300";
+    img.alt = p.name;
+    img.style.width = "100%";
+    img.style.height = "60%";
+    img.style.objectFit = "cover";
+    img.style.borderRadius = "10px";
+
     card.innerHTML = `
-      <img src="${p.image}">
       <h3>${p.name}</h3>
       <p>${p.price} ₽</p>
       <button class="add-btn">В корзину</button>
     `;
+
+    card.prepend(img);
 
     card.querySelector(".add-btn").onclick = (e) => {
       e.stopPropagation();
       addToCart(p);
     };
 
-    container.appendChild(card);
+    containerEl.appendChild(card);
   });
+
   updateMainButton();
 }
 
-/* Поиск */
+/* ПОИСК */
 function filterProducts(value) {
   value = value.toLowerCase();
   const filtered = products.filter(p =>
@@ -51,21 +66,21 @@ function filterProducts(value) {
   renderProducts(filtered);
 }
 
-/* Корзина */
+/* КОРЗИНА */
 function addToCart(product) {
   cart.push(product);
   saveCart();
   updateMainButton();
 }
 
-function saveCart() {
-  tg.CloudStorage.setItem("cart", JSON.stringify(cart));
-}
-
 function removeFromCart(index) {
   cart.splice(index, 1);
   saveCart();
   renderCart();
+}
+
+function saveCart() {
+  tg.CloudStorage.setItem("cart", JSON.stringify(cart));
 }
 
 function updateMainButton() {
@@ -80,50 +95,61 @@ function updateMainButton() {
 /* Кнопка Telegram */
 tg.MainButton.onClick(() => {
   if (inCartScreen) {
-    tg.sendData(JSON.stringify({
-      action: "order",
-      items: cart
-    }));
+    // Дальнейшие действия при оформлении заказа
+    alert("Заказ оформлен!\n" + JSON.stringify(cart, null, 2));
+    tg.sendData(JSON.stringify({ action: "order", items: cart }));
+    cart = [];
+    saveCart();
+    renderProducts();
   } else {
     renderCart();
   }
 });
 
-/* Рендер корзины */
+/* РЕНДЕР КОРЗИНЫ */
 function renderCart() {
   inCartScreen = true;
-  container.innerHTML = "";
+  document.body.style.backgroundColor = '#000000';
+  containerEl.innerHTML = "";
 
   if (cart.length === 0) {
-    container.innerHTML = `<p style="color:white; text-align:center; margin-top:20px;">Корзина пуста</p>`;
+    containerEl.innerHTML = `<p style="color:white; text-align:center; margin-top:20px;">Корзина пуста</p>`;
   } else {
     cart.forEach((p, i) => {
       const card = document.createElement("div");
       card.className = "product";
 
+      const img = new Image();
+      img.src = p.image;
+      img.onerror = () => img.src = "https://via.placeholder.com/300";
+      img.alt = p.name;
+      img.style.width = "100%";
+      img.style.height = "60%";
+      img.style.objectFit = "cover";
+      img.style.borderRadius = "10px";
+
       card.innerHTML = `
-        <img src="${p.image}">
         <h3>${p.name}</h3>
         <p>${p.price} ₽</p>
         <button class="remove-btn">Удалить</button>
       `;
 
+      card.prepend(img);
       card.querySelector(".remove-btn").onclick = () => removeFromCart(i);
-      container.appendChild(card);
+      containerEl.appendChild(card);
     });
 
-    // Сумма
     const total = cart.reduce((sum, item) => sum + item.price, 0);
     const totalDiv = document.createElement("div");
     totalDiv.className = "cart-total";
     totalDiv.textContent = `Итого: ${total} ₽`;
-    container.appendChild(totalDiv);
+    containerEl.appendChild(totalDiv);
   }
 
   updateMainButton();
 }
 
-/* Загрузка корзины при старте */
+/* ЗАГРУЗКА КОРЗИНЫ */
 tg.CloudStorage.getItem("cart", (err, data) => {
   if (!err && data) {
     cart = JSON.parse(data);

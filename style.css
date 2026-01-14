@@ -3,30 +3,21 @@ body {
   margin: 0;
   padding: 0;
   font-family: Arial, sans-serif;
-
-  /* Фоновая картинка */
   background: url('https://i.pinimg.com/736x/49/e1/06/49e106d8647da6e653de71f2d7df3d60.jpg') no-repeat center center;
-  
-  /* Размер и масштабирование */
-  background-size: 120% auto; /* можно подправить % для масштабирования */
-  
-  background-position: center center;
-  background-attachment: scroll; /* фон движется вместе с прокруткой */
-  
-  /* Цветная подложка серого цвета */
-  background-color: #888888;
-
+  background-size: cover;        /* фон заполняет весь экран */
+  background-attachment: scroll; /* движется при прокрутке */
+  background-color: #888888;     /* серый фон под картинкой */
   color: white;
 }
 
-/* Каталог товаров */
-#catalog {
+/* Контейнер каталога */
+.container {
   display: flex;
   flex-wrap: wrap;
-  gap: 20px;
   justify-content: center;
+  gap: 20px;
   padding: 20px;
-  position: relative; /* карточки поверх фона */
+  position: relative; /* чтобы карточки были поверх фона */
   z-index: 1;
 }
 
@@ -53,22 +44,4 @@ body {
 
 .card button {
   margin-top: 10px;
-  padding: 8px 12px;
-  background: #2AABEE;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.card button:hover {
-  background: #008fcc;
-}
-
-/* Адаптив для маленьких экранов */
-@media screen and (max-width: 480px) {
-  .card {
-    width: 90%; /* на телефоне по одной карточке в ряд */
-  }
-}
+  padding: 8px 1

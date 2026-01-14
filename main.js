@@ -2,20 +2,22 @@ const tg = window.Telegram.WebApp;
 tg.expand();
 
 let cart = [];
+let inCartScreen = false;
 
-// Товары
 const products = [
-  { id: 1, name: "Chain 1", price: 1200, image: "https://via.placeholder.com/300" },
-  { id: 2, name: "Chain 2", price: 1350, image: "https://via.placeholder.com/300" },
-  { id: 3, name: "Chain 3", price: 1100, image: "https://via.placeholder.com/300" },
-  { id: 4, name: "Chain 4", price: 1400, image: "https://via.placeholder.com/300" },
-  { id: 5, name: "Chain 5", price: 1600, image: "https://via.placeholder.com/300" },
+  { id: 1, name: "Колье Pierced Chain", price: 1200, image: "https://via.placeholder.com/300" },
+  { id: 2, name: "Колье Starry Sky", price: 1350, image: "https://via.placeholder.com/300" },
+  { id: 3, name: "Колье Gothic Thorns", price: 1100, image: "https://via.placeholder.com/300" },
+  { id: 4, name: "Браслет Hearts", price: 1400, image: "https://via.placeholder.com/300" },
+  { id: 5, name: "Обвес Lighter", price: 1600, image: "https://via.placeholder.com/300" },
+  { id: 6, name: "Обвес Star", price: 1250, image: "https://via.placeholder.com/300" },
+  { id: 7, name: "Серьги Moonlight", price: 1300, image: "https://via.placeholder.com/300" },
+  { id: 8, name: "Кулон с цепочкой Moonlight", price: 1500, image: "https://via.placeholder.com/300" },
 ];
 
 const container = document.getElementById("products");
-let inCartScreen = false;
 
-// Рендер товаров каталога
+/* Рендер каталога */
 function renderProducts(list = products) {
   inCartScreen = false;
   container.innerHTML = "";
@@ -40,7 +42,7 @@ function renderProducts(list = products) {
   updateMainButton();
 }
 
-// Поиск товаров
+/* Поиск */
 function filterProducts(value) {
   value = value.toLowerCase();
   const filtered = products.filter(p =>
@@ -49,26 +51,23 @@ function filterProducts(value) {
   renderProducts(filtered);
 }
 
-// Добавление в корзину
+/* Корзина */
 function addToCart(product) {
   cart.push(product);
   saveCart();
   updateMainButton();
 }
 
-// Сохраняем корзину
 function saveCart() {
   tg.CloudStorage.setItem("cart", JSON.stringify(cart));
 }
 
-// Удаляем товар
 function removeFromCart(index) {
   cart.splice(index, 1);
   saveCart();
   renderCart();
 }
 
-// Обновляем кнопку Telegram
 function updateMainButton() {
   if (cart.length > 0) {
     tg.MainButton.setText(inCartScreen ? `Оформить заказ (${cart.length})` : `Корзина (${cart.length})`);
@@ -78,21 +77,19 @@ function updateMainButton() {
   }
 }
 
-// Обработчик кнопки Telegram
+/* Кнопка Telegram */
 tg.MainButton.onClick(() => {
   if (inCartScreen) {
-    // Отправка заказа в бота
     tg.sendData(JSON.stringify({
       action: "order",
       items: cart
     }));
   } else {
-    // Показ корзины
     renderCart();
   }
 });
 
-// Рендер экрана корзины
+/* Рендер корзины */
 function renderCart() {
   inCartScreen = true;
   container.innerHTML = "";
@@ -103,30 +100,30 @@ function renderCart() {
     cart.forEach((p, i) => {
       const card = document.createElement("div");
       card.className = "product";
+
       card.innerHTML = `
         <img src="${p.image}">
         <h3>${p.name}</h3>
         <p>${p.price} ₽</p>
-        <button class="add-btn">Удалить</button>
+        <button class="remove-btn">Удалить</button>
       `;
-      card.querySelector(".add-btn").onclick = () => removeFromCart(i);
+
+      card.querySelector(".remove-btn").onclick = () => removeFromCart(i);
       container.appendChild(card);
     });
 
-    // Сумма всех товаров
+    // Сумма
     const total = cart.reduce((sum, item) => sum + item.price, 0);
     const totalDiv = document.createElement("div");
-    totalDiv.style.color = "white";
-    totalDiv.style.textAlign = "center";
-    totalDiv.style.marginTop = "10px";
-    totalDiv.innerHTML = `<h3>Итого: ${total} ₽</h3>`;
+    totalDiv.className = "cart-total";
+    totalDiv.textContent = `Итого: ${total} ₽`;
     container.appendChild(totalDiv);
   }
 
   updateMainButton();
 }
 
-// Загрузка корзины при старте
+/* Загрузка корзины при старте */
 tg.CloudStorage.getItem("cart", (err, data) => {
   if (!err && data) {
     cart = JSON.parse(data);

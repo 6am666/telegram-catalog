@@ -2,37 +2,25 @@ const tg = window.Telegram.WebApp;
 tg.expand();
 
 const products = [
-  { id: 1, name: "Футболка Космос", price: 1200, image: "https://example.com/tshirt.png" },
-  { id: 2, name: "Кружка Магия", price: 800, image: "https://example.com/mug.png" },
-  { id: 3, name: "Блокнот Звезда", price: 500, image: "https://example.com/notebook.png" }
+  { id: 1, name: "Chain 1", price: 1200, image: "https://via.placeholder.com/300" },
+  { id: 2, name: "Chain 2", price: 1350, image: "https://via.placeholder.com/300" },
 ];
 
-const catalog = document.getElementById('catalog');
+const container = document.getElementById("products");
 
-products.forEach(product => {
-  const card = document.createElement('div');
-  card.className = 'card';
+products.forEach(p => {
+  const card = document.createElement("div");
+  card.className = "product";
 
-  const img = document.createElement('img');
-  img.src = product.image;
+  card.innerHTML = `
+    <img src="${p.image}">
+    <h3>${p.name}</h3>
+    <p>${p.price} ₽</p>
+  `;
 
-  const name = document.createElement('div');
-  name.textContent = product.name;
-
-  const price = document.createElement('div');
-  price.textContent = product.price + ' ₽';
-
-  const button = document.createElement('button');
-  button.textContent = 'Купить';
-  button.onclick = () => {
-    tg.sendData(JSON.stringify(product));
-    alert(`Вы выбрали: ${product.name}`);
+  card.onclick = () => {
+    tg.sendData(JSON.stringify(p));
   };
 
-  card.appendChild(img);
-  card.appendChild(name);
-  card.appendChild(price);
-  card.appendChild(button);
-
-  catalog.appendChild(card);
+  container.appendChild(card);
 });

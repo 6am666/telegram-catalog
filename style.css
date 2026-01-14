@@ -1,15 +1,35 @@
-/* Фон за всем контентом */
+/* Фон за всеми элементами */
 body {
   margin: 0;
   padding: 0;
   font-family: Arial, sans-serif;
-  color: white;
 
   background: url('https://i.pinimg.com/736x/49/e1/06/49e106d8647da6e653de71f2d7df3d60.jpg') no-repeat center top;
-  background-size: cover;          /* растягиваем картинку на весь фон */
-  background-repeat: no-repeat;    /* не дублируется */
-  background-attachment: scroll;   /* движется с прокруткой */
-  background-color: #888888;       /* серый фон под картинкой для читаемости */
+  background-size: cover;           /* одно изображение, не дублируется */
+  background-repeat: no-repeat;
+  background-attachment: scroll;    /* двигается при прокрутке */
+  background-color: #888888;        /* серый подложка */
+  color: white;
+}
+
+/* Заголовок */
+h1 {
+  text-align: center;
+  margin-top: 12px;
+  font-size: 24px;
+  text-shadow: 0 0 5px rgba(0,0,0,0.7);
+}
+
+/* Поисковая строка */
+#search {
+  display: block;
+  margin: 10px auto;
+  width: 90%;
+  max-width: 400px;
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
 }
 
 /* Контейнер каталога */
@@ -18,37 +38,39 @@ body {
   flex-wrap: wrap;
   gap: 10px;
   justify-content: center;
-  padding: 20px;
+  padding: 10px;
 }
 
-/* Карточки товаров квадратные */
+/* Квадратные карточки */
 .card {
   background: rgba(0, 0, 0, 0.6);
-  width: calc(50% - 10px); /* по 2 карточки в ряд */
-  aspect-ratio: 1 / 1;     /* квадратная форма */
+  width: calc(50% - 12px); /* По 2 в ряд */
+  aspect-ratio: 1 / 1;     /* квадрат */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
   border-radius: 12px;
-  padding: 10px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  padding: 8px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+  text-align: center;
   transition: transform 0.2s;
 }
 
 .card:hover {
-  transform: scale(1.05);
+  transform: scale(1.04);
 }
 
 .card img {
-  width: 100%;
+  width: 90%;
   height: auto;
-  border-radius: 10px;
+  border-radius: 8px;
   flex-shrink: 0;
 }
 
 .card h3, .card p {
-  margin: 5px 0;
+  margin: 6px 0;
+  font-size: 14px;
 }
 
 .card button {
@@ -58,6 +80,7 @@ body {
   border: none;
   border-radius: 6px;
   cursor: pointer;
+  font-size: 14px;
   transition: background 0.2s;
 }
 
@@ -65,9 +88,10 @@ body {
   background: #008fcc;
 }
 
-/* Адаптив для маленьких экранов */
+/* Адаптив (телефон) */
 @media screen and (max-width: 480px) {
   .card {
-    width: 90%; /* по одной карточке в ряд на телефоне */
+    width: 90%;  /* по одной */
   }
+  h1 { font-size: 20px; }
 }

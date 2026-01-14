@@ -1,41 +1,44 @@
-/* Общие стили страницы */
+/* Фон за всем контентом */
 body {
   margin: 0;
   padding: 0;
   font-family: Arial, sans-serif;
+
+  /* Фоновая картинка */
+  background: url('https://i.pinimg.com/736x/49/e1/06/49e106d8647da6e653de71f2d7df3d60.jpg') no-repeat center center;
+  
+  /* Фон растягивается на всю ширину, а высота подстраивается */
+  background-size: 120% auto;   /* можно подправить % для масштабирования */
+  
+  background-attachment: scroll; /* фон двигается с прокруткой */
+  background-position: center center;
+  
+  /* Цветная подложка для затемнения */
+  background-color: #888888;   /* серый фон позади картинки */
+  
   color: white;
 }
 
-/* Фоновая секция */
-.background {
-  background: url('https://i.pinimg.com/736x/49/e1/06/49e106d8647da6e653de71f2d7df3d60.jpg') no-repeat center center;
-  background-size: contain;        /* картинка полностью помещается в блок */
-  height: 50vh;                    /* 50% высоты экрана */
-  width: 100%;
-  display: flex;
-  justify-content: center;         /* центр по горизонтали */
-  align-items: center;             /* центр по вертикали */
-  margin-bottom: 20px;             /* отступ перед каталогом */
-}
-
-/* Каталог товаров */
+/* Контейнер каталога */
 #catalog {
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
   justify-content: center;
   padding: 20px;
+  position: relative; /* чтобы карточки были выше фона */
+  z-index: 1;
 }
 
 /* Карточки товаров */
 .card {
-  background: rgba(0, 0, 0, 0.6); /* полупрозрачный фон */
+  background: rgba(0, 0, 0, 0.6); /* полупрозрачный черный фон */
   color: white;
   border-radius: 15px;
   padding: 15px;
   text-align: center;
   width: 180px;
-  box-shadow: 0 4px 10px rgba(255,255,255,0.1);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
   transition: transform 0.2s;
 }
 

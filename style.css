@@ -1,34 +1,37 @@
-/* Фон за всеми товарами */
+/* Фон за всем контентом */
 body {
   margin: 0;
   padding: 0;
   font-family: Arial, sans-serif;
-  background: url('https://i.pinimg.com/736x/49/e1/06/49e106d8647da6e653de71f2d7df3d60.jpg') no-repeat center center;
-  background-size: cover;        /* фон заполняет весь экран */
-  background-attachment: scroll; /* движется при прокрутке */
-  background-color: #888888;     /* серый фон под картинкой */
   color: white;
+
+  background: url('https://i.pinimg.com/736x/49/e1/06/49e106d8647da6e653de71f2d7df3d60.jpg') no-repeat center top;
+  background-size: cover;          /* растягиваем картинку на весь фон */
+  background-repeat: no-repeat;    /* не дублируется */
+  background-attachment: scroll;   /* движется с прокруткой */
+  background-color: #888888;       /* серый фон под картинкой для читаемости */
 }
 
 /* Контейнер каталога */
-.container {
+#catalog {
   display: flex;
   flex-wrap: wrap;
+  gap: 10px;
   justify-content: center;
-  gap: 20px;
   padding: 20px;
-  position: relative; /* чтобы карточки были поверх фона */
-  z-index: 1;
 }
 
-/* Карточки товаров */
+/* Карточки товаров квадратные */
 .card {
   background: rgba(0, 0, 0, 0.6);
-  color: white;
-  border-radius: 15px;
-  padding: 15px;
-  text-align: center;
-  width: 45%; /* две карточки в ряд */
+  width: calc(50% - 10px); /* по 2 карточки в ряд */
+  aspect-ratio: 1 / 1;     /* квадратная форма */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 12px;
+  padding: 10px;
   box-shadow: 0 4px 10px rgba(0,0,0,0.3);
   transition: transform 0.2s;
 }
@@ -39,9 +42,32 @@ body {
 
 .card img {
   width: 100%;
+  height: auto;
   border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.card h3, .card p {
+  margin: 5px 0;
 }
 
 .card button {
-  margin-top: 10px;
-  padding: 8px 1
+  padding: 6px 10px;
+  background: #2AABEE;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.card button:hover {
+  background: #008fcc;
+}
+
+/* Адаптив для маленьких экранов */
+@media screen and (max-width: 480px) {
+  .card {
+    width: 90%; /* по одной карточке в ряд на телефоне */
+  }
+}

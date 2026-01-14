@@ -5,14 +5,14 @@ let cart = [];
 let inCartScreen = false;
 
 const products = [
-  { id: 1, name: "Колье Pierced Chain", price: 2500, image: "https://via.placeholder.com/300" },
-  { id: 2, name: "Колье Starry Sky", price: 4500, image: "https://via.placeholder.com/300" },
+  { id: 1, name: "Колье Pierced Chain", price: 2500, image: "https://i.pinimg.com/736x/37/0b/db/370bdb870346b42b1000610195261f62.jpg" },
+  { id: 2, name: "Колье Starry Sky", price: 4500, image: "https://i.pinimg.com/736x/55/bf/ec/55bfecc3c2ceebf20752ff2802ff4e19.jpg" },
   { id: 3, name: "Колье Gothic Thorns", price: 3600, image: "https://via.placeholder.com/300" },
-  { id: 4, name: "Браслет Hearts", price: 4000, image: "https://via.placeholder.com/300" },
-  { id: 5, name: "Обвес Lighter", price: 3600, image: "https://via.placeholder.com/300" },
-  { id: 6, name: "Обвес Star", price: 2000, image: "https://via.placeholder.com/300" },
-  { id: 7, name: "Серьги Moonlight", price: 2000, image: "https://via.placeholder.com/300" },
-  { id: 8, name: "Кулон с цепочкой Moonlight", price: 2000, image: "https://via.placeholder.com/300" },
+  { id: 4, name: "Браслет Hearts", price: 4000, image: "https://i.pinimg.com/736x/d4/c5/4c/d4c54cd9c489d1e73d9e306545929b70.jpg" },
+  { id: 5, name: "Обвес Lighter", price: 3600, image: "https://i.pinimg.com/736x/e8/cb/c2/e8cbc2287025b23930c20e030755a0b5.jpg" },
+  { id: 6, name: "Обвес Star", price: 2000, image: "https://i.pinimg.com/736x/16/36/75/163675cf410dfc51ef97238bbbab1056.jpg" },
+  { id: 7, name: "Серьги Moonlight", price: 2000, image: "https://i.pinimg.com/736x/93/e4/e5/93e4e5ee7594f6ef436f8b994ef04016.jpg" },
+  { id: 8, name: "Кулон с цепочкой Moonlight", price: 2000, image: "https://i.pinimg.com/736x/5a/6d/1b/5a6d1beecdc7b79798705e4da0ef3a5c.jpg" },
 ];
 
 const container = document.getElementById("products");

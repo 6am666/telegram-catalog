@@ -3,10 +3,9 @@ body {
   padding: 0;
   font-family: Arial, sans-serif;
 
-  /* фон из Pinterest */
-  background: url('https://sdmntpritalynorth.oaiusercontent.com/files/00000000-61a4-7246-9174-5c4ea3ae1d50/raw?se=2026-01-14T20%3A51%3A42Z&sp=r&sv=2024-08-04&sr=b&scid=ff1e70f9-6ad6-43eb-923f-093a15f35ed5&skoid=0a4a0f0c-99ac-4752-9d87-cfac036fa93f&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-01-14T07%3A11%3A16Z&ske=2026-01-15T07%3A11%3A16Z&sks=b&skv=2024-08-04&sig=%2BA2MbxiHJVOJOB%2BA2UT3qAsqGYaYWiWqPM60CbzgZ%2B4%3D') repeat;
-  background-size: cover;        /* растянуть по экрану */
-  background-position: center;    /* центрировать */
-  background-attachment: fixed;   /* фон не двигается при прокрутке */
-  color: white;                   /* белый текст */
+  /* фон по всей странице */
+  background: url('https://sdmntpritalynorth.oaiusercontent.com/files/00000000-61a4-7246-9174-5c4ea3ae1d50/raw?se=2026-01-14T20%3A51%3A42Z&sp=r&sv=2024-08-04&sr=b&scid=ff1e70f9-6ad6-43eb-923f-093a15f35ed5&skoid=0a4a0f0c-99ac-4752-9d87-cfac036fa93f&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-01-14T07%3A11%3A16Z&ske=2026-01-15T07%3A11%3A16Z&sks=b&skv=2024-08-04&sig=%2BA2MbxiHJVOJOB%2BA2UT3qAsqGYaYWiWqPM60CbzgZ%2B4%3D') no-repeat center center fixed;
+  background-size: cover;  /* растягивает картинку на весь экран */
+
+  color: white; /* чтобы текст был виден на фоне */
 }

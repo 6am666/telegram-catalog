@@ -2,80 +2,77 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>Chronicle Chains</title>
-  <link rel="stylesheet" href="style.css?v=8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Каталог товаров</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: #f5f5f5;
+      padding-top: 60px;
+    }
+    h1 { text-align: center; margin-bottom: 20px; }
+    .product-card img { object-fit: cover; height: 180px; }
+  </style>
 </head>
 <body>
 
-  <h1>Chronicle Chains</h1>
+  <div class="container">
+    <h1>Каталог товаров</h1>
 
-  <input type="text" id="search" placeholder="Поиск товара..." />
+    <div class="row g-4">
+      <!-- Продукт 1 -->
+      <div class="col-6 col-md-4 col-lg-3">
+        <div class="card product-card">
+          <img src="https://via.placeholder.com/300" class="card-img-top" alt="Товар 1">
+          <div class="card-body text-center">
+            <h5 class="card-title">Товар 1</h5>
+            <p class="card-text">1200 ₽</p>
+            <a href="#" class="btn btn-primary">Купить</a>
+          </div>
+        </div>
+      </div>
 
-  <div id="catalog">
-    <!-- 10 товаров по 2 в ряд -->
-    <div class="card" data-name="Chronicle Item 1">
-      <img src="https://i.pinimg.com/736x/49/e1/06/49e106d8647da6e653de71f2d7df3d60.jpg">
-      <h3>Chronicle Item 1</h3>
-      <p>1000 ₽</p>
-    </div>
-    <div class="card" data-name="Chronicle Item 2">
-      <img src="https://i.pinimg.com/736x/db/af/b5/dbafb525000c4efc6e8ecadecf708919.jpg">
-      <h3>Chronicle Item 2</h3>
-      <p>1100 ₽</p>
-    </div>
-    <div class="card" data-name="Chronicle Item 3">
-      <img src="https://i.pinimg.com/736x/49/e1/06/49e106d8647da6e653de71f2d7df3d60.jpg">
-      <h3>Chronicle Item 3</h3>
-      <p>1200 ₽</p>
-    </div>
-    <div class="card" data-name="Chronicle Item 4">
-      <img src="https://i.pinimg.com/736x/db/af/b5/dbafb525000c4efc6e8ecadecf708919.jpg">
-      <h3>Chronicle Item 4</h3>
-      <p>1300 ₽</p>
-    </div>
-    <div class="card" data-name="Chronicle Item 5">
-      <img src="https://i.pinimg.com/736x/49/e1/06/49e106d8647da6e653de71f2d7df3d60.jpg">
-      <h3>Chronicle Item 5</h3>
-      <p>1400 ₽</p>
-    </div>
-    <div class="card" data-name="Chronicle Item 6">
-      <img src="https://i.pinimg.com/736x/db/af/b5/dbafb525000c4efc6e8ecadecf708919.jpg">
-      <h3>Chronicle Item 6</h3>
-      <p>1500 ₽</p>
-    </div>
-    <div class="card" data-name="Chronicle Item 7">
-      <img src="https://i.pinimg.com/736x/49/e1/06/49e106d8647da6e653de71f2d7df3d60.jpg">
-      <h3>Chronicle Item 7</h3>
-      <p>1600 ₽</p>
-    </div>
-    <div class="card" data-name="Chronicle Item 8">
-      <img src="https://i.pinimg.com/736x/db/af/b5/dbafb525000c4efc6e8ecadecf708919.jpg">
-      <h3>Chronicle Item 8</h3>
-      <p>1700 ₽</p>
-    </div>
-    <div class="card" data-name="Chronicle Item 9">
-      <img src="https://i.pinimg.com/736x/49/e1/06/49e106d8647da6e653de71f2d7df3d60.jpg">
-      <h3>Chronicle Item 9</h3>
-      <p>1800 ₽</p>
-    </div>
-    <div class="card" data-name="Chronicle Item 10">
-      <img src="https://i.pinimg.com/736x/db/af/b5/dbafb525000c4efc6e8ecadecf708919.jpg">
-      <h3>Chronicle Item 10</h3>
-      <p>1900 ₽</p>
+      <!-- Продукт 2 -->
+      <div class="col-6 col-md-4 col-lg-3">
+        <div class="card product-card">
+          <img src="https://via.placeholder.com/300" class="card-img-top" alt="Товар 2">
+          <div class="card-body text-center">
+            <h5 class="card-title">Товар 2</h5>
+            <p class="card-text">900 ₽</p>
+            <a href="#" class="btn btn-primary">Купить</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Продукт 3 -->
+      <div class="col-6 col-md-4 col-lg-3">
+        <div class="card product-card">
+          <img src="https://via.placeholder.com/300" class="card-img-top" alt="Товар 3">
+          <div class="card-body text-center">
+            <h5 class="card-title">Товар 3</h5>
+            <p class="card-text">1500 ₽</p>
+            <a href="#" class="btn btn-primary">Купить</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Продукт 4 -->
+      <div class="col-6 col-md-4 col-lg-3">
+        <div class="card product-card">
+          <img src="https://via.placeholder.com/300" class="card-img-top" alt="Товар 4">
+          <div class="card-body text-center">
+            <h5 class="card-title">Товар 4</h5>
+            <p class="card-text">800 ₽</p>
+            <a href="#" class="btn btn-primary">Купить</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Добавь ещё товары в том же стиле -->
     </div>
   </div>
 
-<script>
-// Простейший поиск
-document.getElementById('search').addEventListener('input', function () {
-  const term = this.value.toLowerCase();
-  document.querySelectorAll('.card').forEach(card => {
-    const name = card.getAttribute('data-name').toLowerCase();
-    card.style.display = name.includes(term) ? 'flex' : 'none';
-  });
-});
-</script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>

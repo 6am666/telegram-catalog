@@ -3,6 +3,7 @@ tg.expand();
 
 let cart = [];
 
+// Товары
 const products = [
   { id: 1, name: "Chain 1", price: 1200, image: "https://via.placeholder.com/300" },
   { id: 2, name: "Chain 2", price: 1350, image: "https://via.placeholder.com/300" },
@@ -12,8 +13,11 @@ const products = [
 ];
 
 const container = document.getElementById("products");
+let inCartScreen = false;
 
+// Рендер товаров каталога
 function renderProducts(list = products) {
+  inCartScreen = false;
   container.innerHTML = "";
   list.forEach(p => {
     const card = document.createElement("div");
@@ -33,11 +37,10 @@ function renderProducts(list = products) {
 
     container.appendChild(card);
   });
+  updateMainButton();
 }
 
-renderProducts();
-
-/* ПОИСК */
+// Поиск товаров
 function filterProducts(value) {
   value = value.toLowerCase();
   const filtered = products.filter(p =>
@@ -46,39 +49,87 @@ function filterProducts(value) {
   renderProducts(filtered);
 }
 
-/* КОРЗИНА */
+// Добавление в корзину
 function addToCart(product) {
   cart.push(product);
   saveCart();
   updateMainButton();
 }
 
+// Сохраняем корзину
 function saveCart() {
   tg.CloudStorage.setItem("cart", JSON.stringify(cart));
 }
 
+// Удаляем товар
+function removeFromCart(index) {
+  cart.splice(index, 1);
+  saveCart();
+  renderCart();
+}
+
+// Обновляем кнопку Telegram
 function updateMainButton() {
   if (cart.length > 0) {
-    tg.MainButton.setText(`Оформить заказ (${cart.length})`);
+    tg.MainButton.setText(inCartScreen ? `Оформить заказ (${cart.length})` : `Корзина (${cart.length})`);
     tg.MainButton.show();
   } else {
     tg.MainButton.hide();
   }
 }
 
-/* ОФОРМЛЕНИЕ ЗАКАЗА */
+// Обработчик кнопки Telegram
 tg.MainButton.onClick(() => {
-  tg.sendData(JSON.stringify({
-    action: "order",
-    items: cart
-  }));
-});
-
-/* ЗАГРУЗКА КОРЗИНЫ */
-tg.CloudStorage.getItem("cart", (err, data) => {
-  if (!err && data) {
-    cart = JSON.parse(data);
-    updateMainButton();
+  if (inCartScreen) {
+    // Отправка заказа в бота
+    tg.sendData(JSON.stringify({
+      action: "order",
+      items: cart
+    }));
+  } else {
+    // Показ корзины
+    renderCart();
   }
 });
 
+// Рендер экрана корзины
+function renderCart() {
+  inCartScreen = true;
+  container.innerHTML = "";
+
+  if (cart.length === 0) {
+    container.innerHTML = `<p style="color:white; text-align:center; margin-top:20px;">Корзина пуста</p>`;
+  } else {
+    cart.forEach((p, i) => {
+      const card = document.createElement("div");
+      card.className = "product";
+      card.innerHTML = `
+        <img src="${p.image}">
+        <h3>${p.name}</h3>
+        <p>${p.price} ₽</p>
+        <button class="add-btn">Удалить</button>
+      `;
+      card.querySelector(".add-btn").onclick = () => removeFromCart(i);
+      container.appendChild(card);
+    });
+
+    // Сумма всех товаров
+    const total = cart.reduce((sum, item) => sum + item.price, 0);
+    const totalDiv = document.createElement("div");
+    totalDiv.style.color = "white";
+    totalDiv.style.textAlign = "center";
+    totalDiv.style.marginTop = "10px";
+    totalDiv.innerHTML = `<h3>Итого: ${total} ₽</h3>`;
+    container.appendChild(totalDiv);
+  }
+
+  updateMainButton();
+}
+
+// Загрузка корзины при старте
+tg.CloudStorage.getItem("cart", (err, data) => {
+  if (!err && data) {
+    cart = JSON.parse(data);
+  }
+  renderProducts();
+});

@@ -57,8 +57,9 @@ h1 {
 /* СЕТКА */
 .products {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 12px;
+  justify-items: center;
 }
 
 /* КАРТОЧКА */
@@ -72,6 +73,7 @@ h1 {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  width: 140px;
 }
 
 .product img {
@@ -93,14 +95,30 @@ h1 {
 }
 
 /* КНОПКА */
-.add-btn {
+.add-btn, .remove-btn {
   margin-top: 6px;
   padding: 8px;
   border-radius: 10px;
   border: none;
-  background: #4CAF50;
   color: white;
   font-size: 14px;
+  cursor: pointer;
+}
+
+.add-btn {
+  background: #4CAF50;
+}
+
+.remove-btn {
+  background: #f44336;
+}
+
+/* ИТОГО В КОРЗИНЕ */
+.cart-total {
+  color: white;
+  font-size: 16px;
+  text-align: center;
+  margin-top: 10px;
 }
 </style>
 </head>
@@ -112,12 +130,7 @@ h1 {
 <div class="container">
   <h1>Chronicle Chains</h1>
 
-  <input
-    type="text"
-    class="search"
-    placeholder="Поиск..."
-    oninput="filterProducts(this.value)"
-  >
+  <input type="text" class="search" placeholder="Поиск..." oninput="filterProducts(this.value)">
 
   <div class="products" id="products"></div>
 </div>
@@ -127,21 +140,26 @@ const tg = window.Telegram.WebApp;
 tg.expand();
 
 let cart = [];
+let inCartScreen = false;
 
 /* ТОВАРЫ */
 const products = [
-  { id: 1, name: "Chain 1", price: 1200, image: "https://via.placeholder.com/300" },
-  { id: 2, name: "Chain 2", price: 1350, image: "https://via.placeholder.com/300" },
-  { id: 3, name: "Chain 3", price: 1100, image: "https://via.placeholder.com/300" },
-  { id: 4, name: "Chain 4", price: 1400, image: "https://via.placeholder.com/300" },
-  { id: 5, name: "Chain 5", price: 1600, image: "https://via.placeholder.com/300" },
+  { id: 1, name: "Колье Pierced Chain", price: 1200, image: "https://via.placeholder.com/300" },
+  { id: 2, name: "Колье Starry Sky", price: 1350, image: "https://via.placeholder.com/300" },
+  { id: 3, name: "Колье Gothic Thorns", price: 1100, image: "https://via.placeholder.com/300" },
+  { id: 4, name: "Браслет Hearts", price: 1400, image: "https://via.placeholder.com/300" },
+  { id: 5, name: "Обвес Lighter", price: 1600, image: "https://via.placeholder.com/300" },
+  { id: 6, name: "Обвес Star", price: 1250, image: "https://via.placeholder.com/300" },
+  { id: 7, name: "Серьги Moonlight", price: 1300, image: "https://via.placeholder.com/300" },
+  { id: 8, name: "Кулон с цепочкой Moonlight", price: 1500, image: "https://via.placeholder.com/300" },
 ];
 
-const container = document.getElementById("products");
+const containerEl = document.getElementById("products");
 
-/* РЕНДЕР */
-function renderProducts(list) {
-  container.innerHTML = "";
+/* РЕНДЕР КАТАЛОГА */
+function renderProducts(list = products) {
+  inCartScreen = false;
+  containerEl.innerHTML = "";
   list.forEach(p => {
     const card = document.createElement("div");
     card.className = "product";
@@ -158,11 +176,10 @@ function renderProducts(list) {
       addToCart(p);
     };
 
-    container.appendChild(card);
+    containerEl.appendChild(card);
   });
+  updateMainButton();
 }
-
-renderProducts(products);
 
 /* ПОИСК */
 function filterProducts(value) {
@@ -180,60 +197,79 @@ function addToCart(product) {
   updateMainButton();
 }
 
+function removeFromCart(index) {
+  cart.splice(index, 1);
+  saveCart();
+  renderCart();
+}
+
 function saveCart() {
   tg.CloudStorage.setItem("cart", JSON.stringify(cart));
 }
 
 function updateMainButton() {
   if (cart.length > 0) {
-    tg.MainButton.setText(`Оформить заказ (${cart.length})`);
+    tg.MainButton.setText(inCartScreen ? `Оформить заказ (${cart.length})` : `Корзина (${cart.length})`);
     tg.MainButton.show();
   } else {
     tg.MainButton.hide();
   }
 }
 
-/* КНОПКА ОФОРМЛЕНИЯ */
+/* Кнопка Telegram */
 tg.MainButton.onClick(() => {
-  tg.sendData(JSON.stringify({
-    action: "order",
-    items: cart
-  }));
+  if (inCartScreen) {
+    tg.sendData(JSON.stringify({
+      action: "order",
+      items: cart
+    }));
+  } else {
+    renderCart();
+  }
 });
+
+/* РЕНДЕР КОРЗИНЫ */
+function renderCart() {
+  inCartScreen = true;
+  containerEl.innerHTML = "";
+
+  if (cart.length === 0) {
+    containerEl.innerHTML = `<p style="color:white; text-align:center; margin-top:20px;">Корзина пуста</p>`;
+  } else {
+    cart.forEach((p, i) => {
+      const card = document.createElement("div");
+      card.className = "product";
+
+      card.innerHTML = `
+        <img src="${p.image}">
+        <h3>${p.name}</h3>
+        <p>${p.price} ₽</p>
+        <button class="remove-btn">Удалить</button>
+      `;
+
+      card.querySelector(".remove-btn").onclick = () => removeFromCart(i);
+      containerEl.appendChild(card);
+    });
+
+    // Сумма
+    const total = cart.reduce((sum, item) => sum + item.price, 0);
+    const totalDiv = document.createElement("div");
+    totalDiv.className = "cart-total";
+    totalDiv.textContent = `Итого: ${total} ₽`;
+    containerEl.appendChild(totalDiv);
+  }
+
+  updateMainButton();
+}
 
 /* ЗАГРУЗКА КОРЗИНЫ */
 tg.CloudStorage.getItem("cart", (err, data) => {
   if (!err && data) {
     cart = JSON.parse(data);
-    updateMainButton();
   }
+  renderProducts();
 });
 </script>
 
-</body>
-</html>
-
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Chronicle Chains</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<link rel="stylesheet" href="style.css">
-</head>
-<body>
-
-<div class="background"></div>
-
-<div class="container">
-  <h1>Chronicle Chains</h1>
-
-  <input type="text" class="search" placeholder="Поиск..." oninput="filterProducts(this.value)">
-
-  <div class="products" id="products"></div>
-</div>
-
-<script src="main.js"></script>
 </body>
 </html>

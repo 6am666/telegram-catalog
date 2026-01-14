@@ -1,97 +1,49 @@
-/* Фон за всеми элементами */
+/* Общий фон (одна картинка, движется с прокруткой) */
 body {
-  margin: 0;
-  padding: 0;
-  font-family: Arial, sans-serif;
-
   background: url('https://i.pinimg.com/736x/49/e1/06/49e106d8647da6e653de71f2d7df3d60.jpg') no-repeat center top;
-  background-size: cover;           /* одно изображение, не дублируется */
+  background-size: cover;
   background-repeat: no-repeat;
-  background-attachment: scroll;    /* двигается при прокрутке */
-  background-color: #888888;        /* серый подложка */
-  color: white;
+  background-attachment: scroll;
+  background-color: #888888;
+  font-family: Arial, sans-serif;
 }
 
 /* Заголовок */
 h1 {
-  text-align: center;
-  margin-top: 12px;
-  font-size: 24px;
+  color: white;
   text-shadow: 0 0 5px rgba(0,0,0,0.7);
 }
 
-/* Поисковая строка */
+/* Поиск */
 #search {
-  display: block;
-  margin: 10px auto;
-  width: 90%;
-  max-width: 400px;
-  padding: 10px;
-  font-size: 16px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
+  margin-top: 10px;
+  margin-bottom: 20px;
 }
 
-/* Контейнер каталога */
-#catalog {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  justify-content: center;
-  padding: 10px;
-}
-
-/* Квадратные карточки */
+/* Карточки */
 .card {
-  background: rgba(0, 0, 0, 0.6);
-  width: calc(50% - 12px); /* По 2 в ряд */
-  aspect-ratio: 1 / 1;     /* квадрат */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
   border-radius: 12px;
-  padding: 8px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.3);
+  background: rgba(0,0,0,0.6);
   text-align: center;
-  transition: transform 0.2s;
-}
-
-.card:hover {
-  transform: scale(1.04);
+  aspect-ratio: 1 / 1; /* квадрат */
 }
 
 .card img {
-  width: 90%;
-  height: auto;
-  border-radius: 8px;
-  flex-shrink: 0;
+  width: 100%;
+  height: 60%;
+  object-fit: cover;
 }
 
-.card h3, .card p {
-  margin: 6px 0;
-  font-size: 14px;
-}
-
-.card button {
-  padding: 6px 10px;
-  background: #2AABEE;
+.card-body {
   color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background 0.2s;
 }
 
-.card button:hover {
-  background: #008fcc;
-}
-
-/* Адаптив (телефон) */
+/* Адаптив для телефона */
 @media screen and (max-width: 480px) {
-  .card {
-    width: 90%;  /* по одной */
+  .col-6 {
+    flex: 0 0 100%;
+    max-width: 100%;
   }
-  h1 { font-size: 20px; }
 }

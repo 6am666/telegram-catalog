@@ -5,14 +5,14 @@ let cart = [];
 let inCartScreen = false;
 
 const products = [
-  { id: 1, name: "Колье Pierced Chain", price: 1200, image: "https://via.placeholder.com/300" },
-  { id: 2, name: "Колье Starry Sky", price: 1350, image: "https://via.placeholder.com/300" },
-  { id: 3, name: "Колье Gothic Thorns", price: 1100, image: "https://via.placeholder.com/300" },
-  { id: 4, name: "Браслет Hearts", price: 1400, image: "https://via.placeholder.com/300" },
-  { id: 5, name: "Обвес Lighter", price: 1600, image: "https://via.placeholder.com/300" },
-  { id: 6, name: "Обвес Star", price: 1250, image: "https://via.placeholder.com/300" },
-  { id: 7, name: "Серьги Moonlight", price: 1300, image: "https://via.placeholder.com/300" },
-  { id: 8, name: "Кулон с цепочкой Moonlight", price: 1500, image: "https://via.placeholder.com/300" },
+  { id: 1, name: "Колье Pierced Chain", price: 2500, image: "https://via.placeholder.com/300" },
+  { id: 2, name: "Колье Starry Sky", price: 4500, image: "https://via.placeholder.com/300" },
+  { id: 3, name: "Колье Gothic Thorns", price: 3600, image: "https://via.placeholder.com/300" },
+  { id: 4, name: "Браслет Hearts", price: 4000, image: "https://via.placeholder.com/300" },
+  { id: 5, name: "Обвес Lighter", price: 3600, image: "https://via.placeholder.com/300" },
+  { id: 6, name: "Обвес Star", price: 2000, image: "https://via.placeholder.com/300" },
+  { id: 7, name: "Серьги Moonlight", price: 2000, image: "https://via.placeholder.com/300" },
+  { id: 8, name: "Кулон с цепочкой Moonlight", price: 2000, image: "https://via.placeholder.com/300" },
 ];
 
 const container = document.getElementById("products");

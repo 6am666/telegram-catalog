@@ -29,6 +29,10 @@ const orderModal = document.getElementById("orderModal");
 const orderClose = document.getElementById("orderClose");
 const orderForm = document.getElementById("orderForm");
 
+/* адресные подсказки */
+const addressInput = document.getElementById("addressInput");
+const addressSuggestions = document.getElementById("addressSuggestions");
+
 /* гамбургер */
 menuIcon.onclick = () => { categories.classList.toggle("show"); };
 
@@ -54,16 +58,17 @@ function renderProducts(list){
     const price=document.createElement("p"); price.textContent=`${p.price} ₽`;
     const cartItem=cart.find(i=>i.product.id===p.id);
     const controls=document.createElement("div"); controls.className="count-block";
-    if(cartItem){const minus=document.createElement("button"); minus.textContent="–"; minus.onclick=e=>{e.stopPropagation(); removeFromCart(p)};
+    if(cartItem){
+      const minus=document.createElement("button"); minus.textContent="–"; minus.onclick=e=>{e.stopPropagation(); removeFromCart(p)};
       const count=document.createElement("div"); count.className="count-number"; count.textContent=cartItem.count;
       const plus=document.createElement("button"); plus.textContent="+"; plus.onclick=e=>{e.stopPropagation(); addToCart(p)};
       controls.append(minus,count,plus);
-    }else{const addBtn=document.createElement("button"); addBtn.className="add-btn"; addBtn.textContent="В корзину"; addBtn.onclick=e=>{e.stopPropagation(); addToCart(p)};
+    }else{
+      const addBtn=document.createElement("button"); addBtn.className="add-btn"; addBtn.textContent="В корзину"; addBtn.onclick=e=>{e.stopPropagation(); addToCart(p)};
       controls.appendChild(addBtn);
     }
     card.append(img,title,price,controls); productsEl.appendChild(card);
   });
-
   updateCartUI();
 }
 
@@ -83,19 +88,13 @@ function openModal(p){
   modalImage.src=p.image;
   modalTitle.textContent=p.name;
   modalPrice.textContent=`${p.price} ₽`;
-  modalDescription.innerHTML=p.description.map((line,i)=>{
-    return i===p.description.length-1? `<span>${line}</span>`:line
-  }).join("<br>");
+  modalDescription.innerHTML=p.description.map((line,i)=> i===p.description.length-1? `<span>${line}</span>`:line ).join("<br>");
   modal.style.display="flex";
 }
 modalClose.onclick=()=>modal.style.display="none";
 modal.onclick=e=>{if(e.target===modal) modal.style.display="none";};
 
-function getCurrentList(){
-  if(inCartScreen) return cart.map(i=>i.product);
-  if(currentCategory==="Главная") return products;
-  return products.filter(p=>p.category===currentCategory);
-}
+function getCurrentList(){ if(inCartScreen) return cart.map(i=>i.product); if(currentCategory==="Главная") return products; return products.filter(p=>p.category===currentCategory); }
 
 categories.querySelectorAll("div").forEach(c=>{c.onclick=()=>{
   inCartScreen=false; currentCategory=c.dataset.category; renderProducts(getCurrentList()); categories.classList.remove("show");
@@ -103,12 +102,18 @@ categories.querySelectorAll("div").forEach(c=>{c.onclick=()=>{
 mainTitle.onclick=()=>{inCartScreen=false; currentCategory="Главная"; renderProducts(products);};
 cartButton.onclick=()=>{
   inCartScreen=true; renderProducts(cart.map(i=>i.product));
+  updateUIVisibility();
 };
 
 /* скрываем поиск и футер в корзине */
 function updateUIVisibility(){
-  if(inCartScreen){searchInput.style.display="none"; footerButtons.style.display="none";} 
-  else{searchInput.style.display="block"; footerButtons.style.display="flex";}
+  if(inCartScreen){
+    searchInput.style.display="none";
+    footerButtons.style.display="none"; // футер скрыт
+  } else{
+    searchInput.style.display="block";
+    footerButtons.style.display="flex";
+  }
 }
 
 /* ================== МОДАЛКА ЗАКАЗА ================== */
@@ -133,6 +138,32 @@ orderForm.onsubmit=e=>{
 
 /* ================== ПОИСК ================== */
 searchInput.oninput=()=>{const val=searchInput.value.toLowerCase(); renderProducts(getCurrentList().filter(p=>p.name.toLowerCase().includes(val)));};
+
+/* ================== АВТОДОПОЛНЕНИЕ АДРЕСА ================== */
+addressInput.addEventListener("input", async () => {
+  const query = addressInput.value;
+  if(query.length < 3){ addressSuggestions.innerHTML=""; return; }
+
+  const response = await fetch('https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/address',{
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'Accept':'application/json',
+      'Authorization':'Token YOUR_DADATA_API_KEY'
+    },
+    body: JSON.stringify({query})
+  });
+
+  const data = await response.json();
+  addressSuggestions.innerHTML="";
+  data.suggestions.forEach(item=>{
+    const div=document.createElement("div");
+    div.className="suggestion-item";
+    div.textContent=item.value;
+    div.onclick=()=>{addressInput.value=item.value; addressSuggestions.innerHTML="";}
+    addressSuggestions.appendChild(div);
+  });
+});
 
 /* ================== СТАРТ ================== */
 renderProducts(products);

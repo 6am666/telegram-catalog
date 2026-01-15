@@ -71,7 +71,8 @@
       <input type="text" name="city" placeholder="Введите город" required>
 
       <label>Точный адрес и индекс</label>
-      <input type="text" name="address" placeholder="Улица, дом, квартира, индекс" required>
+      <input type="text" name="address" id="addressInput" placeholder="Улица, дом, квартира, индекс" required>
+      <div id="addressSuggestions" class="suggestions"></div>
 
       <label>Доставка</label>
       <select name="delivery" required>
@@ -80,6 +81,7 @@
         <option value="Почта России">Почта России</option>
         <option value="Boxberry">Boxberry</option>
         <option value="Самовывоз">Самовывоз</option>
+        <option value="Яндекс.Доставка">Яндекс.Доставка</option>
       </select>
 
       <label>Телефон или ник в Telegram</label>

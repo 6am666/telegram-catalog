@@ -33,9 +33,10 @@ body {
 
 /* КОНТЕЙНЕР */
 .container {
-  max-width: 420px;
+  max-width: 460px;
   margin: 0 auto;
   padding: 16px;
+  position: relative;
 }
 
 /* ЗАГОЛОВОК */
@@ -43,6 +44,17 @@ h1 {
   text-align: center;
   color: #fff;
   margin: 20px 0;
+  cursor: pointer;
+}
+
+/* ИКОНКА КОРЗИНЫ */
+.cart-icon {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
 }
 
 /* ПОИСК */
@@ -58,8 +70,8 @@ h1 {
 /* СЕТКА */
 .products {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px;
   justify-items: center;
 }
 
@@ -70,11 +82,11 @@ h1 {
   border-radius: 14px;
   padding: 8px;
   text-align: center;
+  width: 160px;
   aspect-ratio: 1 / 1;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  width: 140px;
 }
 
 .product img {
@@ -100,8 +112,8 @@ h1 {
   margin-top: 6px;
   padding: 8px;
   border-radius: 10px;
-  border: 2px solid white;
-  background: transparent;
+  border: none;
+  background: white;
   color: black;
   font-size: 14px;
   cursor: pointer;
@@ -120,8 +132,8 @@ h1 {
 
 /* Telegram кнопка (Корзина/Оформить заказ) */
 .tg-btn {
-  background-color: black !important;
-  color: white !important;
+  background-color: white !important;
+  color: black !important;
 }
 
 /* ИТОГО В КОРЗИНЕ */
@@ -139,17 +151,23 @@ h1 {
 <div class="background"></div>
 
 <div class="container">
-  <h1>Chronicle Chains</h1>
+  <!-- Иконка корзины -->
+  <img src="https://cdn-icons-png.flaticon.com/512/833/833314.png" class="cart-icon" id="cartIcon" alt="Корзина">
 
+  <!-- Заголовок -->
+  <h1 id="mainTitle">Chronicle Chains</h1>
+
+  <!-- Поиск -->
   <input type="text" class="search" placeholder="Поиск..." oninput="filterProducts(this.value)">
 
+  <!-- Контейнер для товаров -->
   <div class="products" id="products"></div>
 </div>
 
 <script>
 const tg = window.Telegram.WebApp;
 tg.expand();
-tg.MainButton.setParams({ color: '#000000', textColor: '#FFFFFF' });
+tg.MainButton.setParams({ color: '#FFFFFF', textColor: '#000000' });
 
 let cart = [];
 let inCartScreen = false;
@@ -157,7 +175,7 @@ let inCartScreen = false;
 const products = [
   { id: 1, name: "Колье Pierced Chain", price: 2500, image: "https://i.pinimg.com/736x/37/0b/db/370bdb870346b42b1000610195261f62.jpg" },
   { id: 2, name: "Колье Starry Sky", price: 4500, image: "https://i.pinimg.com/736x/55/bf/ec/55bfecc3c2ceebf20752ff2802ff4e19.jpg" },
-  { id: 3, name: "Колье Gothic Thorns", price: 3600, image: "https://via.placeholder.com/300" },
+  { id: 3, name: "Колье Gothic Thorns", price: 3600, image: "https://i.pinimg.com/736x/c2/0d/26/c20d26fb9839c64d328f8989450f547b.jpg" },
   { id: 4, name: "Браслет Hearts", price: 4000, image: "https://i.pinimg.com/736x/d4/c5/4c/d4c54cd9c489d1e73d9e306545929b70.jpg" },
   { id: 5, name: "Обвес Lighter", price: 3600, image: "https://i.pinimg.com/736x/e8/cb/c2/e8cbc2287025b23930c20e030755a0b5.jpg" },
   { id: 6, name: "Обвес Star", price: 2000, image: "https://i.pinimg.com/736x/16/36/75/163675cf410dfc51ef97238bbbab1056.jpg" },
@@ -166,6 +184,8 @@ const products = [
 ];
 
 const containerEl = document.getElementById("products");
+const mainTitle = document.getElementById("mainTitle");
+const cartIcon = document.getElementById("cartIcon");
 
 /* РЕНДЕР КАТАЛОГА */
 function renderProducts(list = products) {
@@ -302,6 +322,12 @@ tg.CloudStorage.getItem("cart", (err, data) => {
   }
   renderProducts();
 });
+
+/* Переход на главную при клике по заголовку */
+mainTitle.onclick = () => renderProducts();
+
+/* Иконка корзины */
+cartIcon.onclick = () => renderCart();
 </script>
 
 </body>

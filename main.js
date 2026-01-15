@@ -3,6 +3,7 @@ const tg = window.Telegram.WebApp; tg.expand();
 let cart = []; 
 let inCartScreen = false;
 
+// Элементы DOM
 const containerEl = document.getElementById("products");
 const searchInput = document.getElementById("searchInput");
 const cartButton = document.getElementById("cartButton");
@@ -31,6 +32,7 @@ document.querySelector(".modal-content").appendChild(modalDescription);
 
 let currentModalProduct = null;
 
+// Данные товаров
 const products = [
 {id:1,name:"Колье Pierced Chain",price:2500,image:"https://i.pinimg.com/736x/37/0b/db/370bdb870346b42b1000610195261f62.jpg",category:"Колье",
 description:`Материал изделия:\nНержавеющая сталь;\nФурнитура из хирургической и нержавеющей стали.\n\nСрок изготовления - до 5 рабочих дней.`},
@@ -59,6 +61,7 @@ description:`Материал изделия:\nлунная бусина;\nХи�
 
 // ---------- Функции ----------
 
+// Рендер карточек
 function renderProducts(list = products){
   containerEl.innerHTML = "";
   searchInput.style.display = inCartScreen ? "none" : "block";
@@ -119,7 +122,7 @@ function renderProducts(list = products){
   updateCartTotal();
 }
 
-// Добавление / удаление товаров
+// Добавление / удаление
 function addToCart(product){
   const cartItem = cart.find(i => i.product.id === product.id); 
   if(cartItem) cartItem.count++; 
@@ -135,7 +138,7 @@ function removeFromCart(product){
   renderProducts(inCartScreen ? cart.map(i => i.product) : products);
 }
 
-// Обновление счетчика и суммы
+// Счётчик и сумма
 function updateCartCount(){ 
   cartCount.textContent = cart.reduce((s,i)=>s+i.count,0); 
 }
@@ -177,9 +180,11 @@ categories.querySelectorAll("div").forEach(cat => {
 
 mainTitle.onclick = () => { inCartScreen = false; renderProducts(products); };
 cartButton.onclick = () => { inCartScreen = true; renderProducts(cart.map(i => i.product)); };
-checkoutButton.onclick = () => { if(cart.length) alert(`Заказ на ${cart.reduce((s,i)=>s+i.product.price*i.count,0)} ₽`); };
+checkoutButton.onclick = () => { 
+  if(cart.length) alert(`Заказ на ${cart.reduce((s,i)=>s+i.product.price*i.count,0)} ₽`); 
+};
 
-// Анимация полета товара
+// Анимация полёта товара
 function flyToCart(img){
   const fly = img.cloneNode(); 
   fly.className = "fly-to-cart"; 

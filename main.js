@@ -1,18 +1,18 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
 
-/* -------------------- STATE -------------------- */
+/* ================== STATE ================== */
 let cart = [];
 let inCartScreen = false;
 let currentModalProduct = null;
 
-/* -------------------- ELEMENTS -------------------- */
-const containerEl = document.getElementById("products");
+/* ================== ELEMENTS ================== */
+const productsEl = document.getElementById("products");
 const searchInput = document.getElementById("searchInput");
 const cartButton = document.getElementById("cartButton");
-const checkoutButton = document.getElementById("checkoutButton");
 const cartCount = document.getElementById("cartCount");
 const cartTotal = document.getElementById("cartTotal");
+const checkoutButton = document.getElementById("checkoutButton");
 const mainTitle = document.getElementById("mainTitle");
 const menuIcon = document.getElementById("menuIcon");
 const categories = document.getElementById("categories");
@@ -22,11 +22,11 @@ const modal = document.getElementById("modal");
 const modalImage = document.getElementById("modalImage");
 const modalTitle = document.getElementById("modalTitle");
 const modalPrice = document.getElementById("modalPrice");
-const modalClose = document.getElementById("modalClose");
 const modalAdd = document.getElementById("modalAdd");
 const modalBack = document.getElementById("modalBack");
+const modalClose = document.getElementById("modalClose");
 
-/* -------------------- PRODUCTS -------------------- */
+/* ================== PRODUCTS ================== */
 const products = [
   {
     id: 1,
@@ -137,9 +137,9 @@ const products = [
   }
 ];
 
-/* -------------------- RENDER -------------------- */
+/* ================== RENDER ================== */
 function renderProducts(list = products) {
-  containerEl.innerHTML = "";
+  productsEl.innerHTML = "";
 
   searchInput.style.display = inCartScreen ? "none" : "block";
   cartTotal.style.display = inCartScreen ? "block" : "none";
@@ -153,10 +153,7 @@ function renderProducts(list = products) {
     const img = new Image();
     img.src = p.image;
     img.alt = p.name;
-    img.onclick = e => {
-      e.stopPropagation();
-      openModal(p);
-    };
+    img.onclick = () => openModal(p);
 
     const cartItem = cart.find(i => i.product.id === p.id);
     const count = cartItem ? cartItem.count : 0;
@@ -175,7 +172,7 @@ function renderProducts(list = products) {
       card.innerHTML += `<button class="add-btn">В корзину</button>`;
     }
 
-    containerEl.appendChild(card);
+    productsEl.appendChild(card);
 
     const addBtn = card.querySelector(".add-btn");
     const removeBtn = card.querySelector(".remove-btn");
@@ -188,7 +185,7 @@ function renderProducts(list = products) {
   updateCartTotal();
 }
 
-/* -------------------- CART -------------------- */
+/* ================== CART ================== */
 function addToCart(product) {
   const item = cart.find(i => i.product.id === product.id);
   if (item) item.count++;
@@ -213,28 +210,32 @@ function updateCartTotal() {
     "Итог: " + cart.reduce((s, i) => s + i.product.price * i.count, 0) + " ₽";
 }
 
-/* -------------------- MODAL -------------------- */
+/* ================== MODAL ================== */
 function openModal(p) {
   currentModalProduct = p;
+
   modalImage.src = p.image;
   modalTitle.textContent = p.name;
   modalPrice.textContent = `${p.price} ₽`;
+
   modalAdd.style.display = "none";
   modalBack.style.display = "none";
 
-  modal.querySelector(".modal-text").innerHTML =
-    `<h3>${p.name}</h3><p>${p.price} ₽</p>
-     <div style="margin-top:8px; white-space:pre-line; font-size:13px;">
-       ${p.description}
-     </div>`;
+  let desc = modal.querySelector(".modal-description");
+  if (!desc) {
+    desc = document.createElement("div");
+    desc.className = "modal-description";
+    modal.querySelector(".modal-content").appendChild(desc);
+  }
 
+  desc.textContent = p.description;
   modal.style.display = "flex";
 }
 
 modalClose.onclick = () => modal.style.display = "none";
 modal.onclick = e => { if (e.target === modal) modal.style.display = "none"; };
 
-/* -------------------- EVENTS -------------------- */
+/* ================== EVENTS ================== */
 cartButton.onclick = () => {
   inCartScreen = true;
   renderProducts(cart.map(i => i.product));
@@ -264,5 +265,5 @@ searchInput.addEventListener("input", e => {
   renderProducts(products.filter(p => p.name.toLowerCase().includes(v)));
 });
 
-/* -------------------- INIT -------------------- */
+/* ================== INIT ================== */
 renderProducts();

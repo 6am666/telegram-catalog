@@ -7,17 +7,11 @@
 body {
   font-family: Arial, sans-serif;
   background-color: #1e1e1e;
-  transition: background-color 0.3s;
-}
-
-/* ФОН */
-.background {
-  position: fixed;
-  inset: 0;
-  background-image: url("https://i.pinimg.com/736x/49/e1/06/49e106d8647da6e653de71f2d7df3d60.jpg");
+  background-image: url("https://i.pinimg.com/originals/6d/7c/65/6d7c65bbef77082a19ff4a2a2327d50d.jpg");
   background-size: cover;
   background-position: center;
-  z-index: -1;
+  overflow-x: hidden;
+  touch-action: manipulation;
 }
 
 /* КОНТЕЙНЕР */
@@ -28,22 +22,56 @@ body {
   position: relative;
 }
 
-/* ИКОНКА КОРЗИНЫ */
-.cart-icon {
-  position: absolute;
-  top: 16px;
-  left: 16px;
-  width: 32px;
-  height: 32px;
-  cursor: pointer;
-}
-
 /* ЗАГОЛОВОК */
 h1 {
   text-align: center;
   color: #fff;
   margin: 20px 0;
+  cursor: default;
+}
+
+/* ГАМБУРГЕР */
+.menu-icon {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  width: 32px;
+  height: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   cursor: pointer;
+  z-index: 10;
+}
+.menu-icon div {
+  width: 32px;
+  height: 4px;
+  background: white;
+  border-radius: 2px;
+}
+
+/* МЕНЮ КАТЕГОРИЙ */
+.categories {
+  position: fixed;
+  top: 0;
+  left: -220px;
+  width: 220px;
+  height: 100%;
+  background: rgba(30,30,30,0.95);
+  color: white;
+  padding: 60px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  transition: left 0.3s;
+  z-index: 9;
+}
+.categories.show {
+  left: 0;
+}
+.categories div {
+  cursor: pointer;
+  font-size: 18px;
 }
 
 /* ПОИСК */
@@ -56,7 +84,7 @@ h1 {
   font-size: 16px;
 }
 
-/* СЕТКА */
+/* СЕТКА ТОВАРОВ */
 .products {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -98,40 +126,71 @@ h1 {
 }
 
 /* КНОПКИ */
-.add-btn {
+.add-btn, .remove-btn {
   margin-top: 6px;
   padding: 8px;
   border-radius: 10px;
   border: none;
-  background: white;
+  background: #333;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* КОРЗИНА ВНИЗУ */
+.cart-bottom {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  max-width: 460px;
+  background: rgba(50,50,50,0.9);
+  display: flex;
+  flex-wrap: wrap;
+  padding: 8px;
+  gap: 8px;
+  z-index: 5;
+  max-height: 180px;
+  overflow-x: auto;
+}
+.cart-item {
+  width: 60px;
+  height: 60px;
+  flex-shrink: 0;
+  position: relative;
+}
+.cart-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 6px;
+}
+.cart-item .count {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #fff;
   color: black;
-  font-size: 14px;
-  cursor: pointer;
+  border-radius: 50%;
+  font-size: 12px;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.remove-btn {
-  margin-top: 6px;
-  padding: 8px;
+/* ANIMATION FLY */
+.fly-img {
+  position: fixed;
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
   border-radius: 10px;
-  border: none;
-  background: #f44336;
-  color: white;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-/* Telegram кнопка */
-.tg-btn {
-  background-color: white !important;
-  color: black !important;
-}
-
-/* ИТОГО В КОРЗИНЕ */
-.cart-total {
-  color: white;
-  font-size: 16px;
-  text-align: center;
-  margin-top: 10px;
+  z-index: 1000;
+  pointer-events: none;
+  transition: transform 0.8s ease-in-out, opacity 0.8s ease-in-out;
+  opacity: 1;
 }
 
 /* МОДАЛ */

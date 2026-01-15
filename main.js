@@ -36,56 +36,47 @@ const products = [
   {id:8,name:"Кулон с цепочкой Moonlight",price:2000,image:"https://i.pinimg.com/736x/5a/6d/1b/5a6d1beecdc7b79798705e4da0ef3a5c.jpg",category:"Кулоны"},
 ];
 
-// --- Функции ---
-function renderProducts(list = products){
-  containerEl.innerHTML = "";
-  searchInput.style.display = inCartScreen ? "none" : "block";
-  cartTotal.style.display = inCartScreen ? "block" : "none";
-  checkoutButton.style.display = inCartScreen ? "flex" : "none";
-  cartButton.style.display = inCartScreen ? "none" : "flex";
+// ---------- Функции ----------
+function renderProducts(list=products){
+  containerEl.innerHTML="";
+  searchInput.style.display = inCartScreen ? "none":"block";
+  cartTotal.style.display = inCartScreen ? "block":"none";
+  checkoutButton.style.display = inCartScreen ? "flex":"none";
+  cartButton.style.display = inCartScreen ? "none":"flex";
 
   list.forEach(p=>{
     const card = document.createElement("div");
-    card.className = "product";
+    card.className="product";
 
     const img = new Image();
-    img.src = p.image;
-    img.alt = p.name;
+    img.src=p.image; img.alt=p.name;
 
     const cartItem = cart.find(item=>item.product.id===p.id);
-    const count = cartItem ? cartItem.count : 0;
+    const count = cartItem ? cartItem.count :0;
 
     if(count>0 || inCartScreen){
       card.innerHTML = `<h3>${p.name}</h3><p>${p.price} ₽</p>
-        <div style="display:flex; justify-content:center; gap:6px;">
+        <div class="count-block">
           <button class="remove-btn">-</button>
-          <span>${count}</span>
+          <div class="count-number">${count}</div>
           <button class="add-btn">+</button>
         </div>`;
-      const removeBtn = card.querySelector(".remove-btn");
-      const addBtn = card.querySelector(".add-btn");
-      removeBtn.onclick = e=>{ e.stopPropagation(); removeFromCart(p); };
-      addBtn.onclick = e=>{ e.stopPropagation(); addToCart(p); };
-      if(!inCartScreen) card.onclick = ()=>openModal(p);
+      card.onclick=()=>openModal(p);
+      const removeBtn=card.querySelector(".remove-btn");
+      const addBtn=card.querySelector(".add-btn");
+      removeBtn.onclick=e=>{ e.stopPropagation(); removeFromCart(p); };
+      addBtn.onclick=e=>{ e.stopPropagation(); addToCart(p); };
     }else{
-      card.innerHTML = `<h3>${p.name}</h3><p>${p.price} ₽</p>
+      card.innerHTML=`<h3>${p.name}</h3><p>${p.price} ₽</p>
         <button class="add-btn">В корзину</button>`;
-      const addBtn = card.querySelector(".add-btn");
-      addBtn.onclick = e=>{ e.stopPropagation(); flyToCart(img); addToCart(p); };
-      card.onclick = ()=>openModal(p);
+      card.onclick=()=>openModal(p);
+      const addBtn=card.querySelector(".add-btn");
+      addBtn.onclick=e=>{ e.stopPropagation(); flyToCart(img); addToCart(p); };
     }
 
-    const wrapper = document.createElement("div");
-    wrapper.className = "card-wrapper";
+    const wrapper=document.createElement("div");
+    wrapper.className="card-wrapper";
     wrapper.appendChild(card);
-
-    if(count>0){
-      const countEl = document.createElement("div");
-      countEl.className = "item-count";
-      countEl.textContent = count;
-      wrapper.appendChild(countEl);
-    }
-
     containerEl.appendChild(wrapper);
   });
 
@@ -94,57 +85,56 @@ function renderProducts(list = products){
 }
 
 function addToCart(product){
-  const cartItem = cart.find(item=>item.product.id===product.id);
-  if(cartItem) cartItem.count++;
-  else cart.push({product, count:1});
-  renderProducts(inCartScreen ? cart.map(i=>i.product) : products);
+  const cartItem=cart.find(i=>i.product.id===product.id);
+  if(cartItem) cartItem.count++; else cart.push({product,count:1});
+  renderProducts(inCartScreen?cart.map(i=>i.product):products);
 }
 
 function removeFromCart(product){
-  const cartItem = cart.find(item=>item.product.id===product.id);
+  const cartItem=cart.find(i=>i.product.id===product.id);
   if(!cartItem) return;
   cartItem.count--;
-  if(cartItem.count===0) cart = cart.filter(i=>i.product.id!==product.id);
-  renderProducts(inCartScreen ? cart.map(i=>i.product) : products);
+  if(cartItem.count===0) cart=cart.filter(i=>i.product.id!==product.id);
+  renderProducts(inCartScreen?cart.map(i=>i.product):products);
 }
 
 function updateCartCount(){ cartCount.textContent = cart.reduce((s,i)=>s+i.count,0); }
 function updateCartTotal(){ cartTotal.textContent = `Итог: ${cart.reduce((s,i)=>s+i.product.price*i.count,0)} ₽`; }
 
 function openModal(p){
-  currentModalProduct = p;
-  modalImage.src = p.image;
-  modalTitle.textContent = p.name;
-  modalPrice.textContent = `${p.price} ₽`;
+  currentModalProduct=p;
+  modalImage.src=p.image;
+  modalTitle.textContent=p.name;
+  modalPrice.textContent=`${p.price} ₽`;
   modal.style.display="flex";
 }
-modalClose.onclick = modalBack.onclick = ()=>modal.style.display="none";
-modalAdd.onclick = ()=>{ addToCart(currentModalProduct); modal.style.display="none"; }
 
-searchInput.addEventListener("input", e=>{
-  const value = e.target.value.toLowerCase();
+modalClose.onclick=modalBack.onclick=()=>modal.style.display="none";
+modalAdd.onclick=()=>{ addToCart(currentModalProduct); modal.style.display="none"; }
+
+searchInput.addEventListener("input",e=>{
+  const value=e.target.value.toLowerCase();
   renderProducts(products.filter(p=>p.name.toLowerCase().includes(value)));
 });
 
-menuIcon.onclick = ()=>categories.classList.toggle("show");
+menuIcon.onclick=()=>categories.classList.toggle("show");
 categories.querySelectorAll("div").forEach(cat=>{
-  cat.onclick = ()=>{
+  cat.onclick=()=>{
     inCartScreen=false;
-    renderProducts(cat.dataset.category==="Главная"? products : products.filter(p=>p.category===cat.dataset.category));
+    renderProducts(cat.dataset.category==="Главная"?products:products.filter(p=>p.category===cat.dataset.category));
     categories.classList.remove("show");
   };
 });
 
-mainTitle.onclick = ()=>{ inCartScreen=false; renderProducts(products); };
-cartButton.onclick = ()=>{ inCartScreen=true; renderProducts(cart.map(i=>i.product)); };
-checkoutButton.onclick = ()=>{ if(cart.length) alert(`Заказ на ${cart.reduce((s,i)=>s+i.product.price*i.count,0)} ₽`); }
+mainTitle.onclick=()=>{ inCartScreen=false; renderProducts(products); }
+cartButton.onclick=()=>{ inCartScreen=true; renderProducts(cart.map(i=>i.product)); }
+checkoutButton.onclick=()=>{ if(cart.length) alert(`Заказ на ${cart.reduce((s,i)=>s+i.product.price*i.count,0)} ₽`); }
 
 function flyToCart(img){
   const fly=img.cloneNode();
   fly.className="fly-to-cart";
   const rect=img.getBoundingClientRect();
-  fly.style.left=rect.left+"px";
-  fly.style.top=rect.top+"px";
+  fly.style.left=rect.left+"px"; fly.style.top=rect.top+"px";
   document.body.appendChild(fly);
   setTimeout(()=>{
     const cartRect=cartButton.getBoundingClientRect();

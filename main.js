@@ -1,30 +1,34 @@
 const tg = window.Telegram.WebApp; tg.expand();
 
-let cart=[]; let inCartScreen=false;
+let cart = []; 
+let inCartScreen = false;
 
-const containerEl=document.getElementById("products");
-const searchInput=document.getElementById("searchInput");
-const cartButton=document.getElementById("cartButton");
-const checkoutButton=document.getElementById("checkoutButton");
-const cartCount=document.getElementById("cartCount");
-const cartTotal=document.getElementById("cartTotal");
-const mainTitle=document.getElementById("mainTitle");
-const menuIcon=document.getElementById("menuIcon");
-const categories=document.getElementById("categories");
-const modal=document.getElementById("modal");
-const modalImage=document.getElementById("modalImage");
-const modalTitle=document.getElementById("modalTitle");
-const modalPrice=document.getElementById("modalPrice");
-const modalDescription=document.createElement("p"); // для описания
+const containerEl = document.getElementById("products");
+const searchInput = document.getElementById("searchInput");
+const cartButton = document.getElementById("cartButton");
+const checkoutButton = document.getElementById("checkoutButton");
+const cartCount = document.getElementById("cartCount");
+const cartTotal = document.getElementById("cartTotal");
+const mainTitle = document.getElementById("mainTitle");
+const menuIcon = document.getElementById("menuIcon");
+const categories = document.getElementById("categories");
+const modal = document.getElementById("modal");
+const modalImage = document.getElementById("modalImage");
+const modalTitle = document.getElementById("modalTitle");
+const modalPrice = document.getElementById("modalPrice");
+const modalAdd = document.getElementById("modalAdd");
+const modalBack = document.getElementById("modalBack");
+
+// Создаём элемент для описания
+const modalDescription = document.createElement("p");
 modalDescription.style.color = "white";
 modalDescription.style.fontSize = "13px";
 modalDescription.style.marginTop = "6px";
-const modalContent=document.querySelector(".modal-content");
-modalContent.appendChild(modalDescription);
+document.querySelector(".modal-content").appendChild(modalDescription);
 
-let currentModalProduct=null;
+let currentModalProduct = null;
 
-const products=[
+const products = [
 {id:1,name:"Колье Pierced Chain",price:2500,image:"https://i.pinimg.com/736x/37/0b/db/370bdb870346b42b1000610195261f62.jpg",category:"Колье",
 description:`Материал изделия:
 Нержавеющая сталь;
@@ -87,114 +91,124 @@ description:`Материал изделия:
 
 // ---------- Функции ----------
 
-function renderProducts(list=products){
-  containerEl.innerHTML="";
-  searchInput.style.display=inCartScreen?"none":"block";
-  cartTotal.style.display=inCartScreen?"block":"none";
-  checkoutButton.style.display=inCartScreen && cart.length>0?"block":"none";
-  document.getElementById("footerButtons").style.display=inCartScreen?"none":"flex";
+function renderProducts(list = products){
+  containerEl.innerHTML = "";
+  searchInput.style.display = inCartScreen ? "none" : "block";
+  cartTotal.style.display = inCartScreen ? "block" : "none";
+  checkoutButton.style.display = inCartScreen && cart.length > 0 ? "block" : "none";
+  document.getElementById("footerButtons").style.display = inCartScreen ? "none" : "flex";
 
-  list.forEach(p=>{
-    const card=document.createElement("div"); 
-    card.className="product";
+  list.forEach(p => {
+    const card = document.createElement("div"); 
+    card.className = "product";
 
-    const img=new Image(); 
-    img.src=p.image; 
-    img.alt=p.name;
-    img.onclick=e=>{
+    const img = new Image(); 
+    img.src = p.image; 
+    img.alt = p.name;
+    img.onclick = e => { 
       e.stopPropagation(); 
-      openModal(p);
+      openModal(p); 
     };
 
-    const cartItem=cart.find(i=>i.product.id===p.id);
-    const count=cartItem?cartItem.count:0;
+    const cartItem = cart.find(i => i.product.id === p.id);
+    const count = cartItem ? cartItem.count : 0;
 
-    if(count>0 || inCartScreen){
-      card.innerHTML=`<h3>${p.name}</h3><p>${p.price} ₽</p>
+    if(count > 0 || inCartScreen){
+      card.innerHTML = `<h3>${p.name}</h3><p>${p.price} ₽</p>
         <div class="count-block">
           <button class="remove-btn">-</button>
           <div class="count-number">${count}</div>
           <button class="add-btn">+</button>
         </div>`;
       card.insertBefore(img, card.firstChild);
-      const removeBtn=card.querySelector(".remove-btn");
-      const addBtn=card.querySelector(".add-btn");
-      removeBtn.onclick=e=>{e.stopPropagation(); removeFromCart(p);};
-      addBtn.onclick=e=>{e.stopPropagation(); addToCart(p);};
-    }else{
-      card.innerHTML=`<h3>${p.name}</h3><p>${p.price} ₽</p>`;
+      const removeBtn = card.querySelector(".remove-btn");
+      const addBtn = card.querySelector(".add-btn");
+      removeBtn.onclick = e => { e.stopPropagation(); removeFromCart(p); };
+      addBtn.onclick = e => { e.stopPropagation(); addToCart(p); };
+    } else {
+      card.innerHTML = `<h3>${p.name}</h3><p>${p.price} ₽</p>`;
       card.insertBefore(img, card.firstChild);
     }
     containerEl.appendChild(card);
   });
-  updateCartCount(); updateCartTotal();
+
+  updateCartCount();
+  updateCartTotal();
 }
 
 function addToCart(product){
-  const cartItem=cart.find(i=>i.product.id===product.id); 
+  const cartItem = cart.find(i => i.product.id === product.id); 
   if(cartItem) cartItem.count++; 
-  else cart.push({product,count:1}); 
-  renderProducts(inCartScreen?cart.map(i=>i.product):products);
+  else cart.push({product, count:1}); 
+  renderProducts(inCartScreen ? cart.map(i => i.product) : products);
 }
 
 function removeFromCart(product){
-  const cartItem=cart.find(i=>i.product.id===product.id); 
+  const cartItem = cart.find(i => i.product.id === product.id); 
   if(!cartItem) return; 
   cartItem.count--; 
-  if(cartItem.count===0) cart=cart.filter(i=>i.product.id!==product.id); 
-  renderProducts(inCartScreen?cart.map(i=>i.product):products);
+  if(cartItem.count === 0) cart = cart.filter(i => i.product.id !== product.id); 
+  renderProducts(inCartScreen ? cart.map(i => i.product) : products);
 }
 
-function updateCartCount(){cartCount.textContent=cart.reduce((s,i)=>s+i.count,0);}
-function updateCartTotal(){cartTotal.textContent=`Итог: ${cart.reduce((s,i)=>s+i.product.price*i.count,0)} ₽`;}
+function updateCartCount(){ cartCount.textContent = cart.reduce((s,i)=>s+i.count,0); }
+function updateCartTotal(){ cartTotal.textContent = `Итог: ${cart.reduce((s,i)=>s+i.product.price*i.count,0)} ₽`; }
 
-// ---------- Модал ----------
+// ---------- Модальное окно ----------
 
 function openModal(p){
-  currentModalProduct=p; 
-  modalImage.src=p.image; 
-  modalTitle.textContent=p.name; 
-  modalPrice.textContent=`${p.price} ₽`;
+  currentModalProduct = p;
+  modalImage.src = p.image;
+  modalTitle.textContent = p.name;
+  modalPrice.textContent = `${p.price} ₽`;
   modalDescription.textContent = p.description;
-  modal.style.display="flex";
+
+  // Скрываем кнопки "В корзину" и "Назад" только в модальном окне
+  modalAdd.style.display = "none";
+  modalBack.style.display = "none";
+
+  modal.style.display = "flex";
 }
 
-modal.addEventListener("click",e=>{if(e.target===modal) modal.style.display="none";});
+modal.addEventListener("click", e => { if(e.target === modal) modal.style.display = "none"; });
 
-searchInput.addEventListener("input",e=>{
-  const v=e.target.value.toLowerCase(); 
-  renderProducts(products.filter(p=>p.name.toLowerCase().includes(v)));
+// ---------- Поиск и фильтры ----------
+
+searchInput.addEventListener("input", e => {
+  const v = e.target.value.toLowerCase(); 
+  renderProducts(products.filter(p => p.name.toLowerCase().includes(v)));
 });
 
-menuIcon.onclick=()=>categories.classList.toggle("show");
-categories.querySelectorAll("div").forEach(cat=>{
-  cat.onclick=()=>{
-    inCartScreen=false; 
-    renderProducts(cat.dataset.category==="Главная"?products:products.filter(p=>p.category===cat.dataset.category)); 
+menuIcon.onclick = () => categories.classList.toggle("show");
+
+categories.querySelectorAll("div").forEach(cat => {
+  cat.onclick = () => {
+    inCartScreen = false; 
+    renderProducts(cat.dataset.category === "Главная" ? products : products.filter(p => p.category === cat.dataset.category)); 
     categories.classList.remove("show");
   };
 });
 
-mainTitle.onclick=()=>{inCartScreen=false; renderProducts(products);};
-cartButton.onclick=()=>{inCartScreen=true; renderProducts(cart.map(i=>i.product));};
-checkoutButton.onclick=()=>{if(cart.length) alert(`Заказ на ${cart.reduce((s,i)=>s+i.product.price*i.count,0)} ₽`);};
+mainTitle.onclick = () => { inCartScreen = false; renderProducts(products); };
+cartButton.onclick = () => { inCartScreen = true; renderProducts(cart.map(i => i.product)); };
+checkoutButton.onclick = () => { if(cart.length) alert(`Заказ на ${cart.reduce((s,i)=>s+i.product.price*i.count,0)} ₽`); };
 
 // Анимация полета товара
 function flyToCart(img){
-  const fly=img.cloneNode(); 
-  fly.className="fly-to-cart"; 
-  const rect=img.getBoundingClientRect(); 
-  fly.style.left=rect.left+"px"; 
-  fly.style.top=rect.top+"px"; 
+  const fly = img.cloneNode(); 
+  fly.className = "fly-to-cart"; 
+  const rect = img.getBoundingClientRect(); 
+  fly.style.left = rect.left + "px"; 
+  fly.style.top = rect.top + "px"; 
   document.body.appendChild(fly); 
   setTimeout(()=>{
-    const cartRect=cartButton.getBoundingClientRect(); 
-    fly.style.transform=`translate(${cartRect.left-rect.left}px,${cartRect.top-rect.top}px) scale(0.1)`; 
-    fly.style.opacity="0";
+    const cartRect = cartButton.getBoundingClientRect(); 
+    fly.style.transform = `translate(${cartRect.left-rect.left}px,${cartRect.top-rect.top}px) scale(0.1)`; 
+    fly.style.opacity = "0";
   },10); 
   setTimeout(()=>fly.remove(),610);
 }
 
-document.addEventListener("click",e=>{if(searchInput&&!searchInput.contains(e.target)) searchInput.blur();});
+document.addEventListener("click", e => { if(searchInput && !searchInput.contains(e.target)) searchInput.blur(); });
 
 renderProducts();

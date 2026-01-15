@@ -19,7 +19,7 @@ body{
   align-items:center;
   justify-content:center;
   padding:16px;
-  background: rgba(30,30,30,0.85);
+  background: rgba(30,30,30,0.95);
   z-index:11;
 }
 .header h1{
@@ -44,6 +44,35 @@ body{
   height:4px;
   background:white;
   border-radius:2px;
+}
+
+/* Кнопка корзины в шапке */
+.cart-btn{
+  position:absolute;
+  right:16px;
+  top:16px;
+  background:white;
+  color:black;
+  padding:8px 12px;
+  border-radius:20px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-size:16px;
+  cursor:pointer;
+  z-index:20;
+  border:none;
+}
+.cart-count{
+  display:inline-block;
+  background:black;
+  color:white;
+  width:22px;
+  height:22px;
+  border-radius:50%;
+  text-align:center;
+  line-height:22px;
+  font-size:14px;
 }
 
 /* Контейнер */
@@ -71,10 +100,7 @@ body{
   z-index:10;
 }
 .categories.show{left:0;}
-.categories div{
-  cursor:pointer;
-  font-size:18px;
-}
+.categories div{cursor:pointer;font-size:18px;}
 
 /* Поиск */
 .search{
@@ -88,9 +114,7 @@ body{
   background-color:#333;
   color:white;
 }
-.search::placeholder{
-  color:#ccc;
-}
+.search::placeholder{color:#ccc;}
 
 /* Сетка товаров */
 .products{
@@ -100,7 +124,7 @@ body{
   justify-items:center;
 }
 
-/* Карточка */
+/* Карточки */
 .product{
   background: rgba(0,0,0,0.6);
   border-radius:14px;
@@ -124,67 +148,34 @@ body{
   object-fit:cover;
   border-radius:10px;
 }
-.product h3{
-  color:#fff;
-  font-size:14px;
+.product h3{color:#fff;font-size:14px;margin-top:6px;}
+.product p{color:#ccc;font-size:13px;}
+
+/* + / - и количество */
+.count-block{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
   margin-top:6px;
 }
-.product p{
-  color:#ccc;
-  font-size:13px;
-}
-
-/* Кнопки + / - и счетчик */
-.count-block{
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 6px;
-}
 .count-block button{
-  padding: 6px 10px;
-  border-radius: 8px;
-  border: none;
-  background: #333;
-  color: white;
-  cursor: pointer;
+  padding:8px 10px;
+  border-radius:10px;
+  border:none;
+  background:#333;
+  color:white;
+  font-size:14px;
+  cursor:pointer;
 }
 .count-number{
-  min-width: 24px;
-  padding: 4px 6px;
-  text-align: center;
-  background: white;
-  color: black;
-  border-radius: 10px;
-}
-
-/* Кнопка корзины в правом верхнем углу */
-.cart-btn{
-  position: fixed;
-  top: 16px;
-  right: 16px;
-  z-index: 20;
-  padding: 12px 16px;
-  border-radius: 20px;
-  background: #333;
-  color: white;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 16px;
-  cursor: pointer;
-}
-.cart-count{
-  display: inline-block;
-  background: black;
-  color: white;
-  font-size: 14px;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  text-align: center;
-  line-height: 22px;
+  min-width:28px;
+  padding:4px 6px;
+  text-align:center;
+  background:white;
+  color:black;
+  border-radius:10px;
+  font-size:14px;
 }
 
 /* Итог корзины */
@@ -221,66 +212,35 @@ body{
   position:relative;
 }
 .modal-img-wrapper{position:relative;}
-.modal-img-wrapper img{
-  width:100%;
-  border-radius:12px;
-}
+.modal-img-wrapper img{width:100%;border-radius:12px;}
 .modal-text{
   position:absolute;
-  bottom:0;
-  left:0;
-  right:0;
+  bottom:0; left:0; right:0;
   background:rgba(0,0,0,0.6);
-  color:white;
-  padding:6px 8px;
+  color:white; padding:6px 8px;
   border-bottom-left-radius:12px;
   border-bottom-right-radius:12px;
 }
-.modal-text h3,
-.modal-text p{
-  margin:0;
-  font-size:14px;
-}
-.modal-close{
-  position:absolute;
-  top:8px;
-  right:12px;
-  color:white;
-  font-size:24px;
-  cursor:pointer;
-}
+.modal-text h3, .modal-text p{margin:0;font-size:14px;}
+.modal-close{position:absolute;top:8px;right:12px;color:white;font-size:24px;cursor:pointer;}
 
-/* Анимация в корзину */
-.fly-to-cart{
-  position:fixed;
-  width:50px;
-  height:50px;
-  border-radius:50%;
-  pointer-events:none;
-  transition:transform 0.6s ease-in-out, opacity 0.6s ease-in-out;
-  z-index:1000;
-}
-
-/* Футер */
+/* Футер кнопки */
 .footer-buttons{
-  position: fixed;
-  bottom: 16px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 12px;
-  z-index: 20;
+  position:fixed;
+  bottom:16px;
+  left:50%;
+  transform:translateX(-50%);
+  display:flex;
+  gap:12px;
+  z-index:20;
 }
 .footer-btn{
-  padding: 10px 16px;
-  border-radius: 20px;
-  background: #333;
-  color: white;
-  text-decoration: none;
-  font-size: 14px;
-  text-align: center;
-  transition: background 0.2s;
+  padding:10px 16px;
+  border-radius:20px;
+  background:#333;
+  color:white;
+  text-decoration:none;
+  font-size:14px;
+  text-align:center;
 }
-.footer-btn:hover{
-  background: #555;
-}
+.footer-btn:hover{background:#555;}

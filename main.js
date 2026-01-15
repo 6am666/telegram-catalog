@@ -29,10 +29,6 @@ const orderModal = document.getElementById("orderModal");
 const orderClose = document.getElementById("orderClose");
 const orderForm = document.getElementById("orderForm");
 
-/* адресные подсказки */
-const addressInput = document.getElementById("addressInput");
-const addressSuggestions = document.getElementById("addressSuggestions");
-
 /* гамбургер */
 menuIcon.onclick = () => { categories.classList.toggle("show"); };
 
@@ -120,50 +116,41 @@ function updateUIVisibility(){
 checkoutButton.onclick=()=>{if(cart.length===0) return alert("Корзина пуста!"); orderModal.style.display="flex";}
 orderClose.onclick=()=>orderModal.style.display="none";
 orderModal.onclick=e=>{if(e.target===orderModal) orderModal.style.display="none";}
-orderForm.onsubmit=e=>{
+
+/* отправка формы на Google Sheets */
+orderForm.onsubmit = async e => {
   e.preventDefault();
-  const fd=new FormData(orderForm);
-  const orderData={
-    fullname:fd.get("fullname"),
-    city:fd.get("city"),
-    address:fd.get("address"),
-    delivery:fd.get("delivery"),
-    phone:fd.get("phone"),
-    items:cart.map(i=>({name:i.product.name,price:i.product.price,count:i.count}))
+  if(cart.length === 0) return alert("Корзина пуста!");
+
+  const fd = new FormData(orderForm);
+  const orderData = {
+    fullname: fd.get("fullname"),
+    address: fd.get("address"),
+    delivery: fd.get("delivery"),
+    phone: fd.get("phone"),
+    items: cart.map(i => ({name:i.product.name, price:i.product.price, count:i.count}))
   };
-  console.log("Данные заказа:",orderData);
-  alert("Форма заполнена! Здесь будет переход на оплату.");
-  orderModal.style.display="none";
+
+  try {
+    const response = await fetch("https://script.google.com/macros/s/AKfycbyly6E28Y6Oen8RiYInebvJBh9fT5bCh15JYFE48QKOpxMai9FDu94vixY_zcbaOtd2/exec", {
+      method: "POST",
+      body: JSON.stringify(orderData),
+      headers: { "Content-Type": "application/json" }
+    });
+    const result = await response.json();
+    if(result.status === "success") alert("Заказ успешно отправлен!");
+    else alert("Ошибка при отправке: " + result.message);
+  } catch(err) {
+    alert("Ошибка соединения: " + err);
+  }
+
+  orderModal.style.display = "none";
+  cart = [];
+  renderProducts(getCurrentList());
 };
 
 /* ================== ПОИСК ================== */
 searchInput.oninput=()=>{const val=searchInput.value.toLowerCase(); renderProducts(getCurrentList().filter(p=>p.name.toLowerCase().includes(val)));};
-
-/* ================== АВТОДОПОЛНЕНИЕ АДРЕСА ================== */
-addressInput.addEventListener("input", async () => {
-  const query = addressInput.value;
-  if(query.length < 3){ addressSuggestions.innerHTML=""; return; }
-
-  const response = await fetch('https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/address',{
-    method:'POST',
-    headers:{
-      'Content-Type':'application/json',
-      'Accept':'application/json',
-      'Authorization':'Token YOUR_DADATA_API_KEY'
-    },
-    body: JSON.stringify({query})
-  });
-
-  const data = await response.json();
-  addressSuggestions.innerHTML="";
-  data.suggestions.forEach(item=>{
-    const div=document.createElement("div");
-    div.className="suggestion-item";
-    div.textContent=item.value;
-    div.onclick=()=>{addressInput.value=item.value; addressSuggestions.innerHTML="";}
-    addressSuggestions.appendChild(div);
-  });
-});
 
 /* ================== СТАРТ ================== */
 renderProducts(products);

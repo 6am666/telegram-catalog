@@ -4,12 +4,13 @@ tg.MainButton.setParams({ color: '#333', textColor: '#fff' });
 
 let cart = [];
 let currentModalProduct = null;
+let inCartScreen = false;
 
 const containerEl = document.getElementById("products");
 const mainTitle = document.getElementById("mainTitle");
 const menuIcon = document.getElementById("menuIcon");
 const categories = document.getElementById("categories");
-const cartBottom = document.getElementById("cartBottom");
+const cartButton = document.getElementById("cartButton");
 
 const modal = document.getElementById("modal");
 const modalImage = document.getElementById("modalImage");
@@ -29,8 +30,10 @@ const products = [
   { id: 8, name: "Кулон с цепочкой Moonlight", price: 2000, image: "https://i.pinimg.com/736x/5a/6d/1b/5a6d1beecdc7b79798705e4da0ef3a5c.jpg", category: "Кулоны" },
 ];
 
+// Рендер товаров
 function renderProducts(list = products) {
   containerEl.innerHTML = "";
+  inCartScreen = false;
   list.forEach(p => {
     const card = document.createElement("div");
     card.className = "product";
@@ -48,14 +51,12 @@ function renderProducts(list = products) {
 
     card.querySelector(".add-btn").onclick = (e) => {
       e.stopPropagation();
-      flyToCart(img);
       addToCart(p);
     };
 
     containerEl.appendChild(card);
   });
-
-  renderCartBottom();
+  updateCartButton();
 }
 
 // Модальное окно
@@ -87,44 +88,39 @@ categories.querySelectorAll("div").forEach(cat => {
   };
 });
 
-// Корзина внизу
+// КОРЗИНА
 function addToCart(product) {
   cart.push(product);
-  renderCartBottom();
-}
-function renderCartBottom() {
-  cartBottom.innerHTML = "";
-  const counts = {};
-  cart.forEach(p => counts[p.id] = (counts[p.id] || 0) + 1);
-  const unique = [...new Set(cart.map(p => p.id))];
-  unique.forEach(id => {
-    const item = cart.find(p => p.id === id);
-    const div = document.createElement("div");
-    div.className = "cart-item";
-    div.innerHTML = `<img src="${item.image}" alt="${item.name}"><div class="count">${counts[id]}</div>`;
-    cartBottom.appendChild(div);
-  });
+  updateCartButton();
 }
 
-// Анимация полета товара
-function flyToCart(img) {
-  const flyImg = img.cloneNode();
-  flyImg.className = "fly-img";
-  document.body.appendChild(flyImg);
-  const rect = img.getBoundingClientRect();
-  flyImg.style.left = rect.left + "px";
-  flyImg.style.top = rect.top + "px";
-  const cartRect = cartBottom.getBoundingClientRect();
-  const x = cartRect.left + 20 - rect.left;
-  const y = cartRect.top - rect.top - 20;
-  requestAnimationFrame(() => {
-    flyImg.style.transform = `translate(${x}px, ${y}px) scale(0.2)`;
-    flyImg.style.opacity = "0";
-  });
-  flyImg.addEventListener("transitionend", () => flyImg.remove());
+function updateCartButton() {
+  cartButton.textContent = `Корзина (${cart.length})`;
 }
 
-// Главная не переносит на экран
-mainTitle.onclick = null;
+cartButton.onclick = () => {
+  inCartScreen = true;
+  containerEl.innerHTML = "";
+  if(cart.length === 0){
+    containerEl.innerHTML = `<p style="color:white; text-align:center; margin-top:20px;">Корзина пуста</p>`;
+  } else {
+    cart.forEach((p,i)=>{
+      const card = document.createElement("div");
+      card.className = "product";
+      card.innerHTML = `<img src="${p.image}" style="width:100%;height:60%;object-fit:cover;border-radius:10px"><h3>${p.name}</h3><p>${p.price} ₽</p><button class="remove-btn">Удалить</button>`;
+      card.querySelector(".remove-btn").onclick = () => {
+        cart.splice(i,1);
+        updateCartButton();
+        cartButton.click();
+      };
+      containerEl.appendChild(card);
+    });
+    const total = cart.reduce((sum,item)=>sum+item.price,0);
+    const totalDiv = document.createElement("div");
+    totalDiv.className = "cart-total";
+    totalDiv.textContent = `Итого: ${total} ₽`;
+    containerEl.appendChild(totalDiv);
+  }
+}
 
 renderProducts();

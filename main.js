@@ -93,7 +93,7 @@ function getCurrentList(){ if(inCartScreen) return cart.map(i=>i.product); if(cu
 categories.querySelectorAll("div").forEach(c=>{c.onclick=()=>{
   inCartScreen=false; currentCategory=c.dataset.category; renderProducts(getCurrentList()); categories.classList.remove("show");
 }});
-mainTitle.onclick=()=>{inCartScreen=false; currentCategory="Главная"; renderProducts(products);};
+mainTitle.onclick=()=>{inCartScreen=false; currentCategory="Главная"; renderProducts(products); updateUIVisibility();};
 cartButton.onclick=()=>{
   inCartScreen=true; renderProducts(cart.map(i=>i.product));
   updateUIVisibility();
@@ -110,7 +110,7 @@ orderClose.onclick=()=>orderModal.style.display="none";
 orderModal.onclick=e=>{if(e.target===orderModal) orderModal.style.display="none";}
 
 /* ================== DaData ================== */
-$(function() {
+$(document).ready(function() {
   $("input[name='address']").suggestions({
     token: "4563b9c9765a1a2d7bf39e1c8944f7fadae05970",
     type: "ADDRESS",
@@ -158,5 +158,7 @@ orderForm.onsubmit = async e => {
 searchInput.oninput=()=>{const val=searchInput.value.toLowerCase(); renderProducts(getCurrentList().filter(p=>p.name.toLowerCase().includes(val)));};
 
 /* ================== СТАРТ ================== */
+inCartScreen = false;
+currentCategory = "Главная";
 renderProducts(products);
 updateUIVisibility();

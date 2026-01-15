@@ -62,8 +62,8 @@ h1 {
 .categories {
   position: fixed;
   top: 0;
-  left: -200px;
-  width: 200px;
+  left: -220px;
+  width: 220px;
   height: 100%;
   background: rgba(30,30,30,0.95);
   color: white;
@@ -144,7 +144,7 @@ h1 {
   cursor: pointer;
 }
 
-/* TELEGRAM КНОПКА */
+/* Telegram кнопка */
 .tg-btn {
   background-color: #333 !important;
   color: white !important;
@@ -214,17 +214,20 @@ h1 {
   <div class="menu-icon" id="menuIcon">
     <div></div><div></div><div></div>
   </div>
+
   <h1 id="mainTitle">Chronicle Chains</h1>
 
   <div class="categories" id="categories">
+    <div data-category="Главная">Главная</div>
     <div data-category="Браслеты">Браслеты</div>
     <div data-category="Колье">Колье</div>
+    <div data-category="Кулоны">Кулоны</div>
     <div data-category="Серьги">Серьги</div>
     <div data-category="Обвесы">Обвесы</div>
+    <div data-category="Аксессуары для волос">Аксессуары для волос</div>
   </div>
 
   <input type="text" class="search" placeholder="Поиск..." oninput="filterProducts(this.value)">
-
   <div class="products" id="products"></div>
 </div>
 
@@ -249,7 +252,7 @@ const products = [
   { id: 5, name: "Обвес Lighter", price: 3600, image: "https://i.pinimg.com/736x/e8/cb/c2/e8cbc2287025b23930c20e030755a0b5.jpg", category: "Обвесы" },
   { id: 6, name: "Обвес Star", price: 2000, image: "https://i.pinimg.com/736x/16/36/75/163675cf410dfc51ef97238bbbab1056.jpg", category: "Обвесы" },
   { id: 7, name: "Серьги Moonlight", price: 2000, image: "https://i.pinimg.com/736x/93/e4/e5/93e4e5ee7594f6ef436f8b994ef04016.jpg", category: "Серьги" },
-  { id: 8, name: "Кулон с цепочкой Moonlight", price: 2000, image: "https://i.pinimg.com/736x/5a/6d/1b/5a6d1beecdc7b79798705e4da0ef3a5c.jpg", category: "Колье" },
+  { id: 8, name: "Кулон с цепочкой Moonlight", price: 2000, image: "https://i.pinimg.com/736x/5a/6d/1b/5a6d1beecdc7b79798705e4da0ef3a5c.jpg", category: "Кулоны" },
 ];
 
 function renderProducts(list = products) {
@@ -281,18 +284,18 @@ function renderProducts(list = products) {
   renderCartBottom();
 }
 
-/* Фильтр по поиску */
 function filterProducts(value) {
   value = value.toLowerCase();
   renderProducts(products.filter(p => p.name.toLowerCase().includes(value)));
 }
 
-/* Категории */
+/* ГАМБУРГЕР */
 menuIcon.onclick = () => categories.classList.toggle("show");
 categories.querySelectorAll("div").forEach(cat => {
   cat.onclick = () => {
     const catName = cat.dataset.category;
-    renderProducts(products.filter(p => p.category === catName));
+    if (catName === "Главная") renderProducts();
+    else renderProducts(products.filter(p => p.category === catName));
     categories.classList.remove("show");
   };
 });

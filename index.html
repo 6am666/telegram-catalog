@@ -31,30 +31,36 @@ body {
   z-index: -1;
 }
 
-/* КОНТЕЙНЕР */
-.container {
+/* ШАПКА */
+.header {
+  position: sticky;
+  top: 0;
+  width: 100%;
   max-width: 460px;
   margin: 0 auto;
-  padding: 16px;
-  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  background: rgba(0,0,0,0.6);
+  z-index: 10;
+  border-radius: 0 0 14px 14px;
 }
 
-/* ЗАГОЛОВОК */
-h1 {
-  text-align: center;
+.header h1 {
   color: #fff;
-  margin: 20px 0;
+  font-size: 22px;
   cursor: pointer;
+  margin: 0;
 }
 
-/* ИКОНКА КОРЗИНЫ */
 .cart-icon {
   position: absolute;
-  top: 16px;
   left: 16px;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   cursor: pointer;
+  filter: invert(1); /* делаем белым */
 }
 
 /* ПОИСК */
@@ -63,7 +69,7 @@ h1 {
   padding: 12px;
   border-radius: 12px;
   border: none;
-  margin-bottom: 20px;
+  margin: 16px 0;
   font-size: 16px;
 }
 
@@ -109,32 +115,19 @@ h1 {
 }
 
 /* КНОПКИ */
-.add-btn {
+.add-btn,
+.remove-btn,
+.tg-btn,
+#modalAddBtn,
+#modalCloseBtn {
   margin-top: 6px;
   padding: 8px;
   border-radius: 10px;
   border: none;
-  background: white;
-  color: black;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-.remove-btn {
-  margin-top: 6px;
-  padding: 8px;
-  border-radius: 10px;
-  border: none;
-  background: #f44336;
+  background: #333333; /* темно-серый */
   color: white;
   font-size: 14px;
   cursor: pointer;
-}
-
-/* Telegram кнопка (Корзина/Оформить заказ) */
-.tg-btn {
-  background-color: white !important;
-  color: black !important;
 }
 
 /* ИТОГО В КОРЗИНЕ */
@@ -183,8 +176,8 @@ h1 {
   margin-top: 16px;
   padding: 10px 20px;
   font-size: 16px;
-  background: white;
-  color: black;
+  background: #333333; /* темно-серый */
+  color: white;
   border: none;
   border-radius: 10px;
   cursor: pointer;
@@ -197,11 +190,11 @@ h1 {
 <div class="background"></div>
 
 <div class="container">
-  <!-- Иконка корзины -->
-  <img src="https://cdn-icons-png.flaticon.com/512/833/833314.png" class="cart-icon" id="cartIcon" alt="Корзина">
-
-  <!-- Заголовок -->
-  <h1 id="mainTitle">Chronicle Chains</h1>
+  <!-- Шапка -->
+  <div class="header">
+    <img src="https://cdn-icons-png.flaticon.com/512/833/833314.png" class="cart-icon" id="cartIcon" alt="Корзина">
+    <h1 id="mainTitle">Chronicle Chains</h1>
+  </div>
 
   <!-- Поиск -->
   <input type="text" class="search" placeholder="Поиск..." oninput="filterProducts(this.value)">
@@ -222,7 +215,7 @@ h1 {
 <script>
 const tg = window.Telegram.WebApp;
 tg.expand();
-tg.MainButton.setParams({ color: '#FFFFFF', textColor: '#000000' });
+tg.MainButton.setParams({ color: '#333333', textColor: '#ffffff' });
 
 let cart = [];
 let inCartScreen = false;
@@ -274,7 +267,6 @@ function renderProducts(list = products) {
     `;
     card.prepend(img);
 
-    // Добавление нажатия для открытия модального окна
     card.onclick = (e) => {
       if (!e.target.classList.contains('add-btn')) showModal(p);
     };

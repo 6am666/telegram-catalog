@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Chronicle Chains</title>
+
 <link rel="stylesheet" href="style.css">
 
-<!-- jQuery и DaData подсказки -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/suggestions-jquery/dist/css/suggestions.min.css">
 <script src="https://cdn.jsdelivr.net/npm/suggestions-jquery/dist/js/jquery.suggestions.min.js"></script>
@@ -18,7 +18,9 @@
 <div class="header">
   <div class="menu-icon" id="menuIcon"><div></div><div></div><div></div></div>
   <h1 id="mainTitle">Chronicle Chains</h1>
-  <button class="cart-btn" id="cartButton">🛒<span id="cartCount" class="cart-count">0</span></button>
+  <button class="cart-btn" id="cartButton">
+    🛒 <span id="cartCount" class="cart-count">0</span>
+  </button>
 </div>
 
 <div class="container">
@@ -29,59 +31,39 @@
     <div data-category="Кулоны">Кулоны</div>
     <div data-category="Серьги">Серьги</div>
     <div data-category="Обвесы">Обвесы</div>
-    <div data-category="Аксессуары для волос">Аксессуары для волос</div>
   </div>
 
-  <input type="text" class="search" placeholder="Мне нужно..." id="searchInput">
+  <input type="text" id="searchInput" class="search" placeholder="Мне нужно...">
 
-  <div class="products" id="products"></div>
-  <div class="cart-total" id="cartTotal"></div>
+  <div id="products" class="products"></div>
+  <div id="cartTotal" class="cart-total"></div>
 
   <div class="footer-buttons" id="footerButtons">
-    <a href="https://t.me/whxt4ru" target="_blank" class="footer-btn">Связь</a>
-    <a href="https://t.me/chroniclechains" target="_blank" class="footer-btn">Магазин</a>
+    <a href="https://t.me/whxt4ru" class="footer-btn">Связь</a>
+    <a href="https://t.me/chroniclechains" class="footer-btn">Магазин</a>
   </div>
 </div>
 
-<!-- Модалка товара -->
-<div class="modal" id="modal">
-  <div class="modal-content">
-    <span class="modal-close" id="modalClose">&times;</span>
-    <div class="modal-img-wrapper"><img id="modalImage" src="" alt=""></div>
-    <div class="modal-title-price">
-      <h3 id="modalTitle"></h3>
-      <p id="modalPrice"></p>
-    </div>
-    <div class="modal-desc"><p id="modalDescription"></p></div>
-  </div>
-</div>
-
-<!-- Модалка заказа -->
+<!-- Оформление заказа -->
 <div class="order-modal" id="orderModal">
   <div class="order-modal-content">
     <span class="order-modal-close" id="orderClose">&times;</span>
     <h2>Оформление заказа</h2>
+
     <form id="orderForm">
-      <label>ФИО</label>
-      <input type="text" name="fullname" placeholder="Введите ваше ФИО" required>
+      <input name="fullname" placeholder="ФИО" required>
+      <input id="addressInput" name="address" placeholder="Адрес" required>
 
-      <label>Адрес</label>
-      <input type="text" id="addressInput" name="address" placeholder="Город, улица, дом, квартира, индекс" required>
-
-      <label>Доставка</label>
       <select name="delivery" required>
-        <option value="" disabled selected>Выберите способ доставки</option>
-        <option value="СДЭК">СДЭК</option>
-        <option value="Почта России">Почта России</option>
-        <option value="Boxberry">Boxberry</option>
-        <option value="Самовывоз">Самовывоз</option>
-        <option value="Яндекс.Доставка">Яндекс.Доставка</option>
+        <option value="" disabled selected>Способ доставки</option>
+        <option>СДЭК</option>
+        <option>Почта России</option>
+        <option>Boxberry</option>
+        <option>Самовывоз</option>
       </select>
 
-      <label>Телефон или ник в Telegram</label>
-      <input type="text" name="phone" placeholder="Введите телефон или ник" required>
-
-      <button type="submit">Оплатить</button>
+      <input name="phone" placeholder="Телефон или @telegram" required>
+      <button type="submit">Отправить заказ</button>
     </form>
   </div>
 </div>

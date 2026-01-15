@@ -8,12 +8,16 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-<div class="container">
+
+<!-- Шапка -->
+<div class="header">
   <div class="menu-icon" id="menuIcon">
     <div></div><div></div><div></div>
   </div>
   <h1 id="mainTitle">Chronicle Chains</h1>
+</div>
 
+<div class="container">
   <div class="categories" id="categories">
     <div data-category="Главная">Главная</div>
     <div data-category="Браслеты">Браслеты</div>
@@ -26,6 +30,9 @@
 
   <input type="text" class="search" placeholder="Поиск..." id="searchInput">
   <div class="products" id="products"></div>
+
+  <!-- Сумма корзины (только в корзине) -->
+  <div class="cart-total" id="cartTotal"></div>
 </div>
 
 <!-- Кнопка корзины -->

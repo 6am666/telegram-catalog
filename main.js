@@ -33,7 +33,6 @@ const products=[
 {id:8,name:"Кулон с цепочкой Moonlight",price:2000,image:"https://i.pinimg.com/736x/5a/6d/1b/5a6d1beecdc7b79798705e4da0ef3a5c.jpg",category:"Кулоны"},
 ];
 
-// ---------- Функции ----------
 function renderProducts(list=products){
   containerEl.innerHTML="";
   searchInput.style.display=inCartScreen?"none":"block";

@@ -10,6 +10,7 @@ const cartButton = document.getElementById("cartButton");
 const checkoutButton = document.getElementById("checkoutButton");
 const cartCount = document.getElementById("cartCount");
 const cartTotal = document.getElementById("cartTotal");
+const mainTitle = document.getElementById("mainTitle");
 
 const menuIcon = document.getElementById("menuIcon");
 const categories = document.getElementById("categories");
@@ -35,40 +36,40 @@ const products = [
   {id:8,name:"Кулон с цепочкой Moonlight",price:2000,image:"https://i.pinimg.com/736x/5a/6d/1b/5a6d1beecdc7b79798705e4da0ef3a5c.jpg",category:"Кулоны"},
 ];
 
-/* РЕНДЕР */
 function renderProducts(list = products) {
   containerEl.innerHTML = "";
+
   searchInput.style.display = inCartScreen ? "none" : "block";
   cartTotal.style.display = inCartScreen ? "block" : "none";
+  checkoutButton.style.display = inCartScreen ? "flex" : "none";
 
   list.forEach((p,index) => {
     const card = document.createElement("div");
     card.className = "product";
+
     const img = new Image();
     img.src = p.image;
     img.alt = p.name;
-    img.onerror = () => img.src = "https://via.placeholder.com/300";
 
-    let btnHTML = inCartScreen 
-      ? `<button class="remove-btn" data-index="${index}">Удалить</button>` 
+    let btnHTML = inCartScreen
+      ? `<button class="remove-btn" data-index="${index}">Удалить</button>`
       : `<button class="add-btn">В корзину</button>`;
 
     card.innerHTML = `<h3>${p.name}</h3><p>${p.price} ₽</p>${btnHTML}`;
     card.prepend(img);
 
-    card.onclick = () => { if(!inCartScreen) openModal(p) }
-
     if (!inCartScreen) {
+      card.onclick = () => openModal(p);
       card.querySelector(".add-btn").onclick = e => {
         e.stopPropagation();
         flyToCart(img);
         addToCart(p);
-      }
+      };
     } else {
       card.querySelector(".remove-btn").onclick = e => {
         e.stopPropagation();
         removeFromCartByIndex(index);
-      }
+      };
     }
 
     containerEl.appendChild(card);
@@ -78,25 +79,29 @@ function renderProducts(list = products) {
   updateCartTotal();
 }
 
-/* ПОИСК */
 searchInput.addEventListener("input", e => {
   const value = e.target.value.toLowerCase();
   renderProducts(products.filter(p => p.name.toLowerCase().includes(value)));
 });
 
-/* ГАМБУРГЕР */
 menuIcon.onclick = () => categories.classList.toggle("show");
 categories.querySelectorAll("div").forEach(cat => {
   cat.onclick = () => {
-    const catName = cat.dataset.category;
     inCartScreen = false;
-    if (catName === "Главная") renderProducts();
-    else renderProducts(products.filter(p => p.category === catName));
+    renderProducts(
+      cat.dataset.category === "Главная"
+        ? products
+        : products.filter(p => p.category === cat.dataset.category)
+    );
     categories.classList.remove("show");
-  }
+  };
 });
 
-/* МОДАЛ */
+mainTitle.onclick = () => {
+  inCartScreen = false;
+  renderProducts(products);
+};
+
 function openModal(p) {
   currentModalProduct = p;
   modalImage.src = p.image;
@@ -104,54 +109,41 @@ function openModal(p) {
   modalPrice.textContent = `${p.price} ₽`;
   modal.style.display = "flex";
 }
-modalClose.onclick = modalBack.onclick = () => modal.style.display = "none";
-window.onclick = e => { if(e.target === modal) modal.style.display = "none"; }
-modalAdd.onclick = () => { if(currentModalProduct) addToCart(currentModalProduct); }
 
-/* КОРЗИНА */
+modalClose.onclick = modalBack.onclick = () => modal.style.display = "none";
+modalAdd.onclick = () => addToCart(currentModalProduct);
+
 function addToCart(product) {
   cart.push(product);
   updateCartCount();
 }
+
 function removeFromCartByIndex(idx){
   cart.splice(idx,1);
   renderProducts(cart);
 }
 
-/* Кнопки снизу */
 cartButton.onclick = () => {
   inCartScreen = true;
   renderProducts(cart);
-}
+};
+
 checkoutButton.onclick = () => {
-  if(cart.length>0) alert(`Вы оформили заказ на ${cart.reduce((s,p)=>s+p.price,0)} ₽`);
+  if(cart.length) alert(`Заказ на ${cart.reduce((s,p)=>s+p.price,0)} ₽`);
+};
+
+function updateCartCount() {
+  cartCount.textContent = cart.length;
 }
 
-/* Анимация добавления в корзину */
+function updateCartTotal() {
+  cartTotal.textContent = `Итог: ${cart.reduce((s,p)=>s+p.price,0)} ₽`;
+}
+
 function flyToCart(img) {
-  const fly = document.createElement("img");
-  fly.src = img.src;
+  const fly = img.cloneNode();
   fly.className = "fly-to-cart";
   const rect = img.getBoundingClientRect();
   fly.style.left = rect.left + "px";
   fly.style.top = rect.top + "px";
-  document.body.appendChild(fly);
-
-  const cartRect = cartButton.getBoundingClientRect();
-  requestAnimationFrame(() => {
-    fly.style.transform = `translate(${cartRect.left - rect.left}px,${cartRect.top - rect.top}px) scale(0.2)`;
-    fly.style.opacity = "0";
-  });
-  fly.addEventListener("transitionend", () => fly.remove());
-}
-
-/* ОБНОВЛЕНИЕ */
-function updateCartCount() {
-  cartCount.textContent = cart.length;
-}
-function updateCartTotal() {
-  const total = cart.reduce((sum,p) => sum + p.price,0);
-  cartTotal.textContent = `Итог: ${total} ₽`;
-}
-
-renderProducts();
+  document.bo

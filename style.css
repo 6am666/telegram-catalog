@@ -244,3 +244,20 @@ body{
   text-align:center;
 }
 .footer-btn:hover{background:#555;}
+
+/* Кнопка оформления заказа */
+.checkout-btn{
+  position:fixed;
+  bottom:70px;
+  left:50%;
+  transform:translateX(-50%);
+  padding:14px 20px;
+  border-radius:20px;
+  border:none;
+  background:#333;
+  color:white;
+  font-size:16px;
+  cursor:pointer;
+  display:none;
+  z-index:20;
+}

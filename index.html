@@ -1,198 +1,49 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Chronicle Chains</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: Arial, sans-serif; background-color: #1e1e1e; background-image: url("https://i.pinimg.com/originals/6d/7c/65/6d7c65bbef77082a19ff4a2a2327d50d.jpg"); background-size: cover; background-position: center; overflow-x: hidden; transition: background-color 0.3s; }
-.container { max-width: 460px; margin: 0 auto; padding: 16px; position: relative; }
-/* ГАМБУРГЕР */
-.menu-icon { position: absolute; top: 16px; left: 16px; width: 32px; height: 24px; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; z-index: 10; }
-.menu-icon div { width: 32px; height: 4px; background: white; border-radius: 2px; transition: all 0.3s; }
-/* МЕНЮ КАТЕГОРИЙ */
-.categories { position: fixed; top: 0; left: -220px; width: 220px; height: 100%; background: rgba(30,30,30,0.95); color: white; padding: 60px 20px; display: flex; flex-direction: column; gap: 20px; transition: left 0.3s; z-index: 9; }
-.categories.show { left: 0; }
-.categories div { cursor: pointer; font-size: 18px; }
-/* ЗАГОЛОВОК */
-h1 { text-align: center; color: #fff; margin: 20px 0; cursor: pointer; }
-/* ПОИСК */
-.search { width: 100%; padding: 12px; border-radius: 12px; border: none; margin-bottom: 20px; font-size: 16px; }
-/* СЕТКА */
-.products { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; justify-items: center; }
-/* КАРТОЧКА */
-.product {
-    background: rgba(0,0,0,0.5);
-    border: 1px solid rgba(255,255,255,0.2);
-    border-radius: 14px;
-    padding: 8px;
-    text-align: center;
-    width: 160px;
-    aspect-ratio: 1 / 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
-}
-.product:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.6); background: rgba(0,0,0,0.7); }
-.product img { width: 100%; height: 60%; object-fit: cover; border-radius: 10px; }
-.product h3 { color: #fff; font-size: 14px; margin-top: 6px; }
-.product p { color: #ccc; font-size: 13px; }
-/* КНОПКИ */
-.add-btn { margin-top: 6px; padding: 8px; border-radius: 10px; border: none; background: white; color: black; font-size: 14px; cursor: pointer; }
-.remove-btn { margin-top: 6px; padding: 8px; border-radius: 10px; border: none; background: #f44336; color: white; font-size: 14px; cursor: pointer; }
-/* КОРЗИНА ВНИЗУ */
-.cart-bottom {
-    position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
-    width: auto; max-width: 420px; background: rgba(50,50,50,0.8);
-    display: flex; padding: 4px 8px; gap: 6px; z-index: 5; max-height: 80px; overflow-x: auto;
-    border-radius: 12px 12px 0 0;
-}
-.cart-item { width: 50px; height: 50px; flex-shrink: 0; position: relative; }
-.cart-item img { width: 100%; height: 100%; object-fit: cover; border-radius: 6px; }
-.cart-item .count { position: absolute; top: -4px; right: -4px; background: #fff; color: black; border-radius: 50%; font-size: 11px; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; }
-/* МОДАЛ */
-.modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); justify-content: center; align-items: center; }
-.modal-content { background: #1e1e1e; padding: 16px; border-radius: 12px; max-width: 360px; width: 90%; text-align: center; position: relative; }
-.modal-content img { width: 100%; max-height: 300px; object-fit: contain; border-radius: 10px; }
-.modal-close { position: absolute; top: 8px; right: 12px; color: white; font-size: 24px; cursor: pointer; }
-/* Telegram кнопка */
-.tg-btn { background-color: white !important; color: black !important; }
-/* ИТОГО В КОРЗИНЕ */
-.cart-total { color: white; font-size: 16px; text-align: center; margin-top: 10px; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Chronicle Chains</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-<div class="container">
-    <div class="menu-icon" id="menuIcon"><div></div><div></div><div></div></div>
-    <h1 id="mainTitle">Chronicle Chains</h1>
-    <div class="categories" id="categories">
-        <div data-category="Главная">Главная</div>
-        <div data-category="Браслеты">Браслеты</div>
-        <div data-category="Колье">Колье</div>
-        <div data-category="Кулоны">Кулоны</div>
-        <div data-category="Серьги">Серьги</div>
-        <div data-category="Обвесы">Обвесы</div>
-        <div data-category="Аксессуары для волос">Аксессуары для волос</div>
+  <div class="container">
+    <div class="menu-icon" id="menuIcon">
+      <div></div><div></div><div></div>
     </div>
-    <input type="text" class="search" placeholder="Поиск..." oninput="filterProducts(this.value)">
+    <h1 id="mainTitle">Chronicle Chains</h1>
+
+    <div class="categories" id="categories">
+      <div data-category="Главная">Главная</div>
+      <div data-category="Браслеты">Браслеты</div>
+      <div data-category="Колье">Колье</div>
+      <div data-category="Кулоны">Кулоны</div>
+      <div data-category="Серьги">Серьги</div>
+      <div data-category="Обвесы">Обвесы</div>
+      <div data-category="Аксессуары для волос">Аксессуары для волос</div>
+    </div>
+
+    <input type="text" class="search" placeholder="Поиск..." id="searchInput">
     <div class="products" id="products"></div>
-</div>
-<div class="cart-bottom" id="cartBottom"></div>
-
-<!-- МОДАЛ -->
-<div class="modal" id="modal">
-  <div class="modal-content">
-    <span class="modal-close" id="modalClose">&times;</span>
-    <img id="modalImage" src="">
-    <h3 id="modalTitle"></h3>
-    <p id="modalPrice"></p>
-    <button class="add-btn" id="modalAdd">В корзину</button>
   </div>
-</div>
 
-<script>
-const tg = window.Telegram.WebApp;
-tg.expand(); tg.MainButton.setParams({ color:'#FFFFFF', textColor:'#000000' });
+  <button class="cart-btn" id="cartButton">
+    Корзина 🛒
+    <span id="cartCount" class="cart-count">0</span>
+  </button>
 
-let cart = [], inCartScreen=false, currentModalProduct=null;
-const containerEl=document.getElementById("products");
-const mainTitle=document.getElementById("mainTitle");
-const menuIcon=document.getElementById("menuIcon");
-const categories=document.getElementById("categories");
-const cartBottom=document.getElementById("cartBottom");
+  <!-- Модальное окно -->
+  <div class="modal" id="modal">
+    <div class="modal-content">
+      <span class="modal-close" id="modalClose">&times;</span>
+      <img id="modalImage" src="" alt="">
+      <h3 id="modalTitle"></h3>
+      <p id="modalPrice"></p>
+      <button class="add-btn" id="modalAdd">В корзину</button>
+    </div>
+  </div>
 
-const modal=document.getElementById("modal");
-const modalImage=document.getElementById("modalImage");
-const modalTitle=document.getElementById("modalTitle");
-const modalPrice=document.getElementById("modalPrice");
-const modalAdd=document.getElementById("modalAdd");
-const modalClose=document.getElementById("modalClose");
-
-const products=[
-{ id:1, name:"Колье Pierced Chain", price:2500, image:"https://i.pinimg.com/736x/37/0b/db/370bdb870346b42b1000610195261f62.jpg", category:"Колье"},
-{ id:2, name:"Колье Starry Sky", price:4500, image:"https://i.pinimg.com/736x/55/bf/ec/55bfecc3c2ceebf20752ff2802ff4e19.jpg", category:"Колье"},
-{ id:3, name:"Колье Gothic Thorns", price:3600, image:"https://i.pinimg.com/736x/c2/0d/26/c20d26fb9839c64d328f8989450f547b.jpg", category:"Колье"},
-{ id:4, name:"Браслет Hearts", price:4000, image:"https://i.pinimg.com/736x/d4/c5/4c/d4c54cd9c489d1e73d9e306545929b70.jpg", category:"Браслеты"},
-{ id:5, name:"Обвес Lighter", price:3600, image:"https://i.pinimg.com/736x/e8/cb/c2/e8cbc2287025b23930c20e030755a0b5.jpg", category:"Обвесы"},
-{ id:6, name:"Обвес Star", price:2000, image:"https://i.pinimg.com/736x/16/36/75/163675cf410dfc51ef97238bbbab1056.jpg", category:"Обвесы"},
-{ id:7, name:"Серьги Moonlight", price:2000, image:"https://i.pinimg.com/736x/93/e4/e5/93e4e5ee7594f6ef436f8b994ef04016.jpg", category:"Серьги"},
-{ id:8, name:"Кулон с цепочкой Moonlight", price:2000, image:"https://i.pinimg.com/736x/5a/6d/1b/5a6d1beecdc7b79798705e4da0ef3a5c.jpg", category:"Кулоны"}];
-
-// --- РЕНДЕР ПРОДУКТОВ ---
-function renderProducts(list=products){
-    inCartScreen=false; document.body.style.backgroundColor='#1e1e1e'; containerEl.innerHTML="";
-    list.forEach(p=>{
-        const card=document.createElement("div"); card.className="product";
-        const img=new Image(); img.src=p.image; img.alt=p.name; img.onerror=()=>img.src="https://via.placeholder.com/300";
-        card.innerHTML=`<h3>${p.name}</h3><p>${p.price} ₽</p><button class="add-btn">В корзину</button>`;
-        card.prepend(img);
-        card.onclick=()=>openModal(p);
-        card.querySelector(".add-btn").onclick=e=>{e.stopPropagation(); addToCart(p);};
-        containerEl.appendChild(card);
-    });
-    renderCartBottom(); updateMainButton();
-}
-
-// --- ФИЛЬТР ---
-function filterProducts(value){ value=value.toLowerCase(); renderProducts(products.filter(p=>p.name.toLowerCase().includes(value))); }
-
-// --- ГАМБУРГЕР ---
-menuIcon.onclick=()=>categories.classList.toggle("show");
-categories.querySelectorAll("div").forEach(cat=>{
-    cat.onclick=()=>{const catName=cat.dataset.category; if(catName==="Главная") renderProducts(); else renderProducts(products.filter(p=>p.category===catName)); categories.classList.remove("show");};
-});
-
-// --- КОРЗИНА ---
-function addToCart(product){ cart.push(product); saveCart(); renderCartBottom(); updateMainButton(); }
-function removeFromCart(index){ cart.splice(index,1); saveCart(); renderCart(); }
-function renderCartBottom(){
-    cartBottom.innerHTML=""; const counts={}; cart.forEach(p=>counts[p.id]=(counts[p.id]||0)+1);
-    [...new Set(cart.map(p=>p.id))].forEach(id=>{
-        const item=cart.find(p=>p.id===id);
-        const div=document.createElement("div"); div.className="cart-item";
-        div.innerHTML=`<img src="${item.image}" alt="${item.name}"><div class="count">${counts[id]}</div>`;
-        cartBottom.appendChild(div);
-    });
-}
-
-// --- МОДАЛ ---
-function openModal(p){ currentModalProduct=p; modalImage.src=p.image; modalTitle.textContent=p.name; modalPrice.textContent=`${p.price} ₽`; modal.style.display="flex"; }
-modalClose.onclick=()=>modal.style.display="none"; window.onclick=e=>{if(e.target===modal) modal.style.display="none";};
-modalAdd.onclick=()=>{if(currentModalProduct)addToCart(currentModalProduct);};
-
-// --- РЕНДЕР КОРЗИНЫ ---
-function renderCart(){
-    inCartScreen=true; document.body.style.backgroundColor='#000'; containerEl.innerHTML="";
-    if(cart.length===0) containerEl.innerHTML=`<p style="color:white;text-align:center;margin-top:20px;">Корзина пуста</p>`;
-    else{
-        cart.forEach((p,i)=>{
-            const card=document.createElement("div"); card.className="product";
-            const img=new Image(); img.src=p.image; img.alt=p.name; img.onerror=()=>img.src="https://via.placeholder.com/300";
-            card.innerHTML=`<h3>${p.name}</h3><p>${p.price} ₽</p><button class="remove-btn">Удалить</button>`; card.prepend(img);
-            card.querySelector(".remove-btn").onclick=()=>removeFromCart(i); containerEl.appendChild(card);
-        });
-        const total=cart.reduce((sum,item)=>sum+item.price,0);
-        const totalDiv=document.createElement("div"); totalDiv.className="cart-total"; totalDiv.textContent=`Итого: ${total} ₽`; containerEl.appendChild(totalDiv);
-    }
-    updateMainButton();
-}
-
-function saveCart(){ tg.CloudStorage.setItem("cart",JSON.stringify(cart)); }
-function updateMainButton(){
-    if(cart.length>0){ tg.MainButton.setText(inCartScreen?`Оформить заказ (${cart.length})`:`Корзина (${cart.length})`); tg.MainButton.show(); }else tg.MainButton.hide();
-}
-
-tg.MainButton.onClick(()=>{
-    if(inCartScreen){ alert("Заказ оформлен!\n"+JSON.stringify(cart,null,2)); tg.sendData(JSON.stringify({action:"order",items:cart})); cart=[]; saveCart(); renderProducts(); }
-    else renderCart();
-});
-
-tg.CloudStorage.getItem("cart",(err,data)=>{if(!err && data) cart=JSON.parse(data); renderProducts();});
-mainTitle.onclick=()=>renderProducts();
-</script>
+  <script src="main.js"></script>
 </body>
 </html>

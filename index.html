@@ -87,6 +87,7 @@ h1 {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  cursor: pointer;
 }
 
 .product img {
@@ -130,7 +131,7 @@ h1 {
   cursor: pointer;
 }
 
-/* Telegram кнопка (Корзина/Оформить заказ) */
+/* Telegram кнопка */
 .tg-btn {
   background-color: white !important;
   color: black !important;
@@ -142,6 +143,46 @@ h1 {
   font-size: 16px;
   text-align: center;
   margin-top: 10px;
+}
+
+/* МОДАЛ */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 100;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.9);
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: #1e1e1e;
+  padding: 16px;
+  border-radius: 12px;
+  max-width: 360px;
+  width: 90%;
+  text-align: center;
+  position: relative;
+}
+
+.modal-content img {
+  width: 100%;
+  max-height: 300px;
+  object-fit: contain;
+  border-radius: 10px;
+}
+
+.modal-close {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
 }
 </style>
 </head>
@@ -164,6 +205,17 @@ h1 {
   <div class="products" id="products"></div>
 </div>
 
+<!-- Модальное окно -->
+<div id="modal" class="modal">
+  <div class="modal-content">
+    <span id="modalClose" class="modal-close">&times;</span>
+    <img id="modalImage" src="" alt="">
+    <h3 id="modalTitle"></h3>
+    <p id="modalPrice"></p>
+    <button id="modalAdd" class="add-btn">В корзину</button>
+  </div>
+</div>
+
 <script>
 const tg = window.Telegram.WebApp;
 tg.expand();
@@ -171,6 +223,7 @@ tg.MainButton.setParams({ color: '#FFFFFF', textColor: '#000000' });
 
 let cart = [];
 let inCartScreen = false;
+let currentModalProduct = null;
 
 const products = [
   { id: 1, name: "Колье Pierced Chain", price: 2500, image: "https://i.pinimg.com/736x/37/0b/db/370bdb870346b42b1000610195261f62.jpg" },
@@ -186,6 +239,12 @@ const products = [
 const containerEl = document.getElementById("products");
 const mainTitle = document.getElementById("mainTitle");
 const cartIcon = document.getElementById("cartIcon");
+const modal = document.getElementById("modal");
+const modalImage = document.getElementById("modalImage");
+const modalTitle = document.getElementById("modalTitle");
+const modalPrice = document.getElementById("modalPrice");
+const modalAdd = document.getElementById("modalAdd");
+const modalClose = document.getElementById("modalClose");
 
 /* РЕНДЕР КАТАЛОГА */
 function renderProducts(list = products) {
@@ -201,10 +260,6 @@ function renderProducts(list = products) {
     img.src = p.image;
     img.onerror = () => img.src = "https://via.placeholder.com/300";
     img.alt = p.name;
-    img.style.width = "100%";
-    img.style.height = "60%";
-    img.style.objectFit = "cover";
-    img.style.borderRadius = "10px";
 
     card.innerHTML = `
       <h3>${p.name}</h3>
@@ -213,10 +268,8 @@ function renderProducts(list = products) {
     `;
     card.prepend(img);
 
-    card.querySelector(".add-btn").onclick = (e) => {
-      e.stopPropagation();
-      addToCart(p);
-    };
+    card.onclick = () => openModal(p);
+    card.querySelector(".add-btn").onclick = (e) => { e.stopPropagation(); addToCart(p); };
 
     containerEl.appendChild(card);
   });
@@ -224,12 +277,23 @@ function renderProducts(list = products) {
   updateMainButton();
 }
 
+/* МОДАЛ */
+function openModal(p) {
+  currentModalProduct = p;
+  modalImage.src = p.image;
+  modalTitle.textContent = p.name;
+  modalPrice.textContent = `${p.price} ₽`;
+  modal.style.display = "flex";
+}
+
+modalClose.onclick = () => modal.style.display = "none";
+window.onclick = (e) => { if(e.target === modal) modal.style.display = "none"; }
+modalAdd.onclick = () => { if(currentModalProduct) addToCart(currentModalProduct); }
+
 /* ПОИСК */
 function filterProducts(value) {
   value = value.toLowerCase();
-  const filtered = products.filter(p =>
-    p.name.toLowerCase().includes(value)
-  );
+  const filtered = products.filter(p => p.name.toLowerCase().includes(value));
   renderProducts(filtered);
 }
 
@@ -259,7 +323,7 @@ function updateMainButton() {
   }
 }
 
-/* Кнопка Telegram */
+/* Telegram кнопка */
 tg.MainButton.onClick(() => {
   if (inCartScreen) {
     alert("Заказ оформлен!\n" + JSON.stringify(cart, null, 2));
@@ -289,10 +353,6 @@ function renderCart() {
       img.src = p.image;
       img.onerror = () => img.src = "https://via.placeholder.com/300";
       img.alt = p.name;
-      img.style.width = "100%";
-      img.style.height = "60%";
-      img.style.objectFit = "cover";
-      img.style.borderRadius = "10px";
 
       card.innerHTML = `
         <h3>${p.name}</h3>

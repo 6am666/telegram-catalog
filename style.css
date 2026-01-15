@@ -134,62 +134,57 @@ body{
   font-size:13px;
 }
 
-/* Кнопки */
-.add-btn,
-.remove-btn{
-  margin-top:6px;
-  padding:8px;
-  border-radius:10px;
-  border:none;
-  background:#333;
-  color:white;
-  font-size:14px;
-  cursor:pointer;
+/* Кнопки + / - и счетчик */
+.count-block{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 6px;
 }
-.back-btn{
-  margin-top:6px;
-  padding:8px;
-  border-radius:10px;
-  border:none;
-  background:#444;
-  color:white;
-  font-size:14px;
-  cursor:pointer;
+.count-block button{
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: none;
+  background: #333;
+  color: white;
+  cursor: pointer;
+}
+.count-number{
+  min-width: 24px;
+  padding: 4px 6px;
+  text-align: center;
+  background: white;
+  color: black;
+  border-radius: 10px;
 }
 
-/* Кнопки внизу */
-.bottom-buttons{
-  position:fixed;
-  bottom:16px;
-  left:50%;
-  transform:translateX(-50%);
-  display:flex;
-  gap:12px;
-  z-index:12;
-}
-.cart-btn,
-.checkout-btn{
-  padding:14px 20px;
-  border-radius:20px;
-  border:none;
-  background:#333;
-  color:white;
-  font-size:16px;
-  cursor:pointer;
-  display:flex;
-  align-items:center;
-  gap:6px;
+/* Кнопка корзины в правом верхнем углу */
+.cart-btn{
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 20;
+  padding: 12px 16px;
+  border-radius: 20px;
+  background: #333;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 16px;
+  cursor: pointer;
 }
 .cart-count{
-  display:inline-block;
-  background:black;
-  color:white;
-  font-size:14px;
-  width:22px;
-  height:22px;
-  border-radius:50%;
-  text-align:center;
-  line-height:22px;
+  display: inline-block;
+  background: black;
+  color: white;
+  font-size: 14px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 22px;
 }
 
 /* Итог корзины */
@@ -266,34 +261,15 @@ body{
   z-index:1000;
 }
 
-/* Количество на карточке */
-.item-count {
-  display: inline-block;
-  background: white;
-  color: black;
-  font-size: 12px;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  text-align: center;
-  line-height: 18px;
-  position: absolute;
-  top: -8px;
-  right: -8px;
-}
-.card-wrapper {
-  position: relative;
-}
-
 /* Футер */
 .footer-buttons{
   position: fixed;
-  bottom: 80px;
+  bottom: 16px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   gap: 12px;
-  z-index: 12;
+  z-index: 20;
 }
 .footer-btn{
   padding: 10px 16px;

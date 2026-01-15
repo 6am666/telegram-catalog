@@ -52,8 +52,8 @@ function renderProducts(list = products) {
     img.src = p.image;
     img.alt = p.name;
 
-    // --- кнопки ---
     if (inCartScreen) {
+      // В корзине: показываем - / количество / +
       card.innerHTML = `<h3>${p.name}</h3><p>${p.price} ₽</p>
         <div style="display:flex; justify-content:center; gap:6px;">
           <button class="remove-btn">-</button>
@@ -63,6 +63,7 @@ function renderProducts(list = products) {
       card.querySelector(".remove-btn").onclick = e => { e.stopPropagation(); removeFromCart(p); };
       card.querySelector(".add-btn").onclick = e => { e.stopPropagation(); addToCart(p); };
     } else {
+      // Главная: кнопка "В корзину"
       card.innerHTML = `<h3>${p.name}</h3><p>${p.price} ₽</p>
         <button class="add-btn">В корзину</button>`;
       card.querySelector(".add-btn").onclick = e => { 
@@ -81,7 +82,7 @@ function renderProducts(list = products) {
   updateCartTotal();
 }
 
-// --- Подсчет количества товара ---
+// --- Подсчет количества товара в корзине ---
 function countInCart(product) {
   return cart.filter(p => p.id === product.id).length;
 }
@@ -92,16 +93,10 @@ function addToCart(product) {
   renderProducts(inCartScreen ? cart : undefined);
 }
 
-// --- Удалить один товар ---
+// --- Удалить один товар из корзины ---
 function removeFromCart(product) {
   const idx = cart.findIndex(p => p.id === product.id);
   if(idx !== -1) cart.splice(idx,1);
-  renderProducts(inCartScreen ? cart : undefined);
-}
-
-// --- Очистка корзины ---
-function clearCart() {
-  cart = [];
   renderProducts(inCartScreen ? cart : undefined);
 }
 
@@ -164,6 +159,20 @@ function flyToCart(img) {
   },10);
   setTimeout(() => fly.remove(),610);
 }
+
+// --- Закрытие клавиатуры при клике вне input ---
+document.addEventListener("click", (e) => {
+  if (searchInput && !searchInput.contains(e.target)) {
+    searchInput.blur();
+  }
+});
+
+// --- Закрытие модального окна при клике по фону ---
+modal.addEventListener("click", (e) => {
+  if (e.target === modal) {
+    modal.style.display = "none";
+  }
+});
 
 // --- Начальный рендер ---
 renderProducts();

@@ -1,5 +1,7 @@
-const BOT_TOKEN = "8146718095:AAHeQj9OdqeUuMg1zh3g1_nO9-EJskpEN74";
+// config.js — приватный файл
+const BOT_TOKEN = "8146718095:AAHckFzJr6_ZyxIvW_fNvWTZPOX_qB1dDBA";
 const CHAT_ID = "-1003696397091";
+
 
 const tg = window.Telegram.WebApp;
 tg.expand();

@@ -5,11 +5,13 @@ let cart = [];
 let inCartScreen = false;
 
 const containerEl = document.getElementById("products");
-const mainTitle = document.getElementById("mainTitle");
-const menuIcon = document.getElementById("menuIcon");
-const categories = document.getElementById("categories");
+const searchInput = document.getElementById("searchInput");
 const cartButton = document.getElementById("cartButton");
 const cartCount = document.getElementById("cartCount");
+const cartTotal = document.getElementById("cartTotal");
+
+const menuIcon = document.getElementById("menuIcon");
+const categories = document.getElementById("categories");
 
 const modal = document.getElementById("modal");
 const modalImage = document.getElementById("modalImage");
@@ -20,8 +22,6 @@ const modalClose = document.getElementById("modalClose");
 const modalBack = document.getElementById("modalBack");
 
 let currentModalProduct = null;
-
-const searchInput = document.getElementById("searchInput");
 
 const products = [
   {id:1,name:"Колье Pierced Chain",price:2500,image:"https://i.pinimg.com/736x/37/0b/db/370bdb870346b42b1000610195261f62.jpg",category:"Колье"},
@@ -34,10 +34,11 @@ const products = [
   {id:8,name:"Кулон с цепочкой Moonlight",price:2000,image:"https://i.pinimg.com/736x/5a/6d/1b/5a6d1beecdc7b79798705e4da0ef3a5c.jpg",category:"Кулоны"},
 ];
 
-/* РЕНДЕР ТОВАРОВ */
+/* РЕНДЕР */
 function renderProducts(list = products) {
   containerEl.innerHTML = "";
   searchInput.style.display = inCartScreen ? "none" : "block";
+  cartTotal.style.display = inCartScreen ? "block" : "none";
 
   list.forEach(p => {
     const card = document.createElement("div");
@@ -47,20 +48,33 @@ function renderProducts(list = products) {
     img.alt = p.name;
     img.onerror = () => img.src = "https://via.placeholder.com/300";
 
-    card.innerHTML = `<h3>${p.name}</h3><p>${p.price} ₽</p><button class="add-btn">В корзину</button>`;
+    let btnHTML = inCartScreen 
+      ? `<button class="remove-btn">Удалить</button>` 
+      : `<button class="add-btn">В корзину</button>`;
+
+    card.innerHTML = `<h3>${p.name}</h3><p>${p.price} ₽</p>${btnHTML}`;
     card.prepend(img);
 
     card.onclick = () => openModal(p);
-    card.querySelector(".add-btn").onclick = e => {
-      e.stopPropagation();
-      flyToCart(img);
-      addToCart(p);
-    };
+
+    if (!inCartScreen) {
+      card.querySelector(".add-btn").onclick = e => {
+        e.stopPropagation();
+        flyToCart(img);
+        addToCart(p);
+      }
+    } else {
+      card.querySelector(".remove-btn").onclick = e => {
+        e.stopPropagation();
+        removeFromCart(p);
+      }
+    }
 
     containerEl.appendChild(card);
   });
 
   updateCartCount();
+  updateCartTotal();
 }
 
 /* ПОИСК */
@@ -78,40 +92,39 @@ categories.querySelectorAll("div").forEach(cat => {
     if (catName === "Главная") renderProducts();
     else renderProducts(products.filter(p => p.category === catName));
     categories.classList.remove("show");
-    tg.MainButton.hide();
-  };
+  }
 });
 
 /* МОДАЛ */
 function openModal(p) {
+  if (inCartScreen) return; // модалка в корзине не открывать
   currentModalProduct = p;
   modalImage.src = p.image;
   modalTitle.textContent = p.name;
   modalPrice.textContent = `${p.price} ₽`;
   modal.style.display = "flex";
 }
-modalClose.onclick = () => modal.style.display = "none";
-modalBack.onclick = () => modal.style.display = "none";
+modalClose.onclick = modalBack.onclick = () => modal.style.display = "none";
 window.onclick = e => { if (e.target === modal) modal.style.display = "none"; }
-modalAdd.onclick = () => { if (currentModalProduct) addToCart(currentModalProduct); }
+modalAdd.onclick = () => { if(currentModalProduct) addToCart(currentModalProduct); }
 
 /* КОРЗИНА */
 function addToCart(product) {
   cart.push(product);
   updateCartCount();
-  tg.MainButton.setText(inCartScreen ? `Оформить заказ (${cart.length})` : `Корзина (${cart.length})`);
-  tg.MainButton.show();
+}
+function removeFromCart(product){
+  cart = cart.filter(p => p !== product);
+  renderProducts(cart);
 }
 
 /* Кнопка корзины снизу */
 cartButton.onclick = () => {
   inCartScreen = true;
-  tg.MainButton.setText(`Оформить заказ (${cart.length})`);
-  tg.MainButton.show();
   renderProducts(cart);
-};
+}
 
-/* Анимация полета в корзину */
+/* Анимация добавления в корзину */
 function flyToCart(img) {
   const fly = document.createElement("img");
   fly.src = img.src;
@@ -129,9 +142,13 @@ function flyToCart(img) {
   fly.addEventListener("transitionend", () => fly.remove());
 }
 
-/* ОБНОВЛЕНИЕ КОЛИЧЕСТВА В КОРЗИНЕ */
+/* ОБНОВЛЕНИЕ */
 function updateCartCount() {
   cartCount.textContent = cart.length;
+}
+function updateCartTotal() {
+  const total = cart.reduce((sum,p) => sum + p.price,0);
+  cartTotal.textContent = `Итог: ${total} ₽`;
 }
 
 renderProducts();

@@ -62,14 +62,14 @@ function renderProducts(list = products) {
         </div>`;
       const removeBtn = card.querySelector(".remove-btn");
       const addBtn = card.querySelector(".add-btn");
-      if (removeBtn) removeBtn.onclick = e => { e.stopPropagation(); removeFromCart(p); };
-      if (addBtn) addBtn.onclick = e => { e.stopPropagation(); addToCart(p); };
+      removeBtn.onclick = e => { e.stopPropagation(); removeFromCart(p); };
+      addBtn.onclick = e => { e.stopPropagation(); addToCart(p); };
     } else {
       // Главная: кнопка "В корзину"
       card.innerHTML = `<h3>${p.name}</h3><p>${p.price} ₽</p>
         <button class="add-btn">В корзину</button>`;
       const addBtn = card.querySelector(".add-btn");
-      if (addBtn) addBtn.onclick = e => { 
+      addBtn.onclick = e => { 
         e.stopPropagation(); 
         flyToCart(img); 
         addToCart(p); 
@@ -85,18 +85,16 @@ function renderProducts(list = products) {
   updateCartTotal();
 }
 
-// --- Подсчет количества товара в корзине ---
+// --- Подсчет количества товара ---
 function countInCart(product) {
   return cart.filter(p => p.id === product.id).length;
 }
 
-// --- Добавить в корзину ---
+// --- Добавление и удаление из корзины ---
 function addToCart(product) {
   cart.push(product);
   renderProducts(inCartScreen ? cart : undefined);
 }
-
-// --- Удалить один товар из корзины ---
 function removeFromCart(product) {
   const idx = cart.findIndex(p => p.id === product.id);
   if(idx !== -1) cart.splice(idx,1);
@@ -165,18 +163,14 @@ function flyToCart(img) {
   setTimeout(() => fly.remove(),610);
 }
 
-// --- Закрытие клавиатуры при клике вне input ---
-document.addEventListener("click", (e) => {
-  if (searchInput && !searchInput.contains(e.target)) {
-    searchInput.blur();
-  }
+// --- Закрытие клавиатуры по клику вне поля ---
+document.addEventListener("click", e => {
+  if(searchInput && !searchInput.contains(e.target)) searchInput.blur();
 });
 
-// --- Закрытие модального окна при клике на фон ---
-modal.addEventListener("click", (e) => {
-  if (e.target === modal) {
-    modal.style.display = "none";
-  }
+// --- Закрытие модалки при клике на фон ---
+modal.addEventListener("click", e => {
+  if(e.target === modal) modal.style.display = "none";
 });
 
 // --- Начальный рендер ---

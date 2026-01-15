@@ -19,77 +19,42 @@ const modalPrice = document.getElementById("modalPrice");
 const modalAdd = document.getElementById("modalAdd");
 const modalBack = document.getElementById("modalBack");
 
-// Создаём элемент для красивого описания
+// Описание в модальном окне
 const modalDescription = document.createElement("div");
 modalDescription.style.color = "white";
 modalDescription.style.fontSize = "13px";
 modalDescription.style.marginTop = "10px";
-modalDescription.style.whiteSpace = "pre-line"; // чтобы \n переносился
-modalDescription.style.textAlign = "left";     // текст выравнен по левому краю
-modalDescription.style.lineHeight = "1.4em";   // удобный интервал между строк
+modalDescription.style.whiteSpace = "pre-line";
+modalDescription.style.textAlign = "left";
+modalDescription.style.lineHeight = "1.4em";
 document.querySelector(".modal-content").appendChild(modalDescription);
 
 let currentModalProduct = null;
 
 const products = [
 {id:1,name:"Колье Pierced Chain",price:2500,image:"https://i.pinimg.com/736x/37/0b/db/370bdb870346b42b1000610195261f62.jpg",category:"Колье",
-description:`Материал изделия:
-Нержавеющая сталь;
-Фурнитура из хирургической и нержавеющей стали.
-
-Срок изготовления - до 5 рабочих дней.`},
+description:`Материал изделия:\nНержавеющая сталь;\nФурнитура из хирургической и нержавеющей стали.\n\nСрок изготовления - до 5 рабочих дней.`},
 
 {id:2,name:"Колье Starry Sky",price:4500,image:"https://i.pinimg.com/736x/55/bf/ec/55bfecc3c2ceebf20752ff2802ff4e19.jpg",category:"Колье",
-description:`Материал изделия:
-Хирургическая сталь;
-Фурнитура из хирургической и нержавеющей стали.
-
-Срок изготовления - до 5 рабочих дней.`},
+description:`Материал изделия:\nХирургическая сталь;\nФурнитура из хирургической и нержавеющей стали.\n\nСрок изготовления - до 5 рабочих дней.`},
 
 {id:3,name:"Колье Gothic Thorns",price:3600,image:"https://i.pinimg.com/736x/c2/0d/26/c20d26fb9839c64d328f8989450f547b.jpg",category:"Колье",
-description:`Материал изделия:
-Атласная лента;
-Хирургическая сталь;
-Фурнитура из хирургической и нержавеющей стали.
-
-Срок изготовления - до 5 рабочих дней.`},
+description:`Материал изделия:\nАтласная лента;\nХирургическая сталь;\nФурнитура из хирургической и нержавеющей стали.\n\nСрок изготовления - до 5 рабочих дней.`},
 
 {id:4,name:"Браслет Hearts",price:4000,image:"https://i.pinimg.com/736x/d4/c5/4c/d4c54cd9c489d1e73d9e306545929b70.jpg",category:"Браслеты",
-description:`Материал изделия:
-Хирургическая сталь;
-Фурнитура из нержавеющей стали.
-
-Срок изготовления - до 5 рабочих дней.`},
+description:`Материал изделия:\nХирургическая сталь;\nФурнитура из нержавеющей стали.\n\nСрок изготовления - до 5 рабочих дней.`},
 
 {id:5,name:"Обвес Lighter",price:3600,image:"https://i.pinimg.com/736x/e8/cb/c2/e8cbc2287025b23930c20e030755a0b5.jpg",category:"Обвесы",
-description:`Материал изделия:
-Фурнитура из нержавеющей стали;
-Хирургическая и нержавеющей сталь.
-
-Срок изготовления - до 5 рабочих дней.`},
+description:`Материал изделия:\nФурнитура из нержавеющей стали;\nХирургическая и нержавеющей сталь.\n\nСрок изготовления - до 5 рабочих дней.`},
 
 {id:6,name:"Обвес Star",price:2000,image:"https://i.pinimg.com/736x/16/36/75/163675cf410dfc51ef97238bbbab1056.jpg",category:"Обвесы",
-description:`Материал изделия:
-Хирургическая;
-Фурнитура из нержавеющей стали.
-
-Срок изготовления - до 5 рабочих дней.`},
+description:`Материал изделия:\nХирургическая;\nФурнитура из нержавеющей стали.\n\nСрок изготовления - до 5 рабочих дней.`},
 
 {id:7,name:"Серьги Moonlight",price:2000,image:"https://i.pinimg.com/736x/93/e4/e5/93e4e5ee7594f6ef436f8b994ef04016.jpg",category:"Серьги",
-description:`Материал изделия:
-Лунные бусины;
-Хирургическая сталь;
-Фурнитура из нержавеющей и хирургической стали.
-
-Срок изготовления - до 5 рабочих дней.`},
+description:`Материал изделия:\nЛунные бусины;\nХирургическая сталь;\nФурнитура из нержавеющей и хирургической стали.\n\nСрок изготовления - до 5 рабочих дней.`},
 
 {id:8,name:"Кулон с цепочкой Moonlight",price:2000,image:"https://i.pinimg.com/736x/5a/6d/1b/5a6d1beecdc7b79798705e4da0ef3a5c.jpg",category:"Кулоны",
-description:`Материал изделия:
-лунная бусина;
-Хирургическая сталь;
-Фурнитура из нержавеющей стали.
-
-Срок изготовления - до 5 рабочих дней.`},
+description:`Материал изделия:\nлунная бусина;\nХирургическая сталь;\nФурнитура из нержавеющей стали.\n\nСрок изготовления - до 5 рабочих дней.`},
 ];
 
 // ---------- Функции ----------
@@ -108,10 +73,7 @@ function renderProducts(list = products){
     const img = new Image(); 
     img.src = p.image; 
     img.alt = p.name;
-    img.onclick = e => { 
-      e.stopPropagation(); 
-      openModal(p); 
-    };
+    img.onclick = e => { e.stopPropagation(); openModal(p); };
 
     const cartItem = cart.find(i => i.product.id === p.id);
     const count = cartItem ? cartItem.count : 0;
@@ -124,16 +86,16 @@ function renderProducts(list = products){
           <button class="add-btn">+</button>
         </div>`;
       card.insertBefore(img, card.firstChild);
-      const removeBtn = card.querySelector(".remove-btn");
-      const addBtn = card.querySelector(".add-btn");
-      removeBtn.onclick = e => { e.stopPropagation(); removeFromCart(p); };
-      addBtn.onclick = e => { e.stopPropagation(); addToCart(p); };
+
+      card.querySelector(".remove-btn").onclick = e => { e.stopPropagation(); removeFromCart(p); };
+      card.querySelector(".add-btn").onclick = e => { e.stopPropagation(); addToCart(p); };
+
     } else {
       card.innerHTML = `<h3>${p.name}</h3><p>${p.price} ₽</p><button class="add-btn">В корзину</button>`;
       card.insertBefore(img, card.firstChild);
-      const addBtn = card.querySelector(".add-btn");
-      addBtn.onclick = e => { e.stopPropagation(); flyToCart(img); addToCart(p); };
+      card.querySelector(".add-btn").onclick = e => { e.stopPropagation(); flyToCart(img); addToCart(p); };
     }
+
     containerEl.appendChild(card);
   });
 
@@ -141,6 +103,7 @@ function renderProducts(list = products){
   updateCartTotal();
 }
 
+// Добавление/удаление из корзины
 function addToCart(product){
   const cartItem = cart.find(i => i.product.id === product.id); 
   if(cartItem) cartItem.count++; 
@@ -156,11 +119,11 @@ function removeFromCart(product){
   renderProducts(inCartScreen ? cart.map(i => i.product) : products);
 }
 
+// Счётчик и сумма
 function updateCartCount(){ cartCount.textContent = cart.reduce((s,i)=>s+i.count,0); }
 function updateCartTotal(){ cartTotal.textContent = `Итог: ${cart.reduce((s,i)=>s+i.product.price*i.count,0)} ₽`; }
 
 // ---------- Модальное окно ----------
-
 function openModal(p){
   currentModalProduct = p;
   modalImage.src = p.image;
@@ -168,7 +131,6 @@ function openModal(p){
   modalPrice.textContent = `${p.price} ₽`;
   modalDescription.textContent = p.description;
 
-  // Скрываем кнопки "В корзину" и "Назад" только в модальном окне
   modalAdd.style.display = "none";
   modalBack.style.display = "none";
 
@@ -178,7 +140,6 @@ function openModal(p){
 modal.addEventListener("click", e => { if(e.target === modal) modal.style.display = "none"; });
 
 // ---------- Поиск и фильтры ----------
-
 searchInput.addEventListener("input", e => {
   const v = e.target.value.toLowerCase(); 
   renderProducts(products.filter(p => p.name.toLowerCase().includes(v)));

@@ -7,6 +7,7 @@ let inCartScreen = false;
 const containerEl = document.getElementById("products");
 const searchInput = document.getElementById("searchInput");
 const cartButton = document.getElementById("cartButton");
+const checkoutButton = document.getElementById("checkoutButton");
 const cartCount = document.getElementById("cartCount");
 const cartTotal = document.getElementById("cartTotal");
 
@@ -40,7 +41,7 @@ function renderProducts(list = products) {
   searchInput.style.display = inCartScreen ? "none" : "block";
   cartTotal.style.display = inCartScreen ? "block" : "none";
 
-  list.forEach(p => {
+  list.forEach((p,index) => {
     const card = document.createElement("div");
     card.className = "product";
     const img = new Image();
@@ -49,13 +50,13 @@ function renderProducts(list = products) {
     img.onerror = () => img.src = "https://via.placeholder.com/300";
 
     let btnHTML = inCartScreen 
-      ? `<button class="remove-btn">Удалить</button>` 
+      ? `<button class="remove-btn" data-index="${index}">Удалить</button>` 
       : `<button class="add-btn">В корзину</button>`;
 
     card.innerHTML = `<h3>${p.name}</h3><p>${p.price} ₽</p>${btnHTML}`;
     card.prepend(img);
 
-    card.onclick = () => openModal(p);
+    card.onclick = () => { if(!inCartScreen) openModal(p) }
 
     if (!inCartScreen) {
       card.querySelector(".add-btn").onclick = e => {
@@ -66,7 +67,7 @@ function renderProducts(list = products) {
     } else {
       card.querySelector(".remove-btn").onclick = e => {
         e.stopPropagation();
-        removeFromCart(p);
+        removeFromCartByIndex(index);
       }
     }
 
@@ -97,7 +98,6 @@ categories.querySelectorAll("div").forEach(cat => {
 
 /* МОДАЛ */
 function openModal(p) {
-  if (inCartScreen) return; // модалка в корзине не открывать
   currentModalProduct = p;
   modalImage.src = p.image;
   modalTitle.textContent = p.name;
@@ -105,7 +105,7 @@ function openModal(p) {
   modal.style.display = "flex";
 }
 modalClose.onclick = modalBack.onclick = () => modal.style.display = "none";
-window.onclick = e => { if (e.target === modal) modal.style.display = "none"; }
+window.onclick = e => { if(e.target === modal) modal.style.display = "none"; }
 modalAdd.onclick = () => { if(currentModalProduct) addToCart(currentModalProduct); }
 
 /* КОРЗИНА */
@@ -113,15 +113,18 @@ function addToCart(product) {
   cart.push(product);
   updateCartCount();
 }
-function removeFromCart(product){
-  cart = cart.filter(p => p !== product);
+function removeFromCartByIndex(idx){
+  cart.splice(idx,1);
   renderProducts(cart);
 }
 
-/* Кнопка корзины снизу */
+/* Кнопки снизу */
 cartButton.onclick = () => {
   inCartScreen = true;
   renderProducts(cart);
+}
+checkoutButton.onclick = () => {
+  if(cart.length>0) alert(`Вы оформили заказ на ${cart.reduce((s,p)=>s+p.price,0)} ₽`);
 }
 
 /* Анимация добавления в корзину */

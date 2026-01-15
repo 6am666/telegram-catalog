@@ -9,6 +9,8 @@
 </head>
 <body>
 
+<div class="bg"></div>
+
 <!-- Шапка -->
 <div class="header">
   <div class="menu-icon" id="menuIcon">
@@ -25,40 +27,16 @@
     <div data-category="Кулоны">Кулоны</div>
     <div data-category="Серьги">Серьги</div>
     <div data-category="Обвесы">Обвесы</div>
-    <div data-category="Аксессуары для волос">Аксессуары для волос</div>
   </div>
 
   <input type="text" class="search" placeholder="Поиск..." id="searchInput">
   <div class="products" id="products"></div>
 
-  <!-- Сумма корзины (только в корзине) -->
   <div class="cart-total" id="cartTotal"></div>
 </div>
 
-<!-- Кнопки внизу -->
-<div class="bottom-buttons">
-  <button class="cart-btn" id="cartButton">
-    🛒 Корзина
-    <span id="cartCount" class="cart-count">0</span>
-  </button>
-  <button class="checkout-btn" id="checkoutButton">Оформить заказ</button>
-</div>
-
-<!-- Модальное окно -->
-<div class="modal" id="modal">
-  <div class="modal-content">
-    <span class="modal-close" id="modalClose">&times;</span>
-    <div class="modal-img-wrapper">
-      <img id="modalImage" src="" alt="">
-      <div class="modal-text">
-        <h3 id="modalTitle"></h3>
-        <p id="modalPrice"></p>
-      </div>
-    </div>
-    <button class="add-btn" id="modalAdd">В корзину</button>
-    <button class="back-btn" id="modalBack">Назад</button>
-  </div>
-</div>
+<!-- Нижняя кнопка -->
+<button class="bottom-btn" id="bottomButton">🛒 Корзина</button>
 
 <script src="main.js"></script>
 </body>

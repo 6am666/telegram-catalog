@@ -24,7 +24,7 @@ h1{text-align:center;color:#fff;margin:20px 0;cursor:default;}
 .categories div{cursor:pointer;font-size:18px;}
 
 /* ПОИСК */
-.search{width:100%;padding:12px;border-radius:12px;border:none;margin-bottom:20px;font-size:16px;}
+.search{width:100%;padding:12px;border-radius:12px;border:none;margin-bottom:20px;font-size:16px;display:block;}
 
 /* СЕТКА */
 .products{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;justify-items:center;}
@@ -49,13 +49,23 @@ h1{text-align:center;color:#fff;margin:20px 0;cursor:default;}
 .product p{color:#ccc;font-size:13px;}
 
 /* КНОПКИ */
-.add-btn,.remove-btn{
+.add-btn{
   margin-top:6px;
   padding:8px;
   border-radius:10px;
   border:none;
-  background:#333; /* темно-серый */
-  color:black;
+  background:#333; 
+  color:white; /* белые буквы */
+  font-size:14px;
+  cursor:pointer;
+}
+.back-btn{
+  margin-top:6px;
+  padding:8px;
+  border-radius:10px;
+  border:none;
+  background:#444; 
+  color:white;
   font-size:14px;
   cursor:pointer;
 }
@@ -63,31 +73,31 @@ h1{text-align:center;color:#fff;margin:20px 0;cursor:default;}
 /* КНОПКА КОРЗИНЫ */
 .cart-btn{
   position:fixed;
-  bottom:12px;
+  bottom:20px;
   left:50%;
   transform:translateX(-50%);
-  padding:8px 12px;
-  border-radius:16px;
+  padding:14px 20px; /* увеличен размер */
+  border-radius:20px;
   border:none;
   background:#333;
-  color:black;
-  font-size:14px;
+  color:white;
+  font-size:16px;
   cursor:pointer;
   z-index:10;
   display:flex;
   align-items:center;
-  gap:6px;
+  gap:8px;
 }
 .cart-count{
   display:inline-block;
   background:black;
   color:white;
-  font-size:12px;
-  width:18px;
-  height:18px;
+  font-size:14px;
+  width:22px;
+  height:22px;
   border-radius:50%;
   text-align:center;
-  line-height:18px;
+  line-height:22px;
 }
 
 /* МОДАЛ */

@@ -73,4 +73,62 @@ h1 {
   text-align: center;
   width: 160px;
   aspect-ratio: 1 / 1;
-  displ
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.product img {
+  width: 100%;
+  height: 60%;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.product h3 {
+  color: #fff;
+  font-size: 14px;
+  margin-top: 6px;
+}
+
+.product p {
+  color: #ccc;
+  font-size: 13px;
+}
+
+/* КНОПКИ */
+.add-btn {
+  margin-top: 6px;
+  padding: 8px;
+  border-radius: 10px;
+  border: none;
+  background: white;
+  color: black;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.remove-btn {
+  margin-top: 6px;
+  padding: 8px;
+  border-radius: 10px;
+  border: none;
+  background: #f44336;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* Telegram кнопка */
+.tg-btn {
+  background-color: white !important;
+  color: black !important;
+}
+
+/* ИТОГО В КОРЗИНЕ */
+.cart-total {
+  color: white;
+  font-size: 16px;
+  text-align: center;
+  margin-top: 10px;
+}

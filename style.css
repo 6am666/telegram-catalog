@@ -182,3 +182,21 @@ body{
 
 /* Кнопка оформления заказа */
 .checkout-btn{position:relative; margin:20px auto; display:none; padding:14px 20px; border-radius:20px; border:none; background:#333; color:white; font-size:16px; cursor:pointer; text-align:center;}
+
+/* DaData подсказки на темный фон */
+.suggestions-suggestions {
+  background-color: #2e2e2e !important;  /* темно-серый фон */
+  color: white !important;                /* белый текст */
+  border: 1px solid #555 !important;      /* граница */
+  border-radius: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000 !important;
+}
+.suggestions-item {
+  padding: 8px 12px;
+  cursor: pointer;
+}
+.suggestions-item:hover {
+  background-color: #444 !important;
+}

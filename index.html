@@ -41,7 +41,7 @@
   </div>
 </div>
 
-<!-- Модальное окно -->
+<!-- Модальное окно товара -->
 <div class="modal" id="modal">
   <div class="modal-content">
     <span class="modal-close" id="modalClose">&times;</span>
@@ -55,6 +55,38 @@
     <div class="modal-desc">
       <p id="modalDescription"></p>
     </div>
+  </div>
+</div>
+
+<!-- Модальное окно оформления заказа -->
+<div class="order-modal" id="orderModal">
+  <div class="order-modal-content">
+    <span class="order-modal-close" id="orderClose">&times;</span>
+    <h2>Оформление заказа</h2>
+    <form id="orderForm">
+      <label>ФИО</label>
+      <input type="text" name="fullname" placeholder="Введите ваше ФИО" required>
+
+      <label>Город</label>
+      <input type="text" name="city" placeholder="Введите город" required>
+
+      <label>Точный адрес и индекс</label>
+      <input type="text" name="address" placeholder="Улица, дом, квартира, индекс" required>
+
+      <label>Доставка</label>
+      <select name="delivery" required>
+        <option value="" disabled selected>Выберите способ доставки</option>
+        <option value="СДЭК">СДЭК</option>
+        <option value="Почта России">Почта России</option>
+        <option value="Boxberry">Boxberry</option>
+        <option value="Самовывоз">Самовывоз</option>
+      </select>
+
+      <label>Телефон или ник в Telegram</label>
+      <input type="text" name="phone" placeholder="Введите телефон или ник" required>
+
+      <button type="submit">Оплатить</button>
+    </form>
   </div>
 </div>
 

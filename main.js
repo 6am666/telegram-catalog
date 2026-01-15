@@ -135,4 +135,26 @@ categories.querySelectorAll("div").forEach(cat=>{
   };
 });
 
-mainTitle.onclick = ()=>{ inCartScreen=false; renderProducts
+mainTitle.onclick = ()=>{ inCartScreen=false; renderProducts(products); };
+cartButton.onclick = ()=>{ inCartScreen=true; renderProducts(cart.map(i=>i.product)); };
+checkoutButton.onclick = ()=>{ if(cart.length) alert(`Заказ на ${cart.reduce((s,i)=>s+i.product.price*i.count,0)} ₽`); }
+
+function flyToCart(img){
+  const fly=img.cloneNode();
+  fly.className="fly-to-cart";
+  const rect=img.getBoundingClientRect();
+  fly.style.left=rect.left+"px";
+  fly.style.top=rect.top+"px";
+  document.body.appendChild(fly);
+  setTimeout(()=>{
+    const cartRect=cartButton.getBoundingClientRect();
+    fly.style.transform=`translate(${cartRect.left-rect.left}px,${cartRect.top-rect.top}px) scale(0.1)`;
+    fly.style.opacity="0";
+  },10);
+  setTimeout(()=>fly.remove(),610);
+}
+
+document.addEventListener("click", e=>{ if(searchInput&&!searchInput.contains(e.target)) searchInput.blur(); });
+modal.addEventListener("click", e=>{ if(e.target===modal) modal.style.display="none"; });
+
+renderProducts();

@@ -15,13 +15,20 @@ const cartTotal = document.getElementById("cartTotal");
 const checkoutButton = document.getElementById("checkoutButton");
 const categories = document.getElementById("categories");
 const mainTitle = document.getElementById("mainTitle");
+const menuIcon = document.getElementById("menuIcon");
 
 /* modal */
 const modal = document.getElementById("modal");
 const modalImage = document.getElementById("modalImage");
 const modalTitle = document.getElementById("modalTitle");
 const modalPrice = document.getElementById("modalPrice");
+const modalDescription = document.getElementById("modalDescription");
 const modalClose = document.getElementById("modalClose");
+
+/* ================== ГАМБУРГЕР ================== */
+menuIcon.onclick = () => {
+  categories.classList.toggle("show");
+};
 
 /* ================== ТОВАРЫ ================== */
 const products = [
@@ -31,12 +38,7 @@ const products = [
     price: 4000,
     image: "https://i.pinimg.com/736x/d4/c5/4c/d4c54cd9c489d1e73d9e306545929b70.jpg",
     category: "Браслеты",
-    description:
-`Материал изделия:
-Хирургическая сталь;
-Фурнитура из нержавеющей стали.
-
-Срок изготовления — до 5 рабочих дней.`
+    description: `Материал изделия:\nХирургическая сталь;\nФурнитура из нержавеющей стали.\nСрок изготовления — до 5 рабочих дней.`
   },
   {
     id: 2,
@@ -44,13 +46,7 @@ const products = [
     price: 3600,
     image: "https://i.pinimg.com/736x/c2/0d/26/c20d26fb9839c64d328f8989450f547b.jpg",
     category: "Колье",
-    description:
-`Материал изделия:
-Атласная лента;
-Хирургическая сталь;
-Фурнитура из хирургической и нержавеющей стали.
-
-Срок изготовления — до 5 рабочих дней.`
+    description: `Материал изделия:\nАтласная лента;\nХирургическая сталь;\nФурнитура из хирургической и нержавеющей стали.\nСрок изготовления — до 5 рабочих дней.`
   },
   {
     id: 3,
@@ -58,12 +54,7 @@ const products = [
     price: 2500,
     image: "https://i.pinimg.com/736x/37/0b/db/370bdb870346b42b1000610195261f62.jpg",
     category: "Колье",
-    description:
-`Материал изделия:
-Нержавеющая сталь;
-Фурнитура из хирургической и нержавеющей стали.
-
-Срок изготовления — до 5 рабочих дней.`
+    description: `Материал изделия:\nНержавеющая сталь;\nФурнитура из хирургической и нержавеющей стали.\nСрок изготовления — до 5 рабочих дней.`
   },
   {
     id: 4,
@@ -71,12 +62,7 @@ const products = [
     price: 4500,
     image: "https://i.pinimg.com/736x/55/bf/ec/55bfecc3c2ceebf20752ff2802ff4e19.jpg",
     category: "Колье",
-    description:
-`Материал изделия:
-Хирургическая сталь;
-Фурнитура из хирургической и нержавеющей стали.
-
-Срок изготовления — до 5 рабочих дней.`
+    description: `Материал изделия:\nХирургическая сталь;\nФурнитура из хирургической и нержавеющей стали.\nСрок изготовления — до 5 рабочих дней.`
   },
   {
     id: 5,
@@ -84,13 +70,7 @@ const products = [
     price: 2000,
     image: "https://i.pinimg.com/736x/5a/6d/1b/5a6d1beecdc7b79798705e4da0ef3a5c.jpg",
     category: "Кулоны",
-    description:
-`Материал изделия:
-Лунная бусина;
-Хирургическая сталь;
-Фурнитура из нержавеющей стали.
-
-Срок изготовления — до 5 рабочих дней.`
+    description: `Материал изделия:\nЛунная бусина;\nХирургическая сталь;\nФурнитура из нержавеющей стали.\nСрок изготовления — до 5 рабочих дней.`
   },
   {
     id: 6,
@@ -98,12 +78,7 @@ const products = [
     price: 3600,
     image: "https://i.pinimg.com/736x/e8/cb/c2/e8cbc2287025b23930c20e030755a0b5.jpg",
     category: "Обвесы",
-    description:
-`Материал изделия:
-Фурнитура из нержавеющей стали;
-Хирургическая и нержавеющая сталь.
-
-Срок изготовления — до 5 рабочих дней.`
+    description: `Материал изделия:\nФурнитура из нержавеющей стали;\nХирургическая и нержавеющая сталь.\nСрок изготовления — до 5 рабочих дней.`
   },
   {
     id: 7,
@@ -111,12 +86,7 @@ const products = [
     price: 2000,
     image: "https://i.pinimg.com/736x/16/36/75/163675cf410dfc51ef97238bbbab1056.jpg",
     category: "Обвесы",
-    description:
-`Материал изделия:
-Хирургическая сталь;
-Фурнитура из нержавеющей стали.
-
-Срок изготовления — до 5 рабочих дней.`
+    description: `Материал изделия:\nХирургическая сталь;\nФурнитура из нержавеющей стали.\nСрок изготовления — до 5 рабочих дней.`
   },
   {
     id: 8,
@@ -124,13 +94,7 @@ const products = [
     price: 2000,
     image: "https://i.pinimg.com/736x/93/e4/e5/93e4e5ee7594f6ef436f8b994ef04016.jpg",
     category: "Серьги",
-    description:
-`Материал изделия:
-Лунные бусины;
-Хирургическая сталь;
-Фурнитура из нержавеющей и хирургической стали.
-
-Срок изготовления — до 5 рабочих дней.`
+    description: `Материал изделия:\nЛунные бусины;\nХирургическая сталь;\nФурнитура из нержавеющей и хирургической стали.\nСрок изготовления — до 5 рабочих дней.`
   }
 ];
 
@@ -215,8 +179,15 @@ function updateCartUI() {
   const totalPrice = cart.reduce((s, i) => s + i.count * i.product.price, 0);
 
   cartCount.textContent = totalCount;
-  cartTotal.textContent = totalPrice ? `Итого: ${totalPrice} ₽` : "";
-  checkoutButton.style.display = totalCount ? "block" : "none";
+  
+  if (inCartScreen && totalCount > 0) {
+    cartTotal.textContent = `Итого: ${totalPrice} ₽`;
+    cartTotal.style.display = "block";
+    checkoutButton.style.display = "block";
+  } else {
+    cartTotal.style.display = "none";
+    checkoutButton.style.display = "none";
+  }
 }
 
 /* ================== МОДАЛ ================== */
@@ -224,15 +195,7 @@ function openModal(p) {
   modalImage.src = p.image;
   modalTitle.textContent = p.name;
   modalPrice.textContent = `${p.price} ₽`;
-
-  let desc = modal.querySelector(".modal-description");
-  if (!desc) {
-    desc = document.createElement("div");
-    desc.className = "modal-description";
-    modal.querySelector(".modal-text").appendChild(desc);
-  }
-  desc.textContent = p.description;
-
+  modalDescription.textContent = p.description;
   modal.style.display = "flex";
 }
 

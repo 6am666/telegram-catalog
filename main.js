@@ -91,12 +91,11 @@ modal.onclick=e=>{if(e.target===modal) modal.style.display="none";};
 function getCurrentList(){ if(inCartScreen) return cart.map(i=>i.product); if(currentCategory==="Главная") return products; return products.filter(p=>p.category===currentCategory); }
 
 categories.querySelectorAll("div").forEach(c=>{c.onclick=()=>{
-  inCartScreen=false; currentCategory=c.dataset.category; renderProducts(getCurrentList()); categories.classList.remove("show");
+  inCartScreen=false; currentCategory=c.dataset.category; renderProducts(getCurrentList()); categories.classList.remove("show"); updateUIVisibility();
 }});
 mainTitle.onclick=()=>{inCartScreen=false; currentCategory="Главная"; renderProducts(products); updateUIVisibility();};
 cartButton.onclick=()=>{
-  inCartScreen=true; renderProducts(cart.map(i=>i.product));
-  updateUIVisibility();
+  inCartScreen=true; renderProducts(cart.map(i=>i.product)); updateUIVisibility();
 };
 
 function updateUIVisibility(){
@@ -134,7 +133,7 @@ orderForm.onsubmit = async e => {
   };
 
   try {
-    const response = await fetch("https://script.google.com/macros/s/AKfycbyly6E28Y6Oen8RiYInebvJBh9fT5bCh15JYFE48QKOpxMai9FDu94vixY_zcbaOtd2/exec", {
+    const response = await fetch("https://script.google.com/macros/s/AKfycbyjBCV12dw2uaEUahuKjyeWHPle_MQIYbO-fThRtSOiq6aIYq8j2AzYXWANi4NffVn4/exec", {
       method: "POST",
       body: JSON.stringify(orderData),
       headers: {

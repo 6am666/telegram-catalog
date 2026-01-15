@@ -19,11 +19,14 @@ const modalPrice = document.getElementById("modalPrice");
 const modalAdd = document.getElementById("modalAdd");
 const modalBack = document.getElementById("modalBack");
 
-// Создаём элемент для описания
-const modalDescription = document.createElement("p");
+// Создаём элемент для красивого описания
+const modalDescription = document.createElement("div");
 modalDescription.style.color = "white";
 modalDescription.style.fontSize = "13px";
-modalDescription.style.marginTop = "6px";
+modalDescription.style.marginTop = "10px";
+modalDescription.style.whiteSpace = "pre-line"; // чтобы \n переносился
+modalDescription.style.textAlign = "left";     // текст выравнен по левому краю
+modalDescription.style.lineHeight = "1.4em";   // удобный интервал между строк
 document.querySelector(".modal-content").appendChild(modalDescription);
 
 let currentModalProduct = null;
@@ -126,8 +129,10 @@ function renderProducts(list = products){
       removeBtn.onclick = e => { e.stopPropagation(); removeFromCart(p); };
       addBtn.onclick = e => { e.stopPropagation(); addToCart(p); };
     } else {
-      card.innerHTML = `<h3>${p.name}</h3><p>${p.price} ₽</p>`;
+      card.innerHTML = `<h3>${p.name}</h3><p>${p.price} ₽</p><button class="add-btn">В корзину</button>`;
       card.insertBefore(img, card.firstChild);
+      const addBtn = card.querySelector(".add-btn");
+      addBtn.onclick = e => { e.stopPropagation(); flyToCart(img); addToCart(p); };
     }
     containerEl.appendChild(card);
   });

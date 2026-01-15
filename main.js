@@ -14,6 +14,7 @@ const checkoutButton = document.getElementById("checkoutButton");
 const categories = document.getElementById("categories");
 const mainTitle = document.getElementById("mainTitle");
 const menuIcon = document.getElementById("menuIcon");
+const footerButtons = document.getElementById("footerButtons");
 
 /* modal */
 const modal = document.getElementById("modal");
@@ -56,6 +57,16 @@ function renderProducts(list){
     card.append(img,title,price,controls);
     productsEl.appendChild(card);
   });
+
+  // Поиск и футер только если не корзина
+  if(inCartScreen){
+    searchInput.style.display="none";
+    footerButtons.style.display="none";
+  } else {
+    searchInput.style.display="block";
+    footerButtons.style.display="flex";
+  }
+
   updateCartUI();
 }
 

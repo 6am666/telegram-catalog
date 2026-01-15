@@ -53,20 +53,23 @@ function renderProducts(list = products) {
     img.alt = p.name;
 
     if (inCartScreen) {
-      // В корзине: показываем - / количество / +
+      // В корзине: - / количество / +
       card.innerHTML = `<h3>${p.name}</h3><p>${p.price} ₽</p>
         <div style="display:flex; justify-content:center; gap:6px;">
           <button class="remove-btn">-</button>
           <span>${countInCart(p)}</span>
           <button class="add-btn">+</button>
         </div>`;
-      card.querySelector(".remove-btn").onclick = e => { e.stopPropagation(); removeFromCart(p); };
-      card.querySelector(".add-btn").onclick = e => { e.stopPropagation(); addToCart(p); };
+      const removeBtn = card.querySelector(".remove-btn");
+      const addBtn = card.querySelector(".add-btn");
+      if (removeBtn) removeBtn.onclick = e => { e.stopPropagation(); removeFromCart(p); };
+      if (addBtn) addBtn.onclick = e => { e.stopPropagation(); addToCart(p); };
     } else {
       // Главная: кнопка "В корзину"
       card.innerHTML = `<h3>${p.name}</h3><p>${p.price} ₽</p>
         <button class="add-btn">В корзину</button>`;
-      card.querySelector(".add-btn").onclick = e => { 
+      const addBtn = card.querySelector(".add-btn");
+      if (addBtn) addBtn.onclick = e => { 
         e.stopPropagation(); 
         flyToCart(img); 
         addToCart(p); 
@@ -121,6 +124,7 @@ searchInput.addEventListener("input", e => {
   renderProducts(products.filter(p => p.name.toLowerCase().includes(value)));
 });
 
+// --- Меню категорий ---
 menuIcon.onclick = () => categories.classList.toggle("show");
 categories.querySelectorAll("div").forEach(cat => {
   cat.onclick = () => {
@@ -134,6 +138,7 @@ categories.querySelectorAll("div").forEach(cat => {
   };
 });
 
+// --- Название → главная ---
 mainTitle.onclick = () => { inCartScreen = false; renderProducts(products); };
 
 // --- Корзина ---
@@ -167,7 +172,7 @@ document.addEventListener("click", (e) => {
   }
 });
 
-// --- Закрытие модального окна при клике по фону ---
+// --- Закрытие модального окна при клике на фон ---
 modal.addEventListener("click", (e) => {
   if (e.target === modal) {
     modal.style.display = "none";

@@ -16,7 +16,6 @@ const mainTitle = document.getElementById("mainTitle");
 const menuIcon = document.getElementById("menuIcon");
 const footerButtons = document.getElementById("footerButtons");
 
-/* модалка товара */
 const modal = document.getElementById("modal");
 const modalImage = document.getElementById("modalImage");
 const modalTitle = document.getElementById("modalTitle");
@@ -24,12 +23,11 @@ const modalPrice = document.getElementById("modalPrice");
 const modalDescription = document.getElementById("modalDescription");
 const modalClose = document.getElementById("modalClose");
 
-/* модалка заказа */
 const orderModal = document.getElementById("orderModal");
 const orderClose = document.getElementById("orderClose");
 const orderForm = document.getElementById("orderForm");
 
-/* гамбургер */
+/* Гамбургер */
 menuIcon.onclick = () => { categories.classList.toggle("show"); };
 
 /* ================== ТОВАРЫ ================== */
@@ -59,7 +57,7 @@ function renderProducts(list){
       const count=document.createElement("div"); count.className="count-number"; count.textContent=cartItem.count;
       const plus=document.createElement("button"); plus.textContent="+"; plus.onclick=e=>{e.stopPropagation(); addToCart(p)};
       controls.append(minus,count,plus);
-    }else{
+    } else{
       const addBtn=document.createElement("button"); addBtn.className="add-btn"; addBtn.textContent="В корзину"; addBtn.onclick=e=>{e.stopPropagation(); addToCart(p)};
       controls.appendChild(addBtn);
     }
@@ -101,15 +99,9 @@ cartButton.onclick=()=>{
   updateUIVisibility();
 };
 
-/* скрываем поиск и футер в корзине */
 function updateUIVisibility(){
-  if(inCartScreen){
-    searchInput.style.display="none";
-    footerButtons.style.display="none"; // футер скрыт
-  } else{
-    searchInput.style.display="block";
-    footerButtons.style.display="flex";
-  }
+  if(inCartScreen){ searchInput.style.display="none"; footerButtons.style.display="none"; } 
+  else{ searchInput.style.display="block"; footerButtons.style.display="flex"; }
 }
 
 /* ================== МОДАЛКА ЗАКАЗА ================== */
@@ -117,7 +109,17 @@ checkoutButton.onclick=()=>{if(cart.length===0) return alert("Корзина п�
 orderClose.onclick=()=>orderModal.style.display="none";
 orderModal.onclick=e=>{if(e.target===orderModal) orderModal.style.display="none";}
 
-/* отправка формы на Google Sheets */
+/* ================== DaData ================== */
+$(function() {
+  $("input[name='address']").suggestions({
+    token: "4563b9c9765a1a2d7bf39e1c8944f7fadae05970",
+    type: "ADDRESS",
+    hint: false,
+    geoLocation: true
+  });
+});
+
+/* ================== Отправка на Google Sheets ================== */
 orderForm.onsubmit = async e => {
   e.preventDefault();
   if(cart.length === 0) return alert("Корзина пуста!");
@@ -135,7 +137,10 @@ orderForm.onsubmit = async e => {
     const response = await fetch("https://script.google.com/macros/s/AKfycbyly6E28Y6Oen8RiYInebvJBh9fT5bCh15JYFE48QKOpxMai9FDu94vixY_zcbaOtd2/exec", {
       method: "POST",
       body: JSON.stringify(orderData),
-      headers: { "Content-Type": "application/json" }
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      }
     });
     const result = await response.json();
     if(result.status === "success") alert("Заказ успешно отправлен!");

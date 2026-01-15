@@ -16,7 +16,6 @@ const mainTitle = document.getElementById("mainTitle");
 const menuIcon = document.getElementById("menuIcon");
 const footerButtons = document.getElementById("footerButtons");
 
-/* модалка товара */
 const modal = document.getElementById("modal");
 const modalImage = document.getElementById("modalImage");
 const modalTitle = document.getElementById("modalTitle");
@@ -24,15 +23,13 @@ const modalPrice = document.getElementById("modalPrice");
 const modalDescription = document.getElementById("modalDescription");
 const modalClose = document.getElementById("modalClose");
 
-/* модалка заказа */
 const orderModal = document.getElementById("orderModal");
 const orderClose = document.getElementById("orderClose");
 const orderForm = document.getElementById("orderForm");
 
-/* гамбургер */
 menuIcon.onclick = () => { categories.classList.toggle("show"); };
 
-/* ================== ТОВАРЫ ================== */
+// ================== ТОВАРЫ ==================
 const products = [
   {id:1,name:"Браслет Hearts",price:4000,image:"https://i.pinimg.com/736x/d4/c5/4c/d4c54cd9c489d1e73d9e306545929b70.jpg",category:"Браслеты",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","Срок изготовления — до 5 рабочих дней."]},
   {id:2,name:"Колье Gothic Thorns",price:3600,image:"https://i.pinimg.com/736x/c2/0d/26/c20d26fb9839c64d328f8989450f547b.jpg",category:"Колье",description:["Материал изделия:","Атласная лента;","Хирургическая сталь;","Фурнитура из хирургической и нержавеющей стали.","Срок изготовления — до 5 рабочих дней."]},
@@ -45,7 +42,7 @@ const products = [
   {id:9,name:"Тестовый товар",price:10,image:"https://via.placeholder.com/150",category:"Тест",description:["Тестовый товар для проверки.","Срок изготовления — 1 день."]}
 ];
 
-/* ================== ФУНКЦИИ ================== */
+// ================== ФУНКЦИИ ==================
 function renderProducts(list){
   productsEl.innerHTML="";
   list.forEach(p=>{
@@ -66,7 +63,6 @@ function renderProducts(list){
     }
     card.append(img,title,price,controls); productsEl.appendChild(card);
   });
-
   updateCartUI();
 }
 
@@ -80,6 +76,7 @@ function updateCartUI(){
   cartTotal.textContent=totalPrice?`Итого: ${totalPrice} ₽`:"";
   cartTotal.style.display=inCartScreen? "block":"none";
   checkoutButton.style.display=totalCount && inCartScreen? "block":"none";
+  updateUIVisibility();
 }
 
 function openModal(p){
@@ -102,35 +99,29 @@ categories.querySelectorAll("div").forEach(c=>{c.onclick=()=>{
   inCartScreen=false; currentCategory=c.dataset.category; renderProducts(getCurrentList()); categories.classList.remove("show");
 }});
 mainTitle.onclick=()=>{inCartScreen=false; currentCategory="Главная"; renderProducts(products);};
-cartButton.onclick=()=>{
-  inCartScreen=true; renderProducts(cart.map(i=>i.product));
-};
+cartButton.onclick=()=>{inCartScreen=true; renderProducts(cart.map(i=>i.product));};
 
-/* скрываем поиск и футер в корзине */
+// скрываем поиск и футер в корзине
 function updateUIVisibility(){
   if(inCartScreen){searchInput.style.display="none"; footerButtons.style.display="none";} 
   else{searchInput.style.display="block"; footerButtons.style.display="flex";}
 }
 
-/* ================== МОДАЛКА ЗАКАЗА ================== */
+// ================== МОДАЛКА ЗАКАЗА ==================
 checkoutButton.onclick=()=>{if(cart.length===0) return alert("Корзина пуста!"); orderModal.style.display="flex";}
 orderClose.onclick=()=>orderModal.style.display="none";
 orderModal.onclick=e=>{if(e.target===orderModal) orderModal.style.display="none";}
 
-/* отправка заказа в Telegram */
+// ================== ОТПРАВКА В TELEGRAM ==================
+const BOT_TOKEN = "ВАШ_BOT_TOKEN"; // <-- сюда вставь свой токен бота
+const CHAT_ID = "ВАШ_CHAT_ID";     // <-- сюда вставь свой ID чата
+
 orderForm.onsubmit = e => {
   e.preventDefault();
   if(cart.length === 0) return alert("Корзина пуста!");
 
   const fd = new FormData(orderForm);
-  const orderText = `
-🛒 Новый заказ!
-ФИО: ${fd.get("fullname")}
-Адрес: ${fd.get("address")}
-Доставка: ${fd.get("delivery")}
-Телефон: ${fd.get("phone")}
-Товары: ${cart.map(i => i.product.name + " x" + i.count).join("; ")}
-  `;
+  const orderText = `🛒 Новый заказ!\nФИО: ${fd.get("fullname")}\nАдрес: ${fd.get("address")}\nДоставка: ${fd.get("delivery")}\nТелефон: ${fd.get("phone")}\nТовары: ${cart.map(i => i.product.name + " x" + i.count).join("; ")}`;
 
   fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
     method: "POST",
@@ -151,10 +142,10 @@ orderForm.onsubmit = e => {
   .catch(err => alert("Ошибка отправки: " + err));
 };
 
-/* ================== ПОИСК ================== */
+// ================== ПОИСК ==================
 searchInput.oninput=()=>{const val=searchInput.value.toLowerCase(); renderProducts(getCurrentList().filter(p=>p.name.toLowerCase().includes(val)));};
 
-/* ================== DaData ================== */
+// ================== DaData ==================
 $(function() {
   $("#addressInput").suggestions({
     token: "4563b9c9765a1a2d7bf39e1c8944f7fadae05970",
@@ -163,13 +154,11 @@ $(function() {
     onSelect: function(suggestion) {
       $("#addressInput").val(suggestion.value);
     },
-    formatResult: function(suggestion, currentValue) {
-      return suggestion.value; // показываем полный адрес
-    },
+    formatResult: function(suggestion) { return suggestion.value; },
     style: {backgroundColor:"#333", color:"#fff"}
   });
 });
 
-/* ================== СТАРТ ================== */
+// ================== СТАРТ ==================
 renderProducts(products);
 updateUIVisibility();

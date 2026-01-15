@@ -15,11 +15,10 @@
     <div></div><div></div><div></div>
   </div>
   <h1 id="mainTitle">Chronicle Chains</h1>
-  <button class="cart-btn" id="cartButton">🛒</button>
+  <button class="cart-btn" id="cartButton">🛒<span id="cartCount" class="cart-count">0</span></button>
 </div>
 
 <div class="container">
-  <!-- Меню категорий -->
   <div class="categories" id="categories">
     <div data-category="Главная">Главная</div>
     <div data-category="Браслеты">Браслеты</div>
@@ -30,20 +29,9 @@
     <div data-category="Аксессуары для волос">Аксессуары для волос</div>
   </div>
 
-  <!-- Поиск -->
   <input type="text" class="search" placeholder="Мне нужно..." id="searchInput">
-
-  <!-- Секция товаров -->
   <div class="products" id="products"></div>
-
-  <!-- Итог корзины -->
   <div class="cart-total" id="cartTotal"></div>
-
-  <!-- Футер -->
-  <div class="footer-buttons" id="footerButtons">
-    <a href="https://t.me/whxt4ru" target="_blank" class="footer-btn">Связь</a>
-    <a href="https://t.me/chroniclechains" target="_blank" class="footer-btn">Магазин</a>
-  </div>
 </div>
 
 <!-- Модальное окно -->
@@ -55,11 +43,16 @@
       <div class="modal-text">
         <h3 id="modalTitle"></h3>
         <p id="modalPrice"></p>
+        <p id="modalDescription"></p>
       </div>
     </div>
-    <button class="add-btn" id="modalAdd">В корзину</button>
-    <button class="back-btn" id="modalBack">Назад</button>
   </div>
+</div>
+
+<!-- Футер -->
+<div class="footer-buttons" id="footerButtons">
+  <a href="https://t.me/whxt4ru" target="_blank" class="footer-btn">Связь</a>
+  <a href="https://t.me/chroniclechains" target="_blank" class="footer-btn">Магазин</a>
 </div>
 
 <!-- Кнопка оформления заказа -->

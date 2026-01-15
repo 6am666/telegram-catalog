@@ -8,18 +8,28 @@ body{
   overflow-x:hidden;
 }
 
+/* ШАПКА */
+.header{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:12px 16px;
+  background: rgba(30,30,30,0.85);
+  z-index:11;
+}
+.header h1{color:#fff; text-align:center; flex:1; font-size:20px;}
+.header .menu-icon{position:absolute; left:16px; display:flex; flex-direction:column; justify-content:space-between; width:32px; height:24px; cursor:pointer;}
+.header .menu-icon div{width:32px; height:4px; background:white; border-radius:2px;}
+
 /* КОНТЕЙНЕР */
-.container{max-width:460px;margin:0 auto;padding:16px;position:relative;}
-
-/* ЗАГОЛОВОК */
-h1{text-align:center;color:#fff;margin:20px 0;cursor:default;}
-
-/* ГАМБУРГЕР */
-.menu-icon{position:absolute;top:16px;left:16px;width:32px;height:24px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;z-index:10;}
-.menu-icon div{width:32px;height:4px;background:white;border-radius:2px;}
+.container{max-width:460px;margin:70px auto 16px;padding:16px;position:relative;}
 
 /* МЕНЮ КАТЕГОРИЙ */
-.categories{position:fixed;top:0;left:-220px;width:220px;height:100%;background:rgba(30,30,30,0.95);color:white;padding:60px 20px;display:flex;flex-direction:column;gap:20px;transition:left 0.3s;z-index:9;}
+.categories{position:fixed;top:0;left:-220px;width:220px;height:100%;background:rgba(30,30,30,0.95);color:white;padding:60px 20px;display:flex;flex-direction:column;gap:20px;transition:left 0.3s;z-index:10;}
 .categories.show{left:0;}
 .categories div{cursor:pointer;font-size:18px;}
 
@@ -49,13 +59,13 @@ h1{text-align:center;color:#fff;margin:20px 0;cursor:default;}
 .product p{color:#ccc;font-size:13px;}
 
 /* КНОПКИ */
-.add-btn{
+.add-btn, .remove-btn{
   margin-top:6px;
   padding:8px;
   border-radius:10px;
   border:none;
-  background:#333; 
-  color:white; /* белые буквы */
+  background:#333;
+  color:white;
   font-size:14px;
   cursor:pointer;
 }
@@ -64,7 +74,7 @@ h1{text-align:center;color:#fff;margin:20px 0;cursor:default;}
   padding:8px;
   border-radius:10px;
   border:none;
-  background:#444; 
+  background:#444;
   color:white;
   font-size:14px;
   cursor:pointer;
@@ -76,7 +86,7 @@ h1{text-align:center;color:#fff;margin:20px 0;cursor:default;}
   bottom:20px;
   left:50%;
   transform:translateX(-50%);
-  padding:14px 20px; /* увеличен размер */
+  padding:14px 20px;
   border-radius:20px;
   border:none;
   background:#333;
@@ -98,6 +108,17 @@ h1{text-align:center;color:#fff;margin:20px 0;cursor:default;}
   border-radius:50%;
   text-align:center;
   line-height:22px;
+}
+
+/* КОРЗИНА - ИТОГ */
+.cart-total{
+  margin-top:10px;
+  padding:10px;
+  background: rgba(0,0,0,0.6);
+  color:white;
+  border-radius:12px;
+  font-size:16px;
+  text-align:center;
 }
 
 /* МОДАЛ */

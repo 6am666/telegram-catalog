@@ -20,6 +20,16 @@ const containerEl = document.getElementById("products");
 const mainTitle = document.getElementById("mainTitle");
 const cartIcon = document.getElementById("cartIcon");
 
+// Модальное окно
+const modal = document.getElementById("modal");
+const modalImage = document.getElementById("modalImage");
+const modalTitle = document.getElementById("modalTitle");
+const modalPrice = document.getElementById("modalPrice");
+const modalAdd = document.getElementById("modalAdd");
+const modalClose = document.getElementById("modalClose");
+
+let currentModalProduct = null;
+
 /* РЕНДЕР КАТАЛОГА */
 function renderProducts(list = products) {
   inCartScreen = false;
@@ -34,10 +44,6 @@ function renderProducts(list = products) {
     img.src = p.image;
     img.onerror = () => img.src = "https://via.placeholder.com/300";
     img.alt = p.name;
-    img.style.width = "100%";
-    img.style.height = "60%";
-    img.style.objectFit = "cover";
-    img.style.borderRadius = "10px";
 
     card.innerHTML = `
       <h3>${p.name}</h3>
@@ -46,6 +52,10 @@ function renderProducts(list = products) {
     `;
     card.prepend(img);
 
+    // Открытие модального окна
+    card.onclick = () => openModal(p);
+
+    // Добавление в корзину
     card.querySelector(".add-btn").onclick = (e) => {
       e.stopPropagation();
       addToCart(p);
@@ -55,6 +65,21 @@ function renderProducts(list = products) {
   });
 
   updateMainButton();
+}
+
+/* ОТКРЫТЬ МОДАЛ */
+function openModal(p) {
+  currentModalProduct = p;
+  modalImage.src = p.image;
+  modalTitle.textContent = p.name;
+  modalPrice.textContent = `${p.price} ₽`;
+  modal.style.display = "flex";
+}
+
+modalClose.onclick = () => modal.style.display = "none";
+window.onclick = (e) => { if(e.target === modal) modal.style.display = "none"; }
+modalAdd.onclick = () => {
+  if(currentModalProduct) addToCart(currentModalProduct);
 }
 
 /* ПОИСК */
@@ -122,10 +147,6 @@ function renderCart() {
       img.src = p.image;
       img.onerror = () => img.src = "https://via.placeholder.com/300";
       img.alt = p.name;
-      img.style.width = "100%";
-      img.style.height = "60%";
-      img.style.objectFit = "cover";
-      img.style.borderRadius = "10px";
 
       card.innerHTML = `
         <h3>${p.name}</h3>

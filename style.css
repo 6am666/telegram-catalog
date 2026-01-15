@@ -18,14 +18,14 @@ body {
   background-size: cover;
   background-position: center;
   z-index: -1;
-  transition: background 0.3s;
 }
 
 /* КОНТЕЙНЕР */
 .container {
-  max-width: 420px;
+  max-width: 460px;
   margin: 0 auto;
   padding: 16px;
+  position: relative;
 }
 
 /* ЗАГОЛОВОК */
@@ -33,6 +33,17 @@ h1 {
   text-align: center;
   color: #fff;
   margin: 20px 0;
+  cursor: pointer;
+}
+
+/* ИКОНКА КОРЗИНЫ */
+.cart-icon {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
 }
 
 /* ПОИСК */
@@ -48,8 +59,8 @@ h1 {
 /* СЕТКА */
 .products {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px;
   justify-items: center;
 }
 
@@ -60,64 +71,6 @@ h1 {
   border-radius: 14px;
   padding: 8px;
   text-align: center;
+  width: 160px;
   aspect-ratio: 1 / 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  width: 140px;
-}
-
-.product img {
-  width: 100%;
-  height: 60%;
-  object-fit: cover;
-  border-radius: 10px;
-}
-
-.product h3 {
-  color: #fff;
-  font-size: 14px;
-  margin-top: 6px;
-}
-
-.product p {
-  color: #ccc;
-  font-size: 13px;
-}
-
-/* КНОПКИ */
-.add-btn {
-  margin-top: 6px;
-  padding: 8px;
-  border-radius: 10px;
-  border: 2px solid white;
-  background: transparent;
-  color: black;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-.remove-btn {
-  margin-top: 6px;
-  padding: 8px;
-  border-radius: 10px;
-  border: none;
-  background: #f44336;
-  color: white;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-/* Кнопка Telegram (корзина/оформить) */
-.tg-btn {
-  background-color: black !important;
-  color: white !important;
-}
-
-/* ИТОГО В КОРЗИНЕ */
-.cart-total {
-  color: white;
-  font-size: 16px;
-  text-align: center;
-  margin-top: 10px;
-}
+  displ

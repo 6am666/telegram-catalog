@@ -158,7 +158,7 @@ orderForm.onsubmit = e=>{
       updateOrderSum();
       orderModal.style.display="none";
       isSubmitting=false;
-      document.activeElement.blur(); // скрыть клавиатуру
+      document.activeElement.blur();
       alert("Заказ принят!");
     })
     .catch(()=>{
@@ -180,9 +180,7 @@ orderModal.onclick = e => {
 };
 
 // ================== ГАМБУРГЕР ==================
-menuIcon.onclick = () => {
-  categories.classList.toggle("show");
-};
+menuIcon.onclick = () => categories.classList.toggle("show");
 categories.querySelectorAll("div").forEach(c => {
   c.onclick = () => categories.classList.remove("show");
 });
@@ -191,6 +189,31 @@ document.addEventListener("click", e => {
     categories.classList.remove("show");
   }
 });
+
+// ================== АНИМАЦИЯ ЛЕТЯЩЕЙ МИНИАТЮРЫ ==================
+function flyToCart(imgEl) {
+  const cartRect = cartButton.getBoundingClientRect();
+  const imgRect = imgEl.getBoundingClientRect();
+
+  const clone = imgEl.cloneNode(true);
+  clone.className = 'fly-img';
+  clone.style.left = imgRect.left + 'px';
+  clone.style.top = imgRect.top + 'px';
+  clone.style.width = imgRect.width + 'px';
+  clone.style.height = imgRect.height + 'px';
+  clone.style.opacity = 1;
+  document.body.appendChild(clone);
+
+  requestAnimationFrame(() => {
+    clone.style.left = cartRect.left + cartRect.width/2 - imgRect.width/4 + 'px';
+    clone.style.top = cartRect.top + cartRect.height/2 - imgRect.height/4 + 'px';
+    clone.style.width = imgRect.width/2 + 'px';
+    clone.style.height = imgRect.height/2 + 'px';
+    clone.style.opacity = 0.7;
+  });
+
+  clone.addEventListener('transitionend', () => clone.remove());
+}
 
 // ================== ОБНОВЛЕНИЕ КОРЗИНЫ ==================
 function updateCartUI(){
@@ -212,10 +235,7 @@ checkoutButton.onclick=()=>{
   updateOrderSum();
 };
 
-// ================== ПОИСК ==================
-searchInput.oninput=()=>{const val=searchInput.value.toLowerCase(); renderProducts(getCurrentList().filter(p=>p.name.toLowerCase().includes(val)));};
-
-// ================== РЕНДЕР ==================
+// ================== РЕНДЕР ТОВАРОВ ==================
 function renderProducts(list){
   productsEl.innerHTML="";
   list.forEach(p=>{
@@ -247,7 +267,11 @@ function renderProducts(list){
     }else{
       const btn=document.createElement("button");
       btn.textContent="В корзину";
-      btn.onclick=e=>{e.stopPropagation();addToCart(p)};
+      btn.onclick=e=>{
+        e.stopPropagation();
+        addToCart(p);
+        flyToCart(img); // анимация при добавлении
+      };
       controls.appendChild(btn);
     }
 
@@ -282,12 +306,14 @@ function openModal(p){
 modalClose.onclick=()=>modal.style.display="none";
 modal.onclick=e=>{if(e.target===modal)modal.style.display="none"};
 
+// ================== ТЕКУЩИЙ СПИСОК ==================
 function getCurrentList(){
   if(inCartScreen)return cart.map(i=>i.product);
   if(currentCategory==="Главная")return products;
   return products.filter(p=>p.category===currentCategory);
 }
 
+// ================== КАТЕГОРИИ ==================
 categories.querySelectorAll("div").forEach(c=>{
   c.onclick=()=>{
     inCartScreen=false;
@@ -306,6 +332,12 @@ mainTitle.onclick=()=>{
 cartButton.onclick=()=>{
   inCartScreen=true;
   renderProducts(cart.map(i=>i.product));
+};
+
+// ================== ПОИСК ==================
+searchInput.oninput=()=>{
+  const val=searchInput.value.toLowerCase();
+  renderProducts(getCurrentList().filter(p=>p.name.toLowerCase().includes(val)));
 };
 
 // ================== СТАРТ ==================

@@ -5,7 +5,10 @@ body{
   background-image:url("https://i.pinimg.com/originals/6d/7c/65/6d7c65bbef77082a19ff4a2a2327d50d.jpg");
   background-size:cover;
   background-position:center;
+  background-repeat:no-repeat;
+  background-attachment:fixed; /* фиксируем фон */
   overflow-x:hidden;
+  transition: background 0.3s;
 }
 
 /* Шапка */
@@ -138,10 +141,8 @@ body{
   padding:12px; 
   border-radius:10px;
 }
-.modal-desc p{margin:0;}
-.modal-desc p span:last-child{display:block; margin-top:8px; font-weight:500;}
 
-/* ================== ФОРМА ОФОРМЛЕНИЯ ЗАКАЗА ================== */
+/* ================== ФОРМА ЗАКАЗА ================== */
 .order-modal{
   display:none;
   position:fixed;
@@ -163,18 +164,6 @@ body{
   flex-direction:column;
   position:relative;
 }
-
-/* Заголовок формы */
-.order-modal h2{
-  text-align:center;
-  font-size:20px;
-  font-weight:bold;
-  text-transform:uppercase;
-  margin-top:0;
-  margin-bottom:12px;
-}
-
-/* Крестик закрытия */
 .order-modal-close{
   position:absolute;
   top:10px;
@@ -185,59 +174,18 @@ body{
   cursor:pointer;
   transition: color 0.2s;
 }
-.order-modal-close:hover{
-  color:#ff5555;
-}
-
-/* Форма внутри модалки */
-.order-modal form {
-  display:flex;
-  flex-direction:column;
-  gap:4px;
-}
-
-.order-modal label {
-  font-size:14px;
-  color:#fff;
-  margin-bottom:2px;
-  display:block;
-}
-
+.order-modal-close:hover{color:#ff5555;}
+.order-modal form {display:flex; flex-direction:column; gap:4px;}
+.order-modal label {font-size:14px; color:#fff; margin-bottom:2px; display:block;}
 .order-modal input, .order-modal select {
-  padding:10px;
-  border-radius:6px;
-  border:none;
-  font-size:14px;
-  outline:none;
-  height:36px;
-  width:100%;
-  box-sizing:border-box;
-  caret-color: black; /* черный курсор только в форме */
+  padding:10px; border-radius:6px; border:none; font-size:14px; outline:none; height:36px; width:100%;
+  box-sizing:border-box; caret-color: black;
 }
-
-/* Итоговая сумма под формой слева */
-#orderSum {
-  color:#aaa;
-  font-weight:500;
-  text-align:left;
-  margin:6px 0 8px 0;
-}
-
-/* Кнопка оплаты */
+#orderSum {color:#aaa; font-weight:500; text-align:left; margin:6px 0 8px 0;}
 .order-modal button {
-  padding:12px 0;
-  border-radius:10px;
-  border:none;
-  background:#333;
-  color:white;
-  font-size:16px;
-  cursor:pointer;
-  transition: background 0.2s;
+  padding:12px 0; border-radius:10px; border:none; background:#333; color:white; font-size:16px; cursor:pointer; transition: background 0.2s;
 }
-
-.order-modal button:hover {
-  background:#555;
-}
+.order-modal button:hover {background:#555;}
 
 /* Футер */
 .footer-buttons{position:relative; display:flex; gap:12px; justify-content:center; margin:12px 0;}
@@ -248,17 +196,15 @@ body{
 .checkout-btn{position:relative; margin:20px auto; display:none; padding:14px 20px; border-radius:20px; border:none; background:#333; color:white; font-size:16px; cursor:pointer; text-align:center;}
 
 /* DaData подсказки */
-.suggestions-suggestions {
-  background-color: #333 !important;
-  color: #fff !important;
-  z-index: 999999 !important;
-}
-.suggestions-item {
-  background-color: #333 !important; 
-  color: #fff !important;
-  cursor: pointer;
-}
-.suggestions-item:hover {
-  background-color: #555 !important; 
-  color: #fff !important;
+.suggestions-suggestions {background-color: #333 !important; color: #fff !important; z-index: 999999 !important;}
+.suggestions-item {background-color: #333 !important; color: #fff !important; cursor: pointer;}
+.suggestions-item:hover {background-color: #555 !important; color: #fff !important;}
+
+/* Летящая миниатюра */
+.fly-img{
+  position:fixed;
+  z-index:1000;
+  border-radius:50%;
+  transition: all 0.6s ease-in-out;
+  pointer-events:none;
 }

@@ -183,9 +183,9 @@ body{
 /* Кнопка оформления заказа */
 .checkout-btn{position:relative; margin:20px auto; display:none; padding:14px 20px; border-radius:20px; border:none; background:#333; color:white; font-size:16px; cursor:pointer; text-align:center;}
 
-/* DaData подсказки на темный фон с белым текстом */
+/* DaData подсказки */
 .suggestions-suggestions {
-  background-color: #2e2e2e !important;  /* фон всей панели */
+  background-color: #333 !important;  /* тёмный фон панели */
   border: 1px solid #555 !important;
   border-radius: 8px;
   max-height: 200px;
@@ -196,17 +196,17 @@ body{
 .suggestions-item {
   padding: 8px 12px !important;
   cursor: pointer !important;
-  color: white !important;             /* белый текст */
-  background-color: #2e2e2e !important; /* фон каждой строки */
+  color: #fff !important;              /* белый текст */
+  background-color: #333 !important;
 }
 
 .suggestions-item:hover {
-  background-color: #444 !important;  /* подсветка при наведении */
-  color: white !important;
+  background-color: #555 !important;
+  color: #fff !important;
 }
 
 .suggestions-item span {
-  color: white !important;  /* белый текст внутри span */
+  color: #fff !important;
 }
 
 

@@ -154,7 +154,9 @@ checkoutButton.onclick=()=>{if(cart.length===0) return alert("Корзина п�
 orderClose.onclick=()=>orderModal.style.display="none";
 orderModal.onclick=e=>{if(e.target===orderModal) orderModal.style.display="none";}
 
-// ================== ОТПРАВКА ЗАКАЗА + СОХРАНЕНИЕ ВСЕХ ЗАКАЗОВ ==================
+// ================== ОТПРАВКА ЗАКАЗА В GOOGLE SHEET ==================
+const SHEETDB_API = "https://sheetdb.io/api/v1/1vejwdm4odk54";
+
 orderForm.onsubmit = e => {
   e.preventDefault();
   if(cart.length===0) return alert("Корзина пуста!");
@@ -165,26 +167,24 @@ orderForm.onsubmit = e => {
     address: fd.get("address"),
     delivery: fd.get("delivery"),
     phone: fd.get("phone"),
-    items: cart.map(i=>({id:i.product?.id, name:i.product?.name, price:i.product?.price, count:i.count})),
+    items: cart.map(i=> `${i.product?.name} x${i.count}`).join("; "),
     total: cart.reduce((s,i)=>s+i.count*(i.product?.price || i.price),0)
   };
 
-  // Сохраняем все заказы
-  let allOrders = JSON.parse(localStorage.getItem("allOrders") || "[]");
-  allOrders.push(order);
-  localStorage.setItem("allOrders", JSON.stringify(allOrders));
-
-  // Сохраняем последний заказ отдельно (для страницы оплаты)
-  localStorage.setItem("lastOrder", JSON.stringify(order));
-
-  // Уведомление и переход на оплату
-  alert("Заказ сохранён! Переходим к оплате...");
-  window.location.href = "payment.html";
-
-  // Очищаем корзину
-  cart = [];
-  renderProducts(getCurrentList());
-  orderModal.style.display="none";
+  fetch(SHEETDB_API, {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({data: order})
+  })
+  .then(res=>res.json())
+  .then(data=>{
+    alert("Заказ отправлен в таблицу!");
+    cart = [];
+    renderProducts(getCurrentList());
+    orderModal.style.display="none";
+    window.location.href = "payment.html"; // редирект на оплату
+  })
+  .catch(err=>alert("Ошибка отправки: "+err));
 };
 
 // ================== ПОИСК ==================

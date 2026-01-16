@@ -118,26 +118,26 @@ orderForm.onsubmit = e => {
   checkoutButton.disabled = true;
 
   const fd = new FormData(orderForm);
-  const itemsStr = cart.map(i => `${i.product.name} x${i.count}`).join(", ");
+  let itemsStr = cart.map(i => `${i.product.name} x${i.count}`).join(", ");
 
   const orderData = {
     fullname: fd.get("fullname"),
     address: fd.get("address"),
     delivery: fd.get("delivery"),
     phone: fd.get("phone"),
-    items: itemsStr,
-    total: cart.reduce((s,i)=>s+i.count*i.product.price,0)
+    items: itemsStr || "Корзина пуста",
+    total: cart.reduce((s,i)=>s + i.count*i.product.price,0)
   };
 
   emailjs.send("service_6drenuw", "template_90b82bq", orderData)
-    .then(response => {
+    .then(() => {
       localStorage.setItem("orderCompleted","true");
       cart = [];
       renderProducts(getCurrentList());
       orderModal.style.display = "none";
       checkoutButton.textContent = "Оформить заказ";
       checkoutButton.disabled = false;
-      window.location.href = "payment.html"; // окно оплаты
+      window.location.href = "payment.html"; 
     })
     .catch(err => {
       alert("Ошибка отправки: " + err.text);

@@ -141,7 +141,7 @@ body{
 .modal-desc p{margin:0;}
 .modal-desc p span:last-child{display:block; margin-top:8px; font-weight:500;}
 
-/* Модалка оформления заказа */
+/* ================== ФОРМА ОФОРМЛЕНИЯ ЗАКАЗА ================== */
 .order-modal{
   display:none;
   position:fixed;
@@ -159,24 +159,21 @@ body{
   width:90%;
   max-width:400px;
   color:white;
-  position:relative;
-}
-.order-modal-close{
-  position:absolute;
-  top:10px;
-  right:12px;
-  font-size:24px;
-  cursor:pointer;
+  display:flex;
+  flex-direction:column;
 }
 
 /* Форма */
 .order-modal form{
   display:flex;
   flex-direction:column;
-  gap:12px;
+  gap:8px; /* компактнее между полями */
 }
 .order-modal label{
-  font-size:14px; color:#fff;
+  font-size:14px;
+  color:#fff;
+  margin-bottom:4px; /* ближе к графам */
+  display:block;
 }
 .order-modal input, .order-modal select{
   padding:10px;
@@ -184,22 +181,20 @@ body{
   border:none;
   font-size:14px;
   outline:none;
-  height:40px;
+  height:38px;
   width:100%;
   box-sizing:border-box;
 }
-@media (max-width:480px){
-  .order-modal input[name="telegram"], .order-modal input[name="phone"]{
-    height:36px;
-    font-size:14px;
-  }
-}
+
+/* Итоговая сумма слева */
 #orderSum{
   color:#aaa;
-  margin:10px 0;
+  margin:8px 0;
   font-weight:500;
-  text-align:right;
+  text-align:left;
 }
+
+/* Кнопка оплаты */
 .order-modal button{
   padding:12px 0;
   border-radius:10px;
@@ -209,6 +204,7 @@ body{
   font-size:16px;
   cursor:pointer;
   transition: background 0.2s;
+  margin-top:6px;
 }
 .order-modal button:hover{
   background:#555;
@@ -223,6 +219,17 @@ body{
 .checkout-btn{position:relative; margin:20px auto; display:none; padding:14px 20px; border-radius:20px; border:none; background:#333; color:white; font-size:16px; cursor:pointer; text-align:center;}
 
 /* DaData подсказки */
-.suggestions-suggestions {background-color:#333!important; color:#fff!important; z-index:999999!important;}
-.suggestions-item {background-color:#333!important; color:#fff!important; cursor:pointer;}
-.suggestions-item:hover {background-color:#555!important; color:#fff!important;}
+.suggestions-suggestions {
+  background-color: #333 !important;
+  color: #fff !important;
+  z-index: 999999 !important;
+}
+.suggestions-item {
+  background-color: #333 !important; 
+  color: #fff !important;
+  cursor: pointer;
+}
+.suggestions-item:hover {
+  background-color: #555 !important; 
+  color: #fff !important;
+}

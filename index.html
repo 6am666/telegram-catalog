@@ -10,7 +10,11 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/suggestions-jquery/dist/css/suggestions.min.css">
 <script src="https://cdn.jsdelivr.net/npm/suggestions-jquery/dist/js/jquery.suggestions.min.js"></script>
 
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<!-- EmailJS SDK -->
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+<script>
+  emailjs.init("0K_N35aYR37FA5PAl"); // Public Key
+</script>
 </head>
 <body>
 
@@ -32,7 +36,6 @@
   </div>
 
   <input type="text" class="search" placeholder="Мне нужно..." id="searchInput">
-
   <div class="products" id="products"></div>
   <div class="cart-total" id="cartTotal"></div>
 

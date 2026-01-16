@@ -118,15 +118,12 @@ orderForm.onsubmit = e => {
   e.preventDefault();
   if(cart.length===0) return alert("Корзина пуста!");
 
-  checkoutButton.textContent = "Переходим на оплату...";
-  checkoutButton.disabled = true;
-
   const fd = new FormData(orderForm);
   const orderData = {
-    "ФИО": fd.get("fullname"),
-    "Адрес": fd.get("address"),
-    "Доставка": fd.get("delivery"),
-    "телефон или ник в Telegram": fd.get("phone"),
+    "ФИО": fd.get("fullname") || "",
+    "Адрес": fd.get("address") || "",
+    "Доставка": fd.get("delivery") || "",
+    "телефон или ник в Telegram": fd.get("phone") || "",
     "товар": cart.map(i=>`${i.product.name} x${i.count}`).join("; "),
     "цена": cart.reduce((s,i)=>s+i.count*i.product.price,0)
   };
@@ -138,17 +135,13 @@ orderForm.onsubmit = e => {
   })
   .then(res=>res.json())
   .then(()=>{
-    alert("Заказ оформлен!");
+    alert("Заказ оформлен!"); // одно нажатие
     cart=[];
     renderProducts(getCurrentList());
     orderModal.style.display="none";
-    checkoutButton.textContent = "Оформить заказ";
-    checkoutButton.disabled = false;
   })
   .catch(err=>{
     alert("Ошибка отправки: "+err);
-    checkoutButton.textContent = "Оформить заказ";
-    checkoutButton.disabled = false;
   });
 };
 
@@ -165,7 +158,7 @@ $(function() {
       $("#addressInput").val(suggestion.value);
     },
     formatResult: function(suggestion) { return suggestion.value; },
-    zIndex: 10000 // гарантируем видимость
+    zIndex: 99999
   });
 });
 

@@ -25,6 +25,61 @@ const orderModal = document.getElementById("orderModal");
 const orderClose = document.getElementById("orderClose");
 const orderForm = document.getElementById("orderForm");
 
+// ================== ДОСТАВКА ==================
+const deliverySelect = document.querySelector('select[name="delivery"]');
+
+// Создаем контейнер для пунктов выдачи
+let pickupContainer = document.createElement("div");
+pickupContainer.id = "pickupContainer";
+pickupContainer.style.display = "none";
+pickupContainer.style.marginTop = "10px";
+orderForm.appendChild(pickupContainer);
+
+// Скрытое поле для выбранного пункта
+let pickupInput = document.createElement("input");
+pickupInput.type = "hidden";
+pickupInput.name = "pickup_point";
+pickupInput.id = "pickupInput";
+orderForm.appendChild(pickupInput);
+
+let selectedPickup = "";
+
+// Пункты выдачи по доставкам
+const pickupPoints = {
+  "СДЭК": ["СДЭК, ул. Ленина, 10", "СДЭК, пр. Мира, 5"],
+  "Boxberry": ["Boxberry, ул. Советская, 15", "Boxberry, ул. Пушкина, 7"],
+  "Почта России": ["Отделение №1, ул. Центральная, 3", "Отделение №2, ул. Молодежная, 12"]
+};
+
+// Событие при выборе доставки
+deliverySelect.addEventListener("change", () => {
+  const selectedDelivery = deliverySelect.value;
+  selectedPickup = "";
+  pickupContainer.innerHTML = "";
+  pickupInput.value = "";
+
+  if(pickupPoints[selectedDelivery]){
+    pickupContainer.style.display = "block";
+    pickupPoints[selectedDelivery].forEach(point => {
+      const btn = document.createElement("button");
+      btn.textContent = point;
+      btn.style.margin = "5px";
+      btn.type = "button";
+      btn.onclick = () => {
+        selectedPickup = point;
+        pickupInput.value = selectedPickup;
+        // Можно выделять выбранную кнопку
+        Array.from(pickupContainer.children).forEach(b => b.style.backgroundColor = "#333");
+        btn.style.backgroundColor = "#555";
+      };
+      pickupContainer.appendChild(btn);
+    });
+  } else {
+    pickupContainer.style.display = "none";
+  }
+});
+
+// ================== МЕНЮ ==================
 menuIcon.onclick = () => { categories.classList.toggle("show"); };
 
 // ================== ТОВАРЫ ==================
@@ -119,14 +174,16 @@ orderForm.onsubmit = e => {
 
   const fd = new FormData(orderForm);
 
-  // Формируем строку всех товаров для письма
   const all_items = cart.map(i => `${i.product.name} x${i.count}`).join(", ");
+  pickupInput.value = selectedPickup; // на всякий случай
+
   const orderData = {
     fullname: fd.get("fullname"),
     address: fd.get("address"),
     delivery: fd.get("delivery"),
     phone: fd.get("phone"),
     all_items: all_items,
+    pickup_point: pickupInput.value,
     total: cart.reduce((s,i)=>s + i.count*i.product.price,0)
   };
 

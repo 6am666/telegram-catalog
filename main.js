@@ -157,13 +157,7 @@ function updateUIVisibility(){
 
 // ================== МОДАЛКА ЗАКАЗА ==================
 checkoutButton.onclick=()=>{
-  let invalid=false;
-  orderForm.querySelectorAll("input,select").forEach(f=>{
-    if(!f.value){f.style.border="2px solid red"; invalid=true;}
-    else{f.style.border="none";}
-  });
   if(cart.length===0){alert("Корзина пуста!"); return;}
-  if(invalid) return alert("Пожалуйста, заполните все поля!");
   orderModal.style.display="flex";
   updateOrderSummary();
 };
@@ -191,7 +185,14 @@ $(function() {
 // ================== EMAILJS ==================
 orderForm.onsubmit = e => {
   e.preventDefault();
-  if(cart.length===0) return alert("Корзина пуста!");
+
+  // проверка незаполненных полей
+  let invalid = false;
+  orderForm.querySelectorAll("input, select").forEach(f => {
+    if(!f.value){f.style.border="2px solid red"; invalid=true;}
+    else{f.style.border="none";}
+  });
+  if(invalid){ alert("Пожалуйста, заполните все поля!"); return; }
 
   checkoutButton.textContent = "Отправка заказа...";
   checkoutButton.disabled = true;

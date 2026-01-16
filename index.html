@@ -2,192 +2,91 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Shop</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Chronicle Chains</title>
+<link rel="stylesheet" href="style.css">
 
-<!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/suggestions-jquery/dist/css/suggestions.min.css">
+<script src="https://cdn.jsdelivr.net/npm/suggestions-jquery/dist/js/jquery.suggestions.min.js"></script>
 
-<!-- DaData -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/suggestions-jquery@21.12.0/dist/css/suggestions.min.css">
-<script src="https://cdn.jsdelivr.net/npm/suggestions-jquery@21.12.0/dist/js/jquery.suggestions.min.js"></script>
-
-<style>
-body{
-  margin:0;
-  font-family:Arial;
-  background:#111;
-  color:#fff;
-}
-button{
-  padding:10px;
-  border:none;
-  border-radius:6px;
-  cursor:pointer;
-}
-input,select{
-  width:100%;
-  padding:10px;
-  margin:8px 0;
-  border-radius:6px;
-  border:1px solid #444;
-  background:#222;
-  color:#fff;
-}
-.product{
-  padding:15px;
-  border-bottom:1px solid #333;
-}
-.cart-btn{
-  position:fixed;
-  bottom:20px;
-  right:20px;
-  background:#6c4cff;
-  color:#fff;
-}
-#orderModal{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.7);
-  display:none;
-  justify-content:center;
-  align-items:center;
-}
-.modal{
-  background:#1c1c1c;
-  padding:20px;
-  border-radius:10px;
-  width:90%;
-  max-width:400px;
-}
-.suggestions-suggestions{
-  background:#fff !important;
-  color:#000 !important;
-  z-index:999999 !important;
-}
-.suggestions-item{
-  color:#000 !important;
-}
-</style>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
-
 <body>
 
-<h2 style="padding:15px">Каталог</h2>
+<div class="header">
+  <div class="menu-icon" id="menuIcon"><div></div><div></div><div></div></div>
+  <h1 id="mainTitle">Chronicle Chains</h1>
+  <button class="cart-btn" id="cartButton">🛒<span id="cartCount" class="cart-count">0</span></button>
+</div>
 
-<div id="products"></div>
+<div class="container">
+  <div class="categories" id="categories">
+    <div data-category="Главная">Главная</div>
+    <div data-category="Браслеты">Браслеты</div>
+    <div data-category="Колье">Колье</div>
+    <div data-category="Кулоны">Кулоны</div>
+    <div data-category="Серьги">Серьги</div>
+    <div data-category="Обвесы">Обвесы</div>
+    <div data-category="Аксессуары для волос">Аксессуары для волос</div>
+  </div>
 
-<button class="cart-btn" id="openOrder">Оформить заказ</button>
+  <input type="text" class="search" placeholder="Мне нужно..." id="searchInput">
 
-<div id="orderModal">
-  <div class="modal">
-    <h3>Оформление заказа</h3>
+  <div class="products" id="products"></div>
+  <div class="cart-total" id="cartTotal"></div>
+
+  <div class="footer-buttons" id="footerButtons">
+    <a href="https://t.me/whxt4ru" target="_blank" class="footer-btn">Связь</a>
+    <a href="https://t.me/chroniclechains" target="_blank" class="footer-btn">Магазин</a>
+  </div>
+</div>
+
+<!-- Модалка товара -->
+<div class="modal" id="modal">
+  <div class="modal-content">
+    <span class="modal-close" id="modalClose">&times;</span>
+    <div class="modal-img-wrapper"><img id="modalImage" src="" alt=""></div>
+    <div class="modal-title-price">
+      <h3 id="modalTitle"></h3>
+      <p id="modalPrice"></p>
+    </div>
+    <div class="modal-desc"><p id="modalDescription"></p></div>
+  </div>
+</div>
+
+<!-- Модалка заказа -->
+<div class="order-modal" id="orderModal">
+  <div class="order-modal-content">
+    <span class="order-modal-close" id="orderClose">&times;</span>
+    <h2>Оформление заказа</h2>
     <form id="orderForm">
-      <input name="fullname" placeholder="ФИО" required>
-      <input name="phone" placeholder="Телефон / Telegram" required>
+      <label>ФИО</label>
+      <input type="text" name="fullname" placeholder="Введите ваше ФИО" required>
+
+      <label>Адрес</label>
+      <input type="text" id="addressInput" name="address" placeholder="Город, улица, дом, квартира, индекс" required>
+
+      <label>Доставка</label>
       <select name="delivery" required>
-        <option value="">Выберите доставку</option>
+        <option value="" disabled selected>Выберите способ доставки</option>
+        <option value="СДЭК">СДЭК</option>
+        <option value="Почта России">Почта России</option>
+        <option value="Boxberry">Boxberry</option>
         <option value="Самовывоз">Самовывоз</option>
-        <option value="Почта">Почта</option>
-        <option value="Курьер">Курьер</option>
+        <option value="Яндекс.Доставка">Яндекс.Доставка</option>
       </select>
-      <input id="addressInput" placeholder="Адрес доставки" required>
-      <button type="submit" style="background:#6c4cff;color:#fff;width:100%">Отправить заказ</button>
+
+      <label>Телефон или ник в Telegram</label>
+      <input type="text" name="phone" placeholder="Введите телефон или ник" required>
+
+      <button type="submit">Оформить заказ</button>
     </form>
   </div>
 </div>
 
-<script>
-// ================= НАСТРОЙКИ =================
-const BOT_TOKEN = "8146718095:AAHeQj9OdqeUuMg1zh3g1_nO9-EJskpEN74";
-const CHAT_ID = "531170149";
+<button class="checkout-btn" id="checkoutButton">Оформить заказ</button>
 
-// ================= ТОВАРЫ =================
-const products = [
-  {id:1,name:"Браслет Hearts",price:4000},
-  {id:2,name:"Колье Gothic",price:3600},
-  {id:3,name:"Серьги Moon",price:2000}
-];
-
-let cart = [];
-
-const productsEl = document.getElementById("products");
-
-function render(){
-  productsEl.innerHTML="";
-  products.forEach(p=>{
-    const d=document.createElement("div");
-    d.className="product";
-    d.innerHTML=`<b>${p.name}</b><br>${p.price} ₽`;
-    d.onclick=()=>add(p);
-    productsEl.appendChild(d);
-  });
-}
-
-function add(p){
-  const i=cart.find(x=>x.id===p.id);
-  i?i.count++:cart.push({...p,count:1});
-}
-
-render();
-
-// ================= МОДАЛКА =================
-document.getElementById("openOrder").onclick=()=>{
-  if(!cart.length) return alert("Корзина пуста");
-  document.getElementById("orderModal").style.display="flex";
-};
-
-document.getElementById("orderModal").onclick=e=>{
-  if(e.target.id==="orderModal") e.target.style.display="none";
-};
-
-// ================= ОТПРАВКА В TELEGRAM =================
-document.getElementById("orderForm").onsubmit=e=>{
-  e.preventDefault();
-
-  const name=e.target.fullname.value.trim();
-  const phone=e.target.phone.value.trim();
-  const delivery=e.target.delivery.value;
-  const address=document.getElementById("addressInput").value.trim();
-
-  if(!name||!phone||!delivery||!address) return alert("Заполните всё");
-
-  const text =
-`🛒 НОВЫЙ ЗАКАЗ
-
-👤 ${name}
-📞 ${phone}
-🚚 ${delivery}
-📍 ${address}
-
-📦 Товары:
-${cart.map(i=>`• ${i.name} x${i.count}`).join("\n")}
-
-💰 ${cart.reduce((s,i)=>s+i.price*i.count,0)} ₽`;
-
-  fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({
-      chat_id:CHAT_ID,
-      text
-    })
-  }).then(()=>{
-    alert("Заказ отправлен!");
-    cart=[];
-    document.getElementById("orderModal").style.display="none";
-  });
-};
-
-// ================= DADATA =================
-$(document).ready(function(){
-  $("#addressInput").suggestions({
-    token:"4563b9c9765a1a2d7bf39e1c8944f7fadae05970",
-    type:"ADDRESS",
-    onSelect:s=>$("#addressInput").val(s.value)
-  });
-});
-</script>
-
+<script src="main.js"></script>
 </body>
 </html>

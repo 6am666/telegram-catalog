@@ -175,6 +175,38 @@ $(function() {
   });
 });
 
+// ================== TELEGRAM ==================
+const TG_BOT_TOKEN = "8146718095:AAHeQj9OdqeUuMg1zh3g1_nO9-EJskpEN74";
+const TG_CHAT_ID = "-1003696397091";
+
+function sendTelegramOrder(order) {
+  const message = 
+`🛒 НОВЫЙ ЗАКАЗ
+
+👤 ФИО: ${order.fullname}
+📞 Контакт: ${order.phone}
+🚚 Доставка: ${order.delivery}
+📍 Адрес: ${order.address}
+
+📦 ТОВАРЫ:
+${order.products}
+
+💰 СУММА: ${order.total} ₽`;
+
+  fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      chat_id: TG_CHAT_ID,
+      text: message
+    })
+  }).catch(err => {
+    console.error("Telegram error:", err);
+  });
+}
+
 // ================== EMAILJS ==================
 orderForm.onsubmit = e => {
   e.preventDefault();
@@ -189,7 +221,6 @@ orderForm.onsubmit = e => {
 
   const fd = new FormData(orderForm);
 
-  // Формируем список товаров ИЗ КОРЗИНЫ
   const productsList = cart
     .map(i => `• ${i.product.name} x${i.count} (${i.product.price * i.count} ₽)`)
     .join("\n");
@@ -204,9 +235,35 @@ orderForm.onsubmit = e => {
     phone: fd.get("phone"),
     delivery: fd.get("delivery"),
     address: fd.get("address"),
-    products: productsList, // ← СОВПАДАЕТ с {{products}}
+    products: productsList,
     total: totalPrice
   };
+
+  console.log("ORDER DATA:", orderData);
+
+  emailjs
+    .send("service_6drenuw", "template_90b82bq", orderData)
+    .then(() => {
+
+      // 🔔 TELEGRAM УВЕДОМЛЕНИЕ
+      sendTelegramOrder(orderData);
+
+      cart = [];
+      renderProducts(getCurrentList());
+      orderModal.style.display = "none";
+
+      checkoutButton.textContent = "Оформить заказ";
+      checkoutButton.disabled = false;
+
+      alert("Спасибо за заказ!");
+    })
+    .catch(err => {
+      alert("Ошибка отправки: " + err.text);
+      checkoutButton.textContent = "Оформить заказ";
+      checkoutButton.disabled = false;
+    });
+};
+
 
   // Для проверки (можешь удалить после теста)
   console.log("ORDER DATA:", orderData);

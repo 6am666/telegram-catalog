@@ -158,12 +158,25 @@ orderForm.onsubmit = e=>{
       updateOrderSum();
       orderModal.style.display="none";
       isSubmitting=false;
+      document.activeElement.blur(); // скрыть клавиатуру
       alert("Заказ принят!");
     })
     .catch(()=>{
       isSubmitting=false;
       alert("Ошибка отправки");
     });
+};
+
+// ================== КНОПКА ЗАКРЫТИЯ + ФОН ==================
+orderClose.onclick = () => {
+  orderModal.style.display = "none";
+  document.activeElement.blur();
+};
+orderModal.onclick = e => {
+  if(e.target===orderModal){
+    orderModal.style.display = "none";
+    document.activeElement.blur();
+  }
 };
 
 // ================== ОБНОВЛЕНИЕ КОРЗИНЫ ==================

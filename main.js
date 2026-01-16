@@ -109,7 +109,7 @@ checkoutButton.onclick=()=>{if(cart.length===0) return alert("Корзина п�
 orderClose.onclick=()=>orderModal.style.display="none";
 orderModal.onclick=e=>{if(e.target===orderModal) orderModal.style.display="none";}
 
-// ================== ОТПРАВКА ЧЕРЕЗ EMAILJS + РЕДИРЕКТ ==================
+// ================== EMAILJS ==================
 orderForm.onsubmit = e => {
   e.preventDefault();
   if(cart.length===0) return alert("Корзина пуста!");
@@ -118,28 +118,26 @@ orderForm.onsubmit = e => {
   checkoutButton.disabled = true;
 
   const fd = new FormData(orderForm);
+  const itemsStr = cart.map(i => `${i.product.name} x${i.count}`).join(", ");
+
   const orderData = {
     fullname: fd.get("fullname"),
     address: fd.get("address"),
     delivery: fd.get("delivery"),
     phone: fd.get("phone"),
-    items: cart.map(i => `${i.product.name} x${i.count}`).join("; "),
+    items: itemsStr,
     total: cart.reduce((s,i)=>s+i.count*i.product.price,0)
   };
 
   emailjs.send("service_6drenuw", "template_90b82bq", orderData)
     .then(response => {
-      // Флаг для сообщения "Спасибо"
-      localStorage.setItem("orderCompleted", "true");
-
+      localStorage.setItem("orderCompleted","true");
       cart = [];
       renderProducts(getCurrentList());
       orderModal.style.display = "none";
       checkoutButton.textContent = "Оформить заказ";
       checkoutButton.disabled = false;
-
-      // Редирект на окно оплаты
-      window.location.href = "payment.html";
+      window.location.href = "payment.html"; // окно оплаты
     })
     .catch(err => {
       alert("Ошибка отправки: " + err.text);
@@ -148,10 +146,9 @@ orderForm.onsubmit = e => {
     });
 };
 
-// ================== ПОКАЗ СПАСИБО ==================
+// ================== СПАСИБО ==================
 window.addEventListener("DOMContentLoaded", () => {
-  const orderCompleted = localStorage.getItem("orderCompleted");
-  if(orderCompleted === "true"){
+  if(localStorage.getItem("orderCompleted")==="true"){
     alert("Спасибо за заказ!");
     localStorage.removeItem("orderCompleted");
   }

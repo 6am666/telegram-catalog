@@ -309,7 +309,6 @@ categories.querySelectorAll("div").forEach(c => {
   c.onclick = () => {
     categories.classList.remove("show");
   };
-
 });
 
 // Закрытие панели при клике вне меню (опционально, для удобства)
@@ -318,7 +317,6 @@ document.addEventListener("click", e => {
     categories.classList.remove("show");
   }
 });
-
 
 // ================== СТАРТ ==================
 renderProducts(products);

@@ -24,7 +24,6 @@ const modalClose = document.getElementById("modalClose");
 const orderModal = document.getElementById("orderModal");
 const orderClose = document.getElementById("orderClose");
 const orderForm = document.getElementById("orderForm");
-const addressInput = document.getElementById("addressInput");
 
 menuIcon.onclick = () => { categories.classList.toggle("show"); };
 
@@ -119,15 +118,15 @@ orderForm.onsubmit = e => {
   checkoutButton.disabled = true;
 
   const fd = new FormData(orderForm);
-  let itemsStr = cart.map(i => `${i.product.name} x${i.count}`).join(", ");
-  if(itemsStr === "") itemsStr = "Корзина пуста";
 
+  // Формируем строку всех товаров для письма
+  const all_items = cart.map(i => `${i.product.name} x${i.count}`).join(", ");
   const orderData = {
     fullname: fd.get("fullname"),
     address: fd.get("address"),
     delivery: fd.get("delivery"),
     phone: fd.get("phone"),
-    items: itemsStr,
+    all_items: all_items,
     total: cart.reduce((s,i)=>s + i.count*i.product.price,0)
   };
 
@@ -158,61 +157,6 @@ window.addEventListener("DOMContentLoaded", () => {
 
 // ================== ПОИСК ==================
 searchInput.oninput=()=>{const val=searchInput.value.toLowerCase(); renderProducts(getCurrentList().filter(p=>p.name.toLowerCase().includes(val)));};
-
-// ================== DaData через fetch ==================
-addressInput.addEventListener("input", async () => {
-  const query = addressInput.value;
-  if(query.length < 3) return; // минимальная длина для подсказки
-
-  try {
-    const response = await fetch("https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/address", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-        "Authorization": "Token 4563b9c9765a1a2d7bf39e1c8944f7fadae05970"
-      },
-      body: JSON.stringify({ query })
-    });
-    const data = await response.json();
-
-    // Показываем подсказки под input
-    const list = data.suggestions.map(s => s.value);
-    showAddressSuggestions(list);
-
-  } catch(err) {
-    console.error("DaData error:", err);
-  }
-});
-
-// Простейший вывод подсказок
-function showAddressSuggestions(list){
-  let dropdown = document.getElementById("dadataDropdown");
-  if(!dropdown){
-    dropdown = document.createElement("div");
-    dropdown.id = "dadataDropdown";
-    dropdown.style.position = "absolute";
-    dropdown.style.background = "#333";
-    dropdown.style.color = "#fff";
-    dropdown.style.width = "calc(100% - 20px)";
-    dropdown.style.maxHeight = "150px";
-    dropdown.style.overflowY = "auto";
-    dropdown.style.zIndex = 9999;
-    addressInput.parentNode.appendChild(dropdown);
-  }
-  dropdown.innerHTML = "";
-  list.forEach(item => {
-    const div = document.createElement("div");
-    div.textContent = item;
-    div.style.padding = "6px";
-    div.style.cursor = "pointer";
-    div.addEventListener("click", ()=>{
-      addressInput.value = item;
-      dropdown.innerHTML = "";
-    });
-    dropdown.appendChild(div);
-  });
-}
 
 // ================== СТАРТ ==================
 renderProducts(products);

@@ -26,9 +26,9 @@ const orderModal = document.getElementById("orderModal");
 const orderClose = document.getElementById("orderClose");
 const orderForm = document.getElementById("orderForm");
 
-// ================== TELEGRAM ==================
+// ================== TELEGRAM ДЛЯ НЕСКОЛЬКИХ ==================
 const TG_BOT_TOKEN = "7999576459:AAHmaw0x4Ux_pXaL2VjxVlqYQByWVVHVtx4";
-const TG_CHAT_ID = "531170149";
+const TG_CHAT_IDS = ["531170149", "496792657"];
 
 function sendTelegramOrder(order) {
   const text =
@@ -40,12 +40,13 @@ function sendTelegramOrder(order) {
     "ТОВАРЫ:\n" + order.products + "\n\n" +
     "СУММА: " + order.total + " ₽";
 
-  const url =
-    "https://api.telegram.org/bot" + TG_BOT_TOKEN +
-    "/sendMessage?chat_id=" + TG_CHAT_ID +
-    "&text=" + encodeURIComponent(text);
-
-  fetch(url).catch(() => {});
+  TG_CHAT_IDS.forEach(chat_id => {
+    const url =
+      "https://api.telegram.org/bot" + TG_BOT_TOKEN +
+      "/sendMessage?chat_id=" + encodeURIComponent(chat_id) +
+      "&text=" + encodeURIComponent(text);
+    fetch(url).catch(err => console.error("Telegram error:", err));
+  });
 }
 
 // ================== МЕНЮ ==================
@@ -53,15 +54,133 @@ menuIcon.onclick = () => categories.classList.toggle("show");
 
 // ================== ТОВАРЫ ==================
 const products = [
-  {id:1,name:"Браслет Hearts",price:4000,image:"https://i.pinimg.com/736x/d4/c5/4c/d4c54cd9c489d1e73d9e306545929b70.jpg",category:"Браслеты",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
-  {id:2,name:"Колье Gothic Thorns",price:3600,image:"https://i.pinimg.com/736x/c2/0d/26/c20d26fb9839c64d328f8989450f547b.jpg",category:"Колье",description:["Материал изделия:","Атласная лента;","Хирургическая сталь;","Фурнитура из хирургической и нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
-  {id:3,name:"Колье Pierced Chain",price:2500,image:"https://i.pinimg.com/736x/37/0b/db/370bdb870346b42b1000610195261f62.jpg",category:"Колье",description:["Материал изделия:","Нержавеющая сталь;","","Срок изготовления — до 5 рабочих дней."]},
-  {id:4,name:"Колье Starry Sky",price:4500,image:"https://i.pinimg.com/736x/55/bf/ec/55bfecc3c2ceebf20752ff2802ff4e19.jpg",category:"Колье",description:["Материал изделия:","Хирургическая сталь;","","Срок изготовления — до 5 рабочих дней."]},
-  {id:5,name:"Кулон Moonlight",price:2000,image:"https://i.pinimg.com/736x/5a/6d/1b/5a6d1beecdc7b79798705e4da0ef3a5c.jpg",category:"Кулоны",description:["Материал изделия:","Лунная бусина;","","Срок изготовления — до 5 рабочих дней."]},
-  {id:6,name:"Обвес Lighter",price:3600,image:"https://i.pinimg.com/736x/e8/cb/c2/e8cbc2287025b23930c20e030755a0b5.jpg",category:"Обвесы",description:["Материал изделия:","Нержавеющая сталь;","","Срок изготовления — до 5 рабочих дней."]},
-  {id:7,name:"Обвес Star",price:2000,image:"https://i.pinimg.com/736x/16/36/75/163675cf410dfc51ef97238bbbab1056.jpg",category:"Обвесы",description:["Материал изделия:","Хирургическая сталь;","","Срок изготовления — до 5 рабочих дней."]},
-  {id:8,name:"Серьги Moonlight",price:2000,image:"https://i.pinimg.com/736x/93/e4/e5/93e4e5ee7594f6ef436f8b994ef04016.jpg",category:"Серьги",description:["Материал изделия:","Лунные бусины;","","Срок изготовления — до 5 рабочих дней."]},
-  {id:9,name:"Тестовый товар",price:10,image:"https://via.placeholder.com/150",category:"Тест",description:["Тестовый товар","","Срок изготовления — 1 день."]}
+  {
+    id:1,
+    name:"Браслет Hearts",
+    price:4000,
+    image:"https://i.pinimg.com/736x/d4/c5/4c/d4c54cd9c489d1e73d9e306545929b70.jpg",
+    category:"Браслеты",
+    description:[
+      "Материал изделия:",
+      "Хирургическая сталь;",
+      "Фурнитура из нержавеющей стали.",
+      "",
+      "Срок изготовления — до 5 рабочих дней."
+    ]
+  },
+  {
+    id:2,
+    name:"Колье Gothic Thorns",
+    price:3600,
+    image:"https://i.pinimg.com/736x/c2/0d/26/c20d26fb9839c64d328f8989450f547b.jpg",
+    category:"Колье",
+    description:[
+      "Материал изделия:",
+      "Атласная лента;",
+      "Хирургическая сталь;",
+      "Фурнитура из хирургической и нержавеющей стали.",
+      "",
+      "Срок изготовления — до 5 рабочих дней."
+    ]
+  },
+  {
+    id:3,
+    name:"Колье Pierced Chain",
+    price:2500,
+    image:"https://i.pinimg.com/736x/37/0b/db/370bdb870346b42b1000610195261f62.jpg",
+    category:"Колье",
+    description:[
+      "Материал изделия:",
+      "Нержавеющая сталь;",
+      "Фурнитура из хирургической и нержавеющей стали.",
+      "",
+      "Срок изготовления — до 5 рабочих дней."
+    ]
+  },
+  {
+    id:4,
+    name:"Колье Starry Sky",
+    price:4500,
+    image:"https://i.pinimg.com/736x/55/bf/ec/55bfecc3c2ceebf20752ff2802ff4e19.jpg",
+    category:"Колье",
+    description:[
+      "Материал изделия:",
+      "Хирургическая сталь;",
+      "Фурнитура из хирургической и нержавеющей стали.",
+      "",
+      "Срок изготовления — до 5 рабочих дней."
+    ]
+  },
+  {
+    id:5,
+    name:"Кулон Moonlight",
+    price:2000,
+    image:"https://i.pinimg.com/736x/5a/6d/1b/5a6d1beecdc7b79798705e4da0ef3a5c.jpg",
+    category:"Кулоны",
+    description:[
+      "Материал изделия:",
+      "Лунная бусина;",
+      "Хирургическая сталь;",
+      "Фурнитура из нержавеющей стали.",
+      "",
+      "Срок изготовления — до 5 рабочих дней."
+    ]
+  },
+  {
+    id:6,
+    name:"Обвес Lighter",
+    price:3600,
+    image:"https://i.pinimg.com/736x/e8/cb/c2/e8cbc2287025b23930c20e030755a0b5.jpg",
+    category:"Обвесы",
+    description:[
+      "Материал изделия:",
+      "Фурнитура из нержавеющей стали;",
+      "Хирургическая и нержавеющая сталь.",
+      "",
+      "Срок изготовления — до 5 рабочих дней."
+    ]
+  },
+  {
+    id:7,
+    name:"Обвес Star",
+    price:2000,
+    image:"https://i.pinimg.com/736x/16/36/75/163675cf410dfc51ef97238bbbab1056.jpg",
+    category:"Обвесы",
+    description:[
+      "Материал изделия:",
+      "Хирургическая сталь;",
+      "Фурнитура из нержавеющей стали.",
+      "",
+      "Срок изготовления — до 5 рабочих дней."
+    ]
+  },
+  {
+    id:8,
+    name:"Серьги Moonlight",
+    price:2000,
+    image:"https://i.pinimg.com/736x/93/e4/e5/93e4e5ee7594f6ef436f8b994ef04016.jpg",
+    category:"Серьги",
+    description:[
+      "Материал изделия:",
+      "Лунные бусины;",
+      "Хирургическая сталь;",
+      "Фурнитура из нержавеющей и хирургической стали.",
+      "",
+      "Срок изготовления — до 5 рабочих дней."
+    ]
+  },
+  {
+    id:9,
+    name:"Тестовый товар",
+    price:10,
+    image:"https://via.placeholder.com/150",
+    category:"Тест",
+    description:[
+      "Тестовый товар для проверки.",
+      "",
+      "Срок изготовления — 1 день."
+    ]
+  }
 ];
 
 // ================== РЕНДЕР ==================
@@ -126,6 +245,9 @@ function updateCartUI(){
   cartTotal.textContent=t?"Итого: "+t+" ₽":"";
   cartTotal.style.display=inCartScreen?"block":"none";
   checkoutButton.style.display=c&&inCartScreen?"block":"none";
+
+  // Скрыть кнопки футера в корзине
+  footerButtons.style.display=inCartScreen?"none":"flex";
 }
 
 function openModal(p){
@@ -165,7 +287,7 @@ cartButton.onclick=()=>{
 };
 
 // ================== ЗАКАЗ ==================
-checkoutButton.textContent="Оплатить";
+checkoutButton.textContent="Оформить заказ";
 
 checkoutButton.onclick=()=>{
   if(!cart.length)return alert("Корзина пуста!");

@@ -161,19 +161,45 @@ body{
   color:white;
   display:flex;
   flex-direction:column;
+  position:relative;
 }
 
-/* Форма */
+/* Заголовок формы */
+.order-modal h2{
+  text-align:center;
+  font-size:20px;
+  font-weight:bold;
+  text-transform:uppercase;
+  margin-top:0;
+  margin-bottom:12px;
+}
+
+/* Крестик закрытия */
+.order-modal-close{
+  position:absolute;
+  top:10px;
+  right:12px;
+  font-size:28px;
+  color:red;
+  font-weight:bold;
+  cursor:pointer;
+  transition: color 0.2s;
+}
+.order-modal-close:hover{
+  color:#ff5555;
+}
+
+/* Форма внутри модалки */
 .order-modal form {
   display:flex;
   flex-direction:column;
-  gap:4px; /* компактное расстояние */
+  gap:4px;
 }
 
 .order-modal label {
   font-size:14px;
   color:#fff;
-  margin-bottom:2px; /* почти на строчке с графой */
+  margin-bottom:2px;
   display:block;
 }
 

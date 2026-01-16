@@ -194,9 +194,11 @@ orderForm.onsubmit = e => {
   });
   if(invalid){ alert("Пожалуйста, заполните все поля!"); return; }
 
-  checkoutButton.textContent = "Отправка заказа...";
-  checkoutButton.disabled = true;
+  // Если все поля заполнены → здесь можно перейти на страницу оплаты
+  // Пример: window.location.href = "страница_оплаты.html";
+  alert("Все поля заполнены. Здесь будет переход на оплату!");
 
+  // Если нужен EmailJS — оставляю как опциональный шаг:
   const fd = new FormData(orderForm);
   const all_items = cart.map(i => `${i.product.name} x${i.count}`).join(", ");
   pickupInput.value = selectedPickup;

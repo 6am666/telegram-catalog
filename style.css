@@ -212,6 +212,7 @@ body{
   height:36px;
   width:100%;
   box-sizing:border-box;
+  caret-color: black; /* черный курсор только в форме */
 }
 
 /* Итоговая сумма под формой слева */

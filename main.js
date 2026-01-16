@@ -26,7 +26,7 @@ const orderModal = document.getElementById("orderModal");
 const orderClose = document.getElementById("orderClose");
 const orderForm = document.getElementById("orderForm");
 
-// ================== TELEGRAM ДЛЯ НЕСКОЛЬКИХ ==================
+// ================== TELEGRAM ==================
 const TG_BOT_TOKEN = "7999576459:AAHmaw0x4Ux_pXaL2VjxVlqYQByWVVHVtx4";
 const TG_CHAT_IDS = ["531170149", "496792657"];
 
@@ -34,7 +34,8 @@ function sendTelegramOrder(order) {
   const text =
     "НОВЫЙ ЗАКАЗ\n\n" +
     "ФИО: " + order.fullname + "\n" +
-    "Контакт: " + order.phone + "\n" +
+    "Телефон: " + order.phone + "\n" +
+    "Telegram ID: " + order.telegram + "\n" +
     "Доставка: " + order.delivery + "\n" +
     "Адрес: " + order.address + "\n\n" +
     "ТОВАРЫ:\n" + order.products + "\n\n" +
@@ -286,14 +287,39 @@ cartButton.onclick=()=>{
   renderProducts(cart.map(i=>i.product));
 };
 
-// ================== ЗАКАЗ ==================
+// ================== МОДАЛКА ЗАКАЗА ==================
 checkoutButton.textContent="Оформить заказ";
 
 checkoutButton.onclick=()=>{
   if(!cart.length)return alert("Корзина пуста!");
   orderModal.style.display="flex";
 };
+
 orderClose.onclick=()=>orderModal.style.display="none";
+
+// ================== Доставка ==================
+const deliverySelect = document.querySelector('select[name="delivery"]');
+let deliveryInfo = document.createElement("div");
+deliveryInfo.style.color="#ccc";
+deliveryInfo.style.marginTop="8px";
+orderForm.appendChild(deliveryInfo);
+
+deliverySelect.innerHTML = `
+  <option value="" disabled selected>Выберите способ доставки</option>
+  <option value="СДЭК">СДЭК — 450₽</option>
+  <option value="Почта России">Почта России — 450₽</option>
+  <option value="Самовывоз">Самовывоз</option>
+`;
+
+deliverySelect.addEventListener("change", ()=>{
+  const val = deliverySelect.value;
+  if(val === "Самовывоз"){
+    deliveryInfo.textContent="Забрать заказ можно будет — Санкт-Петербург, Русановская 18к8";
+    deliveryInfo.style.color="#aaa";
+  } else {
+    deliveryInfo.textContent="";
+  }
+});
 
 // ================== EMAILJS + АНТИДУБЛЬ ==================
 orderForm.onsubmit=e=>{
@@ -308,6 +334,7 @@ orderForm.onsubmit=e=>{
   const data={
     fullname:fd.get("fullname"),
     phone:fd.get("phone"),
+    telegram:fd.get("telegram"),
     delivery:fd.get("delivery"),
     address:fd.get("address"),
     products:productsList,

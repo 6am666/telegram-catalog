@@ -138,7 +138,7 @@ orderForm.onsubmit = e => {
   })
   .then(res=>res.json())
   .then(()=>{
-    alert("Заказ отправлен!");
+    alert("Заказ оформлен!");
     cart=[];
     renderProducts(getCurrentList());
     orderModal.style.display="none";
@@ -165,7 +165,7 @@ $(function() {
       $("#addressInput").val(suggestion.value);
     },
     formatResult: function(suggestion) { return suggestion.value; },
-    style: {backgroundColor:"#333", color:"#fff"}
+    zIndex: 10000 // гарантируем видимость
   });
 });
 

@@ -154,7 +154,7 @@ checkoutButton.onclick=()=>{if(cart.length===0) return alert("Корзина п�
 orderClose.onclick=()=>orderModal.style.display="none";
 orderModal.onclick=e=>{if(e.target===orderModal) orderModal.style.display="none";}
 
-// ================== ОТПРАВКА ЗАКАЗА + ПЕРЕНАПРАВЛЕНИЕ НА ОПЛАТУ ==================
+// ================== ОТПРАВКА ЗАКАЗА + СОХРАНЕНИЕ ВСЕХ ЗАКАЗОВ ==================
 orderForm.onsubmit = e => {
   e.preventDefault();
   if(cart.length===0) return alert("Корзина пуста!");
@@ -169,14 +169,19 @@ orderForm.onsubmit = e => {
     total: cart.reduce((s,i)=>s+i.count*(i.product?.price || i.price),0)
   };
 
-  // сохраняем заказ
+  // Сохраняем все заказы
+  let allOrders = JSON.parse(localStorage.getItem("allOrders") || "[]");
+  allOrders.push(order);
+  localStorage.setItem("allOrders", JSON.stringify(allOrders));
+
+  // Сохраняем последний заказ отдельно (для страницы оплаты)
   localStorage.setItem("lastOrder", JSON.stringify(order));
 
-  // уведомление и переход на оплату
+  // Уведомление и переход на оплату
   alert("Заказ сохранён! Переходим к оплате...");
   window.location.href = "payment.html";
 
-  // очищаем корзину
+  // Очищаем корзину
   cart = [];
   renderProducts(getCurrentList());
   orderModal.style.display="none";

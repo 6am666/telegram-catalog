@@ -50,9 +50,6 @@ function sendTelegramOrder(order) {
   });
 }
 
-// ================== МЕНЮ ==================
-menuIcon.onclick = () => categories.classList.toggle("show");
-
 // ================== ТОВАРЫ ==================
 const products = [
   {id:1,name:"Браслет Hearts",price:4000,image:"https://i.pinimg.com/736x/d4/c5/4c/d4c54cd9c489d1e73d9e306545929b70.jpg",category:"Браслеты",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
@@ -65,6 +62,132 @@ const products = [
   {id:8,name:"Серьги Moonlight",price:2000,image:"https://i.pinimg.com/736x/93/e4/e5/93e4e5ee7594f6ef436f8b994ef04016.jpg",category:"Серьги",description:["Материал изделия:","Лунные бусины;","Хирургическая сталь;","Фурнитура из нержавеющей и хирургической стали.","","Срок изготовления — до 5 рабочих дней."]},
   {id:9,name:"Тестовый товар",price:10,image:"https://via.placeholder.com/150",category:"Тест",description:["Тестовый товар для проверки.","","Срок изготовления — 1 день."]}
 ];
+
+// ================== ФОРМА ОФОРМЛЕНИЯ ==================
+orderForm.innerHTML = `
+<label>ФИО</label>
+<input type="text" name="fullname" placeholder="Введите ФИО" required>
+
+<label>Адрес</label>
+<input type="text" name="address" id="addressInput" placeholder="Город, улица, дом, индекс" required>
+
+<label>Доставка</label>
+<select name="delivery" id="deliverySelect" required>
+  <option value="" disabled selected>Выберите способ доставки</option>
+  <option value="СДЭК">СДЭК — 450₽</option>
+  <option value="Почта России">Почта России — 550₽</option>
+  <option value="Яндекс.Доставка">Яндекс.Доставка — 400₽</option>
+  <option value="Самовывоз">Самовывоз</option>
+</select>
+<div id="deliveryInfo" style="color:#aaa;margin-top:4px;"></div>
+
+<label>Номер телефона</label>
+<input type="text" name="phone" placeholder="Введите номер" required>
+
+<label>Telegram ID</label>
+<input type="text" name="telegram" placeholder="@id" required>
+
+<div id="orderSum" style="color:#aaa;margin:10px 0;font-weight:500;">Итоговая сумма: 0 ₽</div>
+
+<button type="submit">Оплатить</button>
+`;
+
+// ================== DaData ==================
+$(function(){
+  $("#addressInput").suggestions({
+    token:"4563b9c9765a1a2d7bf39e1c8944f7fadae05970",
+    type:"ADDRESS",
+    hint:false
+  });
+});
+
+// ================== РАССЧЁТ СУММЫ ==================
+const deliverySelectEl = document.getElementById("deliverySelect");
+const deliveryInfoEl = document.getElementById("deliveryInfo");
+const orderSumEl = document.getElementById("orderSum");
+
+function updateOrderSum() {
+  let total = cart.reduce((s,i)=>s+i.count*i.product.price,0);
+  let deliveryCost = 0;
+  switch(deliverySelectEl.value){
+    case "СДЭК": deliveryCost = 450; break;
+    case "Почта России": deliveryCost = 550; break;
+    case "Яндекс.Доставка": deliveryCost = 400; break;
+    case "Самовывоз": deliveryCost = 0; break;
+  }
+  orderSumEl.textContent = "Итоговая сумма: " + (total + deliveryCost) + " ₽";
+  if(deliverySelectEl.value === "Самовывоз") deliveryInfoEl.textContent="Забрать заказ можно будет — Санкт-Петербург, Русановская 18к8";
+  else deliveryInfoEl.textContent="";
+}
+
+deliverySelectEl.addEventListener("change", updateOrderSum);
+
+// ================== EMAIL + TELEGRAM ==================
+orderForm.onsubmit = e=>{
+  e.preventDefault();
+  if(isSubmitting) return;
+  if(!cart.length) return alert("Корзина пуста!");
+  isSubmitting = true;
+
+  const fd = new FormData(orderForm);
+  const productsList = cart.map(i=>"• "+i.product.name+" x"+i.count).join("\n");
+  const deliveryCost = (()=>{switch(fd.get("delivery")){
+    case "СДЭК": return 450;
+    case "Почта России": return 550;
+    case "Яндекс.Доставка": return 400;
+    default: return 0;
+  }})();
+
+  const total = cart.reduce((s,i)=>s+i.count*i.product.price,0) + deliveryCost;
+
+  const data = {
+    fullname: fd.get("fullname"),
+    phone: fd.get("phone"),
+    telegram: fd.get("telegram"),
+    delivery: fd.get("delivery"),
+    address: fd.get("address"),
+    products: productsList,
+    total
+  };
+
+  emailjs.send("service_6drenuw","template_90b82bq",data)
+    .then(()=>{
+      sendTelegramOrder(data);
+      cart=[];
+      renderProducts(products);
+      updateOrderSum();
+      orderModal.style.display="none";
+      isSubmitting=false;
+      alert("Заказ принят!");
+    })
+    .catch(()=>{
+      isSubmitting=false;
+      alert("Ошибка отправки");
+    });
+};
+
+// ================== ОБНОВЛЕНИЕ КОРЗИНЫ ==================
+function updateCartUI(){
+  const c = cart.reduce((s,i)=>s+i.count,0);
+  const t = cart.reduce((s,i)=>s+i.count*i.product.price,0);
+  cartCount.textContent=c;
+  cartTotal.textContent=t?"Итого: "+t+" ₽":"";
+  cartTotal.style.display=inCartScreen?"block":"none";
+  checkoutButton.style.display=c&&inCartScreen?"block":"none";
+  footerButtons.style.display=inCartScreen?"none":"flex";
+  updateOrderSum();
+}
+
+// ================== КОРЗИНА ==================
+checkoutButton.textContent="Оформить заказ";
+checkoutButton.onclick=()=>{
+  if(!cart.length)return alert("Корзина пуста!");
+  orderModal.style.display="flex";
+  updateOrderSum();
+};
+
+// ================== ПОИСК ==================
+searchInput.oninput=()=>{const val=searchInput.value.toLowerCase(); renderProducts(getCurrentList().filter(p=>p.name.toLowerCase().includes(val)));};
 
 // ================== РЕНДЕР ==================
 function renderProducts(list){
@@ -110,30 +233,19 @@ function renderProducts(list){
 
 // ================== ДОБАВЛЕНИЕ/УДАЛЕНИЕ ==================
 function addToCart(p){
-  const i=cart.find(x=>x.product.id===p.id);
+  const i = cart.find(x=>x.product.id===p.id);
   i?i.count++:cart.push({product:p,count:1});
   renderProducts(getCurrentList());
 }
 function removeFromCart(p){
-  const i=cart.find(x=>x.product.id===p.id);
+  const i = cart.find(x=>x.product.id===p.id);
   if(!i)return;
   i.count--;
   if(i.count===0)cart=cart.filter(x=>x!==i);
   renderProducts(getCurrentList());
 }
 
-// ================== ОБНОВЛЕНИЕ КОРЗИНЫ ==================
-function updateCartUI(){
-  const c=cart.reduce((s,i)=>s+i.count,0);
-  const t=cart.reduce((s,i)=>s+i.count*i.product.price,0);
-  cartCount.textContent=c;
-  cartTotal.textContent=t?"Итого: "+t+" ₽":"";
-  cartTotal.style.display=inCartScreen?"block":"none";
-  checkoutButton.style.display=c&&inCartScreen?"block":"none";
-  footerButtons.style.display=inCartScreen?"none":"flex";
-}
-
-// ================== МОДАЛКА ТОВАРА ==================
+// ================== МОДАЛКА ==================
 function openModal(p){
   modalImage.src=p.image;
   modalTitle.textContent=p.name;
@@ -170,108 +282,6 @@ cartButton.onclick=()=>{
   renderProducts(cart.map(i=>i.product));
 };
 
-// ================== МОДАЛКА ЗАКАЗА ==================
-checkoutButton.textContent="Оформить заказ";
-checkoutButton.onclick=()=>{
-  if(!cart.length)return alert("Корзина пуста!");
-  orderModal.style.display="flex";
-};
-
-orderClose.onclick=()=>orderModal.style.display="none";
-
-// ================== ФОРМА ==================
-// Убираем старое поле телефона
-orderForm.querySelector('input[name="phone"]')?.remove();
-orderForm.querySelector('input[name="telegram"]')?.remove();
-
-// Телефон
-let phoneInput = document.createElement("input");
-phoneInput.type = "text";
-phoneInput.name = "phone";
-phoneInput.placeholder = "Номер телефона";
-phoneInput.required = true;
-orderForm.insertBefore(phoneInput, orderForm.querySelector('select[name="delivery"]'));
-
-// Telegram
-let telegramInput = document.createElement("input");
-telegramInput.type = "text";
-telegramInput.name = "telegram";
-telegramInput.placeholder = "@id";
-telegramInput.required = true;
-orderForm.insertBefore(telegramInput, orderForm.querySelector('select[name="delivery"]'));
-
-// Кнопка «Оплатить»
-let submitButton = orderForm.querySelector("button[type='submit']");
-submitButton.textContent = "Оплатить";
-
-// ================== Доставка ==================
-const deliverySelect = document.querySelector('select[name="delivery"]');
-let deliveryInfo = document.createElement("div");
-deliveryInfo.style.color = "#ccc";
-deliveryInfo.style.marginTop = "8px";
-orderForm.appendChild(deliveryInfo);
-
-deliverySelect.innerHTML = `
-  <option value="" disabled selected>Выберите способ доставки</option>
-  <option value="СДЭК">СДЭК — 450₽</option>
-  <option value="Почта России">Почта России — 550₽</option>
-  <option value="Яндекс.Доставка">Яндекс.Доставка — 400₽</option>
-  <option value="Самовывоз">Самовывоз</option>
-`;
-
-deliverySelect.addEventListener("change", ()=>{
-  const val = deliverySelect.value;
-  if(val === "Самовывоз"){
-    deliveryInfo.textContent="Забрать заказ можно будет — Санкт-Петербург, Русановская 18к8";
-    deliveryInfo.style.color="#aaa";
-  }else{
-    deliveryInfo.textContent="";
-  }
-});
-
-// ================== EMAILJS ==================
-orderForm.onsubmit=e=>{
-  e.preventDefault();
-  if(isSubmitting)return;
-  isSubmitting=true;
-
-  const fd = new FormData(orderForm);
-  const productsList = cart.map(i=>"• "+i.product.name+" x"+i.count).join("\n");
-  const total = cart.reduce((s,i)=>s+i.count*i.product.price,0);
-
-  const data = {
-    fullname: fd.get("fullname"),
-    phone: fd.get("phone"),
-    telegram: fd.get("telegram"),
-    delivery: fd.get("delivery"),
-    address: fd.get("address"),
-    products: productsList,
-    total
-  };
-
-  emailjs.send("service_6drenuw","template_90b82bq",data)
-    .then(()=>{
-      sendTelegramOrder(data);
-      cart=[];
-      renderProducts(products);
-      orderModal.style.display="none";
-      isSubmitting=false;
-      alert("Заказ принят!");
-    })
-    .catch(()=>{
-      isSubmitting=false;
-      alert("Ошибка отправки");
-    });
-};
-
-// ================== DaData ==================
-$(function(){
-  $("#addressInput").suggestions({
-    token:"4563b9c9765a1a2d7bf39e1c8944f7fadae05970",
-    type:"ADDRESS",
-    hint:false
-  });
-});
-
 // ================== СТАРТ ==================
 renderProducts(products);
+updateOrderSum();

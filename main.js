@@ -1,6 +1,4 @@
-const tg = window.Telegram.WebApp;
-tg.expand();
-
+// ================== ИНИЦИАЛИЗАЦИЯ ==================
 let cart = [];
 let inCartScreen = false;
 let currentCategory = "Главная";
@@ -40,7 +38,7 @@ const products = [
   {id:7,name:"Обвес Star",price:2000,image:"https://i.pinimg.com/736x/16/36/75/163675cf410dfc51ef97238bbbab1056.jpg",category:"Обвесы",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","Срок изготовления — до 5 рабочих дней."]},
   {id:8,name:"Серьги Moonlight",price:2000,image:"https://i.pinimg.com/736x/93/e4/e5/93e4e5ee7594f6ef436f8b994ef04016.jpg",category:"Серьги",description:["Материал изделия:","Лунные бусины;","Хирургическая сталь;","Фурнитура из нержавеющей и хирургической стали.","Срок изготовления — до 5 рабочих дней."]},
   {id:9,name:"Тестовый товар",price:10,image:"https://via.placeholder.com/150",category:"Тест",description:["Тестовый товар для проверки.","Срок изготовления — 1 день."]}
-]
+];
 
 // ================== ФУНКЦИИ ==================
 function renderProducts(list){
@@ -111,45 +109,38 @@ checkoutButton.onclick=()=>{if(cart.length===0) return alert("Корзина п�
 orderClose.onclick=()=>orderModal.style.display="none";
 orderModal.onclick=e=>{if(e.target===orderModal) orderModal.style.display="none";}
 
-// ================== ОТПРАВКА В GOOGLE SHEET ==================
-const SHEETDB_API = "https://sheetdb.io/api/v1/1vejwdm4odk54";
-
+// ================== ОТПРАВКА ЧЕРЕЗ EMAILJS ==================
 orderForm.onsubmit = e => {
   e.preventDefault();
   if(cart.length===0) return alert("Корзина пуста!");
 
-  checkoutButton.textContent = "Переходим на оплату...";
+  checkoutButton.textContent = "Отправка заказа...";
   checkoutButton.disabled = true;
 
   const fd = new FormData(orderForm);
   const orderData = {
-    "ФИО": fd.get("fullname"),
-    "Адрес": fd.get("address"),
-    "Доставка": fd.get("delivery"),
-    "телефон или ник в Telegram": fd.get("phone"),
-    "товар": cart.map(i=>`${i.product.name} x${i.count}`).join("; "),
-    "цена": cart.reduce((s,i)=>s+i.count*i.product.price,0)
+    fullname: fd.get("fullname"),
+    address: fd.get("address"),
+    delivery: fd.get("delivery"),
+    phone: fd.get("phone"),
+    items: cart.map(i => `${i.product.name} x${i.count}`).join("; "),
+    total: cart.reduce((s,i)=>s+i.count*i.product.price,0)
   };
 
-  fetch(SHEETDB_API, {
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({data: orderData})
-  })
-  .then(res=>res.json())
-  .then(()=>{
-    alert("Заказ отправлен!");
-    cart=[];
-    renderProducts(getCurrentList());
-    orderModal.style.display="none";
-    checkoutButton.textContent = "Оформить заказ";
-    checkoutButton.disabled = false;
-  })
-  .catch(err=>{
-    alert("Ошибка отправки: "+err);
-    checkoutButton.textContent = "Оформить заказ";
-    checkoutButton.disabled = false;
-  });
+  emailjs.send("service_6drenuw", "template_90b82bq", orderData)
+    .then(response => {
+      alert("Заказ отправлен на почту!");
+      cart = [];
+      renderProducts(getCurrentList());
+      orderModal.style.display = "none";
+      checkoutButton.textContent = "Оформить заказ";
+      checkoutButton.disabled = false;
+    })
+    .catch(err => {
+      alert("Ошибка отправки: " + err.text);
+      checkoutButton.textContent = "Оформить заказ";
+      checkoutButton.disabled = false;
+    });
 };
 
 // ================== ПОИСК ==================
@@ -161,9 +152,7 @@ $(function() {
     token: "4563b9c9765a1a2d7bf39e1c8944f7fadae05970",
     type: "ADDRESS",
     hint: false,
-    onSelect: function(suggestion) {
-      $("#addressInput").val(suggestion.value);
-    },
+    onSelect: function(suggestion) { $("#addressInput").val(suggestion.value); },
     formatResult: function(suggestion) { return suggestion.value; },
     style: {backgroundColor:"#333", color:"#fff"}
   });

@@ -40,7 +40,7 @@ const products = [
   {id:7,name:"Обвес Star",price:2000,image:"https://i.pinimg.com/736x/16/36/75/163675cf410dfc51ef97238bbbab1056.jpg",category:"Обвесы",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","Срок изготовления — до 5 рабочих дней."]},
   {id:8,name:"Серьги Moonlight",price:2000,image:"https://i.pinimg.com/736x/93/e4/e5/93e4e5ee7594f6ef436f8b994ef04016.jpg",category:"Серьги",description:["Материал изделия:","Лунные бусины;","Хирургическая сталь;","Фурнитура из нержавеющей и хирургической стали.","Срок изготовления — до 5 рабочих дней."]},
   {id:9,name:"Тестовый товар",price:10,image:"https://via.placeholder.com/150",category:"Тест",description:["Тестовый товар для проверки.","Срок изготовления — 1 день."]}
-]
+];
 
 // ================== ФУНКЦИИ ==================
 function renderProducts(list){
@@ -118,12 +118,20 @@ orderForm.onsubmit = e => {
   e.preventDefault();
   if(cart.length===0) return alert("Корзина пуста!");
 
-  const fd = new FormData(orderForm);
+  const fullname = document.querySelector('[name="fullname"]').value.trim();
+  const address = document.querySelector('#addressInput').value.trim();
+  const delivery = document.querySelector('[name="delivery"]').value;
+  const phone = document.querySelector('[name="phone"]').value.trim();
+
+  if(!fullname || !address || !delivery || !phone){
+    return alert("Пожалуйста, заполните все поля!");
+  }
+
   const orderData = {
-    "ФИО": fd.get("fullname") || "",
-    "Адрес": fd.get("address") || "",
-    "Доставка": fd.get("delivery") || "",
-    "телефон или ник в Telegram": fd.get("phone") || "",
+    "ФИО": fullname,
+    "Адрес": address,
+    "Доставка": delivery,
+    "телефон или ник в Telegram": phone,
     "товар": cart.map(i=>`${i.product.name} x${i.count}`).join("; "),
     "цена": cart.reduce((s,i)=>s+i.count*i.product.price,0)
   };
@@ -135,7 +143,7 @@ orderForm.onsubmit = e => {
   })
   .then(res=>res.json())
   .then(()=>{
-    alert("Заказ оформлен!"); // одно нажатие
+    alert("Заказ оформлен!");
     cart=[];
     renderProducts(getCurrentList());
     orderModal.style.display="none";
@@ -153,7 +161,7 @@ $(function() {
   $("#addressInput").suggestions({
     token: "4563b9c9765a1a2d7bf39e1c8944f7fadae05970",
     type: "ADDRESS",
-    hint: false,
+    hint: true,
     onSelect: function(suggestion) {
       $("#addressInput").val(suggestion.value);
     },

@@ -185,18 +185,23 @@ body{
 
 /* DaData подсказки на темный фон */
 .suggestions-suggestions {
-  background-color: #2e2e2e !important;
-  color: white !important;
+  background-color: #2e2e2e !important;  /* темно-серый фон панели */
   border: 1px solid #555 !important;
   border-radius: 8px;
   max-height: 200px;
   overflow-y: auto;
   z-index: 1000 !important;
 }
+
 .suggestions-item {
   padding: 8px 12px;
   cursor: pointer;
+  color: white !important;         /* белый текст строк */
+  background-color: transparent;   /* прозрачный фон строки, чтобы был виден фон панели */
 }
+
 .suggestions-item:hover {
-  background-color: #444 !important;
+  background-color: #444 !important; /* немного светлее при наведении */
+  color: white !important;           /* белый текст при наведении */
 }
+

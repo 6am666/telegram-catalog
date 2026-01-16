@@ -109,7 +109,7 @@ checkoutButton.onclick=()=>{if(cart.length===0) return alert("Корзина п�
 orderClose.onclick=()=>orderModal.style.display="none";
 orderModal.onclick=e=>{if(e.target===orderModal) orderModal.style.display="none";}
 
-// ================== ОТПРАВКА ЧЕРЕЗ EMAILJS ==================
+// ================== ОТПРАВКА ЧЕРЕЗ EMAILJS + РЕДИРЕКТ ==================
 orderForm.onsubmit = e => {
   e.preventDefault();
   if(cart.length===0) return alert("Корзина пуста!");
@@ -129,12 +129,17 @@ orderForm.onsubmit = e => {
 
   emailjs.send("service_6drenuw", "template_90b82bq", orderData)
     .then(response => {
-      alert("Заказ отправлен на почту!");
+      // Флаг для сообщения "Спасибо"
+      localStorage.setItem("orderCompleted", "true");
+
       cart = [];
       renderProducts(getCurrentList());
       orderModal.style.display = "none";
       checkoutButton.textContent = "Оформить заказ";
       checkoutButton.disabled = false;
+
+      // Редирект на окно оплаты
+      window.location.href = "payment.html";
     })
     .catch(err => {
       alert("Ошибка отправки: " + err.text);
@@ -142,6 +147,15 @@ orderForm.onsubmit = e => {
       checkoutButton.disabled = false;
     });
 };
+
+// ================== ПОКАЗ СПАСИБО ==================
+window.addEventListener("DOMContentLoaded", () => {
+  const orderCompleted = localStorage.getItem("orderCompleted");
+  if(orderCompleted === "true"){
+    alert("Спасибо за заказ!");
+    localStorage.removeItem("orderCompleted");
+  }
+});
 
 // ================== ПОИСК ==================
 searchInput.oninput=()=>{const val=searchInput.value.toLowerCase(); renderProducts(getCurrentList().filter(p=>p.name.toLowerCase().includes(val)));};

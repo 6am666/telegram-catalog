@@ -185,16 +185,17 @@ body{
 
 /* DaData подсказки */
 .suggestions-suggestions {
-  background:#333 !important;
-  color:#fff !important;
-  z-index:999999 !important;
+  background-color: #333 !important; /* тёмный фон */
+  color: #fff !important;           /* белый текст */
+  z-index: 999999 !important;
 }
 .suggestions-item {
-  background:#333 !important;
-  color:#fff !important;
+  background-color: #333 !important; 
+  color: #fff !important;
+  cursor: pointer;
 }
 .suggestions-item:hover {
-  background:#555 !important;
-  color:#fff !important;
+  background-color: #555 !important; 
+  color: #fff !important;
 }
 

@@ -33,7 +33,7 @@ const TG_BOT_TOKEN = "8146718095:AAHeQj9OdqeUuMg1zh3g1_nO9-EJskpEN74";
 const TG_CHAT_ID = "-1003696397091";
 
 function sendTelegramOrder(order) {
-  const message =
+  const text =
     "НОВЫЙ ЗАКАЗ\n\n" +
     "ФИО: " + order.fullname + "\n" +
     "Контакт: " + order.phone + "\n" +
@@ -43,15 +43,19 @@ function sendTelegramOrder(order) {
     order.products + "\n\n" +
     "СУММА: " + order.total + " ₽";
 
-  fetch("https://api.telegram.org/bot" + TG_BOT_TOKEN + "/sendMessage", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      chat_id: TG_CHAT_ID,
-      text: message
-    })
-  }).catch(err => console.error("Telegram error:", err));
+  const url =
+    "https://api.telegram.org/bot" +
+    TG_BOT_TOKEN +
+    "/sendMessage?" +
+    "chat_id=" + encodeURIComponent(TG_CHAT_ID) +
+    "&text=" + encodeURIComponent(text);
+
+  fetch(url)
+    .then(r => r.json())
+    .then(d => console.log("TG response:", d))
+    .catch(err => console.error("TG error:", err));
 }
+
 
 // ================== МЕНЮ ==================
 menuIcon.onclick = () => categories.classList.toggle("show");

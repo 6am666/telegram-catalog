@@ -295,6 +295,31 @@ cartButton.onclick=()=>{
   renderProducts(cart.map(i=>i.product));
 };
 
+// ================== ГАМБУРГЕР И ПАНЕЛЬ КАТЕГОРИЙ ==================
+const menuIcon = document.getElementById("menuIcon");
+const categories = document.getElementById("categories");
+
+// Открытие/закрытие панели
+menuIcon.onclick = () => {
+  categories.classList.toggle("show");
+};
+
+// Закрытие панели при клике на категорию
+categories.querySelectorAll("div").forEach(c => {
+  c.onclick = () => {
+    categories.classList.remove("show");
+  };
+
+});
+
+// Закрытие панели при клике вне меню (опционально, для удобства)
+document.addEventListener("click", e => {
+  if (!categories.contains(e.target) && !menuIcon.contains(e.target)) {
+    categories.classList.remove("show");
+  }
+});
+
+
 // ================== СТАРТ ==================
 renderProducts(products);
 updateOrderSum();

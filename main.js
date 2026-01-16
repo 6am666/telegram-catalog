@@ -178,32 +178,49 @@ $(function() {
 // ================== EMAILJS ==================
 orderForm.onsubmit = e => {
   e.preventDefault();
-  if(cart.length===0) return alert("Корзина пуста!");
+
+  if (cart.length === 0) {
+    alert("Корзина пуста!");
+    return;
+  }
 
   checkoutButton.textContent = "Отправка заказа...";
   checkoutButton.disabled = true;
 
   const fd = new FormData(orderForm);
-  const all_items = cart.map(i => `${i.product.name} x${i.count}`).join(", ");
-  pickupInput.value = selectedPickup;
+
+  // Формируем список товаров ИЗ КОРЗИНЫ
+  const productsList = cart
+    .map(i => `• ${i.product.name} x${i.count} (${i.product.price * i.count} ₽)`)
+    .join("\n");
+
+  const totalPrice = cart.reduce(
+    (sum, i) => sum + i.count * i.product.price,
+    0
+  );
 
   const orderData = {
     fullname: fd.get("fullname"),
-    address: fd.get("address"),
-    delivery: fd.get("delivery"),
     phone: fd.get("phone"),
-    your_order: all_items, // вот эта строка для EmailJS
-    pickup_point: pickupInput.value,
-    total: cart.reduce((s,i)=>s + i.count*i.product.price,0)
+    delivery: fd.get("delivery"),
+    address: fd.get("address"),
+    products: productsList, // ← СОВПАДАЕТ с {{products}}
+    total: totalPrice
   };
 
-  emailjs.send("service_6drenuw", "template_90b82bq", orderData)
+  // Для проверки (можешь удалить после теста)
+  console.log("ORDER DATA:", orderData);
+
+  emailjs
+    .send("service_6drenuw", "template_90b82bq", orderData)
     .then(() => {
       cart = [];
       renderProducts(getCurrentList());
       orderModal.style.display = "none";
+
       checkoutButton.textContent = "Оформить заказ";
       checkoutButton.disabled = false;
+
       alert("Спасибо за заказ!");
     })
     .catch(err => {
@@ -212,6 +229,7 @@ orderForm.onsubmit = e => {
       checkoutButton.disabled = false;
     });
 };
+
 
 // ================== ПОИСК ==================
 searchInput.oninput=()=>{const val=searchInput.value.toLowerCase(); renderProducts(getCurrentList().filter(p=>p.name.toLowerCase().includes(val)));};

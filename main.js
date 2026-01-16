@@ -185,6 +185,25 @@ function updateUIVisibility(){
   footerButtons.style.display = inCartScreen ? "none" : "flex";
 }
 
+// ================== МОДАЛКА ЗАКАЗА ==================
+checkoutButton.onclick = () => {
+  if (cart.length === 0) {
+    alert("Корзина пуста!");
+    return;
+  }
+  orderModal.style.display = "flex";
+};
+
+orderClose.onclick = () => {
+  orderModal.style.display = "none";
+};
+
+orderModal.onclick = e => {
+  if (e.target === orderModal) {
+    orderModal.style.display = "none";
+  }
+};
+
 // ================== EMAILJS ==================
 orderForm.onsubmit = e => {
   e.preventDefault();

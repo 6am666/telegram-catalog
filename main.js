@@ -158,7 +158,7 @@ orderForm.onsubmit = e=>{
       updateOrderSum();
       orderModal.style.display="none";
       isSubmitting=false;
-      document.activeElement.blur();
+      document.activeElement.blur(); // скрыть клавиатуру
       alert("Заказ принят!");
     })
     .catch(()=>{
@@ -212,44 +212,56 @@ checkoutButton.onclick=()=>{
   updateOrderSum();
 };
 
-// ================== ФЛАЙ АНИМАЦИЯ В КОРЗИНУ ==================
-function flyToCart(img, callback) {
-    const cartRect = cartButton.getBoundingClientRect();
-    const imgRect = img.getBoundingClientRect();
-    const clone = img.cloneNode(true);
+// ================== ПОИСК ==================
+searchInput.oninput=()=>{const val=searchInput.value.toLowerCase(); renderProducts(getCurrentList().filter(p=>p.name.toLowerCase().includes(val)));};
 
-    clone.style.position = "fixed";
-    clone.style.left = imgRect.left + "px";
-    clone.style.top = imgRect.top + "px";
-    clone.style.width = imgRect.width + "px";
-    clone.style.height = imgRect.height + "px";
-    clone.style.transition = "all 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55)";
-    clone.style.zIndex = 1000;
-    clone.style.borderRadius = "10px";
-    document.body.appendChild(clone);
+// ================== РЕНДЕР ==================
+function renderProducts(list){
+  productsEl.innerHTML="";
+  list.forEach(p=>{
+    const card=document.createElement("div");
+    card.className="product";
+    const img=document.createElement("img");
+    img.src=p.image;
+    img.onclick=()=>openModal(p);
+    const title=document.createElement("h3");
+    title.textContent=p.name;
+    const price=document.createElement("p");
+    price.textContent=p.price+" ₽";
 
-    requestAnimationFrame(() => {
-        clone.style.left = cartRect.left + cartRect.width/2 - imgRect.width/4 + "px";
-        clone.style.top = cartRect.top + cartRect.height/2 - imgRect.height/4 + "px";
-        clone.style.width = imgRect.width/2 + "px";
-        clone.style.height = imgRect.height/2 + "px";
-        clone.style.opacity = 0.5;
-    });
+    const controls=document.createElement("div");
+    controls.className="count-block";
+    const item=cart.find(i=>i.product.id===p.id);
 
-    clone.addEventListener("transitionend", () => {
-        clone.remove();
-        if(callback) callback();
-    });
+    if(item){
+      const minus=document.createElement("button");
+      minus.textContent="–";
+      minus.onclick=e=>{e.stopPropagation();removeFromCart(p)};
+      const count=document.createElement("div");
+      count.className="count-number";
+      count.textContent=item.count;
+      const plus=document.createElement("button");
+      plus.textContent="+";
+      plus.onclick=e=>{e.stopPropagation();addToCart(p)};
+      controls.append(minus,count,plus);
+    }else{
+      const btn=document.createElement("button");
+      btn.textContent="В корзину";
+      btn.onclick=e=>{e.stopPropagation();addToCart(p)};
+      controls.appendChild(btn);
+    }
+
+    card.append(img,title,price,controls);
+    productsEl.appendChild(card);
+  });
+  updateCartUI();
 }
 
 // ================== ДОБАВЛЕНИЕ/УДАЛЕНИЕ ==================
 function addToCart(p){
-  const img = [...document.querySelectorAll(".product")].find(el=>el.querySelector("h3").textContent===p.name).querySelector("img");
-  flyToCart(img, ()=>{
-    const i = cart.find(x=>x.product.id===p.id);
-    i ? i.count++ : cart.push({product:p,count:1});
-    renderProducts(getCurrentList());
-  });
+  const i = cart.find(x=>x.product.id===p.id);
+  i?i.count++:cart.push({product:p,count:1});
+  renderProducts(getCurrentList());
 }
 function removeFromCart(p){
   const i = cart.find(x=>x.product.id===p.id);
@@ -295,56 +307,6 @@ cartButton.onclick=()=>{
   inCartScreen=true;
   renderProducts(cart.map(i=>i.product));
 };
-
-// ================== ПОИСК ==================
-searchInput.addEventListener("input", () => {
-    setTimeout(()=>{
-        const val = searchInput.value.toLowerCase();
-        renderProducts(getCurrentList().filter(p => p.name.toLowerCase().includes(val)));
-    }, 0);
-});
-
-// ================== РЕНДЕР ==================
-function renderProducts(list){
-  productsEl.innerHTML="";
-  list.forEach(p=>{
-    const card=document.createElement("div");
-    card.className="product";
-    const img=document.createElement("img");
-    img.src=p.image;
-    img.onclick=()=>openModal(p);
-    const title=document.createElement("h3");
-    title.textContent=p.name;
-    const price=document.createElement("p");
-    price.textContent=p.price+" ₽";
-
-    const controls=document.createElement("div");
-    controls.className="count-block";
-    const item=cart.find(i=>i.product.id===p.id);
-
-    if(item){
-      const minus=document.createElement("button");
-      minus.textContent="–";
-      minus.onclick=e=>{e.stopPropagation();removeFromCart(p)};
-      const count=document.createElement("div");
-      count.className="count-number";
-      count.textContent=item.count;
-      const plus=document.createElement("button");
-      plus.textContent="+";
-      plus.onclick=e=>{e.stopPropagation();addToCart(p)};
-      controls.append(minus,count,plus);
-    }else{
-      const btn=document.createElement("button");
-      btn.textContent="В корзину";
-      btn.onclick=e=>{e.stopPropagation();addToCart(p)};
-      controls.appendChild(btn);
-    }
-
-    card.append(img,title,price,controls);
-    productsEl.appendChild(card);
-  });
-  updateCartUI();
-}
 
 // ================== СТАРТ ==================
 renderProducts(products);

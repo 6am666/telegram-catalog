@@ -164,38 +164,40 @@ body{
 }
 
 /* Форма */
-.order-modal form{
+.order-modal form {
   display:flex;
   flex-direction:column;
-  gap:8px; /* компактнее между полями */
+  gap:4px; /* компактное расстояние */
 }
-.order-modal label{
+
+.order-modal label {
   font-size:14px;
   color:#fff;
-  margin-bottom:4px; /* ближе к графам */
+  margin-bottom:2px; /* почти на строчке с графой */
   display:block;
 }
-.order-modal input, .order-modal select{
+
+.order-modal input, .order-modal select {
   padding:10px;
-  border-radius:8px;
+  border-radius:6px;
   border:none;
   font-size:14px;
   outline:none;
-  height:38px;
+  height:36px;
   width:100%;
   box-sizing:border-box;
 }
 
-/* Итоговая сумма слева */
-#orderSum{
+/* Итоговая сумма под формой слева */
+#orderSum {
   color:#aaa;
-  margin:8px 0;
   font-weight:500;
   text-align:left;
+  margin:6px 0 8px 0;
 }
 
 /* Кнопка оплаты */
-.order-modal button{
+.order-modal button {
   padding:12px 0;
   border-radius:10px;
   border:none;
@@ -204,9 +206,9 @@ body{
   font-size:16px;
   cursor:pointer;
   transition: background 0.2s;
-  margin-top:6px;
 }
-.order-modal button:hover{
+
+.order-modal button:hover {
   background:#555;
 }
 

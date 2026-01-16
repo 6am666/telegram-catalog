@@ -185,21 +185,21 @@ body{
 
 /* DaData подсказки — видимые */
 .suggestions-suggestions {
-  background-color: #fff !important;   /* белый фон */
-  color: #000 !important;             /* черный текст */
+  background: #fff !important;
+  color: #000 !important;
   border: 1px solid #aaa !important;
   border-radius: 8px;
   max-height: 200px;
   overflow-y: auto;
-  z-index: 99999 !important;          /* поверх всего */
+  z-index: 99999 !important;
 }
 .suggestions-item {
+  color: #000 !important;
+  background: #fff !important;
   padding: 8px 12px !important;
   cursor: pointer !important;
-  color: #000 !important;             /* текст черный */
-  background-color: #fff !important;  /* фон белый */
 }
 .suggestions-item:hover {
-  background-color: #f0f0f0 !important;
+  background: #f0f0f0 !important;
   color: #000 !important;
 }

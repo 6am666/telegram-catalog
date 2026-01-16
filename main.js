@@ -27,6 +27,7 @@ const modalClose = document.getElementById("modalClose");
 const orderModal = document.getElementById("orderModal");
 const orderClose = document.getElementById("orderClose");
 const orderForm = document.getElementById("orderForm");
+const orderSummary = document.getElementById("orderSummary");
 
 // ================== ДОСТАВКА ==================
 const deliverySelect = document.querySelector('select[name="delivery"]');
@@ -44,8 +45,6 @@ pickupInput.id = "pickupInput";
 orderForm.appendChild(pickupInput);
 
 let selectedPickup = "";
-
-// Простейшие пункты выдачи для примера
 const pickupPoints = {
   "СДЭК": ["СДЭК, ул. Ленина, 10", "СДЭК, пр. Мира, 5"],
   "Boxberry": ["Boxberry, ул. Советская, 15", "Boxberry, ул. Пушкина, 7"],
@@ -118,8 +117,8 @@ function renderProducts(list){
   updateCartUI();
 }
 
-function addToCart(product){const item=cart.find(i=>i.product.id===product.id); item?item.count++:cart.push({product,count:1}); renderProducts(getCurrentList());}
-function removeFromCart(product){const item=cart.find(i=>i.product.id===product.id); if(!item)return; item.count--; if(item.count===0) cart=cart.filter(i=>i.product.id!==product.id); renderProducts(getCurrentList());}
+function addToCart(product){const item=cart.find(i=>i.product.id===product.id); item?item.count++:cart.push({product,count:1}); renderProducts(getCurrentList()); updateOrderSummary();}
+function removeFromCart(product){const item=cart.find(i=>i.product.id===product.id); if(!item)return; item.count--; if(item.count===0) cart=cart.filter(i=>i.product.id!==product.id); renderProducts(getCurrentList()); updateOrderSummary();}
 
 function updateCartUI(){
   const totalCount=cart.reduce((s,i)=>s+i.count,0);
@@ -157,9 +156,24 @@ function updateUIVisibility(){
 }
 
 // ================== МОДАЛКА ЗАКАЗА ==================
-checkoutButton.onclick=()=>{if(cart.length===0) return alert("Корзина пуста!"); orderModal.style.display="flex";}
+checkoutButton.onclick=()=>{
+  let invalid=false;
+  orderForm.querySelectorAll("input,select").forEach(f=>{
+    if(!f.value){f.style.border="2px solid red"; invalid=true;}
+    else{f.style.border="none";}
+  });
+  if(cart.length===0){alert("Корзина пуста!"); return;}
+  if(invalid) return alert("Пожалуйста, заполните все поля!");
+  orderModal.style.display="flex";
+  updateOrderSummary();
+};
 orderClose.onclick=()=>orderModal.style.display="none";
 orderModal.onclick=e=>{if(e.target===orderModal) orderModal.style.display="none";}
+
+function updateOrderSummary(){
+  if(cart.length===0){orderSummary.textContent=""; return;}
+  orderSummary.innerHTML = "Ваш заказ: " + cart.map(i=>`${i.product.name} x${i.count}`).join(", ");
+}
 
 // ================== DA DATA ==================
 $(function() {
@@ -170,8 +184,7 @@ $(function() {
     onSelect: function(suggestion) {
       $("#addressInput").val(suggestion.value);
     },
-    formatResult: function(suggestion) { return suggestion.value; },
-    style: {backgroundColor:"#333", color:"#fff"}
+    formatResult: function(suggestion) { return suggestion.value; }
   });
 });
 
@@ -192,7 +205,7 @@ orderForm.onsubmit = e => {
     address: fd.get("address"),
     delivery: fd.get("delivery"),
     phone: fd.get("phone"),
-    your_order: all_items, // вот эта строка для EmailJS
+    your_order: all_items,
     pickup_point: pickupInput.value,
     total: cart.reduce((s,i)=>s + i.count*i.product.price,0)
   };

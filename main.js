@@ -69,7 +69,7 @@ orderForm.innerHTML = `
 <input type="text" name="fullname" placeholder="Введите ФИО" required>
 
 <label>Адрес</label>
-<input type="text" name="address" id="addressInput" placeholder="Город, улица, дом, индекс" required>
+<input type="text" id="addressInput" name="address" placeholder="Город, улица, дом, индекс" required>
 
 <label>Доставка</label>
 <select name="delivery" id="deliverySelect" required>
@@ -142,6 +142,7 @@ orderForm.onsubmit = async e => {
 
   const fd = new FormData(orderForm);
   const productsList = cart.map(i => "• " + i.product.name + " x" + i.count).join("\n");
+
   const deliveryCost = (() => {
     switch (fd.get("delivery")) {
       case "СДЭК": return 450;
@@ -153,7 +154,7 @@ orderForm.onsubmit = async e => {
 
   const total = cart.reduce((s, i) => s + i.count * i.product.price, 0) + deliveryCost;
 
-  const data = {
+  const orderData = {
     fullname: fd.get("fullname"),
     phone: fd.get("phone"),
     telegram: fd.get("telegram"),
@@ -164,9 +165,13 @@ orderForm.onsubmit = async e => {
   };
 
   try {
-    await emailjs.send("service_6drenuw", "template_90b82bq", data);
-    sendTelegramOrder(data);
+    // EmailJS
+    await emailjs.send("service_6drenuw", "template_90b82bq", orderData);
 
+    // Telegram
+    sendTelegramOrder(orderData);
+
+    // ЮKassa
     const res = await fetch("/api/create-payment", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -192,7 +197,9 @@ orderForm.onsubmit = async e => {
         window.open(json.payment_url, "_blank");
       }
 
-    } else alert("Ошибка создания оплаты");
+    } else {
+      alert("Ошибка создания оплаты");
+    }
 
   } catch (err) {
     console.error(err);

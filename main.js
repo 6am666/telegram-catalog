@@ -219,8 +219,9 @@ searchInput.oninput=()=>{const val=searchInput.value.toLowerCase(); renderProduc
 
 // ================== РЕНДЕР ==================
 function renderProducts(list){
-  productsEl.innerHTML="";
-  list.forEach(p=>{
+    productsEl.classList.toggle("cart-screen", inCartScreen);
+    productsEl.innerHTML="";
+    list.forEach(p=>{
     const card=document.createElement("div");
     card.className="product";
     const img=document.createElement("img");

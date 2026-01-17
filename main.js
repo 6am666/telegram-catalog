@@ -158,7 +158,7 @@ orderForm.onsubmit = e=>{
       updateOrderSum();
       orderModal.style.display="none";
       isSubmitting=false;
-      document.activeElement.blur(); // скрыть клавиатуру
+      document.activeElement.blur();
       alert("Заказ принят!");
     })
     .catch(()=>{
@@ -201,7 +201,11 @@ function updateCartUI(){
   cartTotal.style.display=inCartScreen?"block":"none";
   checkoutButton.style.display=c&&inCartScreen?"block":"none";
   footerButtons.style.display=inCartScreen?"none":"flex";
+
   updateOrderSum();
+
+  // 🔴 ПРАВКА: скрываем поиск в корзине
+  searchInput.style.display = inCartScreen ? "none" : "block";
 }
 
 // ================== КОРЗИНА ==================
@@ -291,6 +295,7 @@ function getCurrentList(){
 categories.querySelectorAll("div").forEach(c=>{
   c.onclick=()=>{
     inCartScreen=false;
+    document.body.classList.remove("cart-mode"); // 🔴 фикс фона для категорий
     currentCategory=c.dataset.category;
     renderProducts(getCurrentList());
     categories.classList.remove("show");
@@ -299,12 +304,14 @@ categories.querySelectorAll("div").forEach(c=>{
 
 mainTitle.onclick=()=>{
   inCartScreen=false;
+  document.body.classList.remove("cart-mode"); // 🔴 возвращаем фон
   currentCategory="Главная";
   renderProducts(products);
 };
 
 cartButton.onclick=()=>{
   inCartScreen=true;
+  document.body.classList.add("cart-mode"); // 🔴 фикс фона
   renderProducts(cart.map(i=>i.product));
 };
 

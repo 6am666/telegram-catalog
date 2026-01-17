@@ -63,6 +63,44 @@ const products = [
   {id:9,name:"Тестовый товар",price:10,image:"https://via.placeholder.com/150",category:"Тест",description:["Тестовый товар для проверки.","","Срок изготовления — 1 день."]}
 ];
 
+// ================== ФОРМА ОФОРМЛЕНИЯ ==================
+orderForm.innerHTML = `
+<label>ФИО</label>
+<input type="text" name="fullname" placeholder="Введите ФИО" required>
+
+<label>Адрес</label>
+<input type="text" name="address" id="addressInput" placeholder="Город, улица, дом, индекс" required>
+
+<label>Доставка</label>
+<select name="delivery" id="deliverySelect" required>
+  <option value="" disabled selected>Выберите способ доставки</option>
+  <option value="СДЭК">СДЭК — 450₽</option>
+  <option value="Почта России">Почта России — 550₽</option>
+  <option value="Яндекс.Доставка">Яндекс.Доставка — 400₽</option>
+  <option value="Самовывоз">Самовывоз</option>
+</select>
+<div id="deliveryInfo" style="color:#aaa;margin-top:4px;"></div>
+
+<label>Номер телефона</label>
+<input type="text" name="phone" placeholder="Введите номер" required>
+
+<label>Telegram ID</label>
+<input type="text" name="telegram" placeholder="@id" required>
+
+<div id="orderSum" style="color:#aaa;margin:10px 0;font-weight:500;">Итоговая сумма: 0 ₽</div>
+
+<button type="submit">Оплатить</button>
+`;
+
+// ================== DaData ==================
+$(function(){
+  $("#addressInput").suggestions({
+    token:"4563b9c9765a1a2d7bf39e1c8944f7fadae05970",
+    type:"ADDRESS",
+    hint:false
+  });
+});
+
 // ================== РАССЧЁТ СУММЫ ==================
 const deliverySelectEl = document.getElementById("deliverySelect");
 const deliveryInfoEl = document.getElementById("deliveryInfo");
@@ -81,9 +119,21 @@ function updateOrderSum() {
   if(deliverySelectEl.value === "Самовывоз") deliveryInfoEl.textContent="Забрать заказ можно будет — Санкт-Петербург, Русановская 18к8";
   else deliveryInfoEl.textContent="";
 }
+
 deliverySelectEl.addEventListener("change", updateOrderSum);
 
-// ================== ОФОРМЛЕНИЕ ЗАКАЗА + YooKassa ==================
+// ================== ПЛАШКА "СПАСИБО" ==================
+function showThankYou() {
+  const div = document.createElement("div");
+  div.style.cssText = `position:fixed; top:20px; left:50%; transform:translateX(-50%);
+    background:#333; color:#fff; padding:16px 24px; border-radius:12px; z-index:9999; font-size:16px`;
+  div.innerHTML = "Спасибо за то что выбрали наш магазин Chronicle-Chains!<br>Мы уже получили ваш заказ и начинаем его собирать! ❤️";
+  document.body.appendChild(div);
+  setTimeout(()=>div.remove(),8000);
+}
+if(window.location.search.includes("success")) showThankYou();
+
+// ================== EMAIL + TELEGRAM + ЮKASSA ==================
 orderForm.onsubmit = async e => {
   e.preventDefault();
   if (isSubmitting) return;
@@ -91,8 +141,7 @@ orderForm.onsubmit = async e => {
   isSubmitting = true;
 
   const fd = new FormData(orderForm);
-  const productsList = cart.map(i => `• ${i.product.name} x${i.count}`).join("\n");
-
+  const productsList = cart.map(i => "• " + i.product.name + " x" + i.count).join("\n");
   const deliveryCost = (() => {
     switch (fd.get("delivery")) {
       case "СДЭК": return 450;
@@ -115,11 +164,9 @@ orderForm.onsubmit = async e => {
   };
 
   try {
-    // Email + Telegram
     await emailjs.send("service_6drenuw", "template_90b82bq", data);
     sendTelegramOrder(data);
 
-    // YooKassa
     const res = await fetch("/api/create-payment", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -130,32 +177,26 @@ orderForm.onsubmit = async e => {
       })
     });
 
-    const text = await res.text();
-    let json;
-    try { json = JSON.parse(text); } 
-    catch(err) { console.error("Invalid JSON from server:", text); alert("Ошибка сервера. Смотри консоль."); return; }
-
-    console.log("create-payment response:", json);
+    const json = await res.json();
 
     if (json.payment_url) {
       cart = [];
       renderProducts(products);
       updateOrderSum();
       orderModal.style.display = "none";
+      document.activeElement.blur();
 
-      if (window.Telegram?.WebApp?.openLink) {
+      if (window.Telegram?.WebApp) {
         Telegram.WebApp.openLink(json.payment_url);
       } else {
         window.open(json.payment_url, "_blank");
       }
-    } else {
-      console.error("Ошибка создания оплаты:", json);
-      alert("Ошибка создания оплаты. Подробности в консоли.");
-    }
+
+    } else alert("Ошибка создания оплаты");
 
   } catch (err) {
-    console.error("Ошибка отправки заказа:", err);
-    alert("Произошла ошибка при оформлении заказа. Попробуйте ещё раз.");
+    console.error(err);
+    alert("Ошибка отправки");
   } finally {
     isSubmitting = false;
   }
@@ -170,7 +211,27 @@ menuIcon.onclick = ()=>{ categories.classList.toggle("show"); };
 categories.querySelectorAll("div").forEach(c=>{ c.onclick=()=>categories.classList.remove("show"); });
 document.addEventListener("click", e=>{ if(!categories.contains(e.target) && !menuIcon.contains(e.target)) categories.classList.remove("show"); });
 
-// ================== РЕНДЕР ТОВАРОВ ==================
+// ================== ОБНОВЛЕНИЕ КОРЗИНЫ ==================
+function updateCartUI(){
+  const c = cart.reduce((s,i)=>s+i.count,0);
+  const t = cart.reduce((s,i)=>s+i.count*i.product.price,0);
+  cartCount.textContent=c;
+  cartTotal.textContent=t?"Итого: "+t+" ₽":"";  
+  cartTotal.style.display=inCartScreen?"block":"none";
+  checkoutButton.style.display=c&&inCartScreen?"block":"none";
+  footerButtons.style.display=inCartScreen?"none":"flex";
+  updateOrderSum();
+  searchInput.style.display = inCartScreen ? "none" : "block";
+}
+
+// ================== КОРЗИНА ==================
+checkoutButton.textContent="Оформить заказ";
+checkoutButton.onclick=()=>{ if(!cart.length)return alert("Корзина пуста!"); orderModal.style.display="flex"; updateOrderSum(); };
+
+// ================== ПОИСК ==================
+searchInput.oninput=()=>{ const val=searchInput.value.toLowerCase(); renderProducts(getCurrentList().filter(p=>p.name.toLowerCase().includes(val))); };
+
+// ================== РЕНДЕР ==================
 function renderProducts(list){
   productsEl.innerHTML="";
   list.forEach(p=>{
@@ -211,29 +272,15 @@ function getCurrentList(){ if(inCartScreen)return cart.map(i=>i.product); if(cur
 
 // ================== КАТЕГОРИИ ==================
 categories.querySelectorAll("div").forEach(c=>{
-  c.onclick=()=>{ inCartScreen=false; document.body.classList.remove("cart-mode"); currentCategory=c.dataset.category; renderProducts(getCurrentList()); categories.classList.remove("show"); };
+  c.onclick=()=>{
+    inCartScreen=false; document.body.classList.remove("cart-mode");
+    currentCategory=c.dataset.category;
+    renderProducts(getCurrentList());
+    categories.classList.remove("show");
+  };
 });
 mainTitle.onclick=()=>{ inCartScreen=false; document.body.classList.remove("cart-mode"); currentCategory="Главная"; renderProducts(products); };
 cartButton.onclick=()=>{ inCartScreen=true; document.body.classList.add("cart-mode"); renderProducts(cart.map(i=>i.product)); };
-
-// ================== ОБНОВЛЕНИЕ КОРЗИНЫ ==================
-function updateCartUI(){
-  const c = cart.reduce((s,i)=>s+i.count,0);
-  const t = cart.reduce((s,i)=>s+i.count*i.product.price,0);
-  cartCount.textContent=c;
-  cartTotal.textContent=t?"Итого: "+t+" ₽":""; 
-  cartTotal.style.display=inCartScreen?"block":"none";
-  checkoutButton.style.display=c&&inCartScreen?"block":"none";
-  footerButtons.style.display=inCartScreen?"none":"flex";
-  updateOrderSum();
-}
-
-// ================== КНОПКА ОФОРМЛЕНИЯ ==================
-checkoutButton.textContent="Оформить заказ";
-checkoutButton.onclick=()=>{ if(!cart.length)return alert("Корзина пуста!"); orderModal.style.display="flex"; updateOrderSum(); };
-
-// ================== ПОИСК ==================
-searchInput.oninput=()=>{ const val=searchInput.value.toLowerCase(); renderProducts(getCurrentList().filter(p=>p.name.toLowerCase().includes(val))); };
 
 // ================== СТАРТ ==================
 renderProducts(products);

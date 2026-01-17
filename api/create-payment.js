@@ -8,47 +8,53 @@ export default async function handler(req, res) {
   const { amount, order_id, return_url } = req.body;
 
   if (!amount || !order_id || !return_url) {
-    return res.status(400).json({ error: "Missing required fields" });
+    return res.status(400).json({ error: "Missing fields" });
   }
 
-  const shopId = 1247918;
-  const secretKey = "live_Tm1kL9j1HluFO7DIxbZzD816Z9cHGMVX8G8REsTHcVQ";
+  const shopId = 1247918; // твой shopId
+  const secretKey = "live_Tm1kL9j1HluFO7DIxbZzD816Z9cHGMVX8G8REsTHcVQ"; // твой секретный ключ
 
-  const paymentBody = {
-    amount: { value: Number(amount).toFixed(2), currency: "RUB" },
+  // Форматируем сумму как строку "1234.00"
+  const amountValue = Number(amount).toFixed(2);
+
+  const body = {
+    amount: { value: amountValue, currency: "RUB" },
     confirmation: { type: "redirect", return_url },
     capture: true,
     description: `Заказ №${order_id}`,
     metadata: { order_id: order_id.toString() }
   };
 
-  console.log("Создаём платеж в YooKassa:", paymentBody);
-
   try {
-    const response = await fetch("https://api.yookassa.ru/v3/payments", {
+    const response = await fetch(`https://api.yookassa.ru/v3/payments`, {
       method: "POST",
       headers: {
         "Authorization": "Basic " + Buffer.from(`${shopId}:${secretKey}`).toString("base64"),
         "Content-Type": "application/json"
       },
-      body: JSON.stringify(paymentBody)
+      body: JSON.stringify(body)
     });
 
-    const data = await response.json().catch(() => null);
+    const text = await response.text(); // всегда читаем текст
+    let data;
 
-    if (!response.ok) {
-      console.error("❌ YooKassa API Error:", data);
-      return res.status(500).json({
-        error: "YooKassa error",
-        status: response.status,
-        details: data
-      });
+    try {
+      data = JSON.parse(text); // пытаемся распарсить JSON
+    } catch (err) {
+      console.error("YooKassa returned non-JSON response:", text);
+      return res.status(500).json({ error: "Invalid JSON from YooKassa", details: text });
     }
 
-    res.status(200).json({ payment_url: data.confirmation.confirmation_url });
+    if (!response.ok) {
+      console.error("YooKassa error:", data);
+      return res.status(500).json({ error: "YooKassa error", details: data });
+    }
 
+    console.log("YooKassa payment created:", data);
+
+    res.status(200).json({ payment_url: data.confirmation.confirmation_url });
   } catch (err) {
-    console.error("❌ Server error while creating payment:", err);
+    console.error("Server error:", err);
     res.status(500).json({ error: "Server error", details: err.message });
   }
 }

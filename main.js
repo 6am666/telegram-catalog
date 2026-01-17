@@ -122,91 +122,35 @@ function openModal(p){
   modalPrice.textContent = p.price+" ₽"; 
   modalDescription.innerHTML = p.description.join("<br>"); 
   modal.style.display="flex"; 
+  modal.style.pointerEvents="auto"; 
 }
 
-function getCurrentList(){ 
-  if(inCartScreen) return cart.map(i=>i.product); 
-  if(currentCategory==="Главная") return products; 
-  return products.filter(p=>p.category===currentCategory); 
-}
+modalClose.onclick = ()=>{ modal.style.display="none"; modal.style.pointerEvents="none"; };
+modal.onclick = e=>{ if(e.target===modal){ modal.style.display="none"; modal.style.pointerEvents="none"; } };
 
-function updateCartUI(){
-  const c = cart.reduce((s,i)=>s+i.count,0);
-  const t = cart.reduce((s,i)=>s+i.count*i.product.price,0);
-  cartCount.textContent=c;
-  cartTotal.textContent=t?"Итого: "+t+" ₽":"";
-  cartTotal.style.display=inCartScreen?"block":"none";
-  checkoutButton.style.display=c&&inCartScreen?"block":"none";
-  footerButtons.style.display=inCartScreen?"none":"flex";
-}
+orderClose.onclick = ()=>{ orderModal.style.display="none"; orderModal.style.pointerEvents="none"; };
+orderModal.onclick = e=>{ if(e.target===orderModal){ orderModal.style.display="none"; orderModal.style.pointerEvents="none"; } };
 
-// ================== ОФОРМЛЕНИЕ ЗАКАЗА ==================
-orderForm.onsubmit = async e => {
-  e.preventDefault();
-  if (isSubmitting) return;
-  if (!cart.length) return alert("Корзина пуста!");
-  isSubmitting = true;
-
-  const fd = new FormData(orderForm);
-  const productsList = cart.map(i => "• " + i.product.name + " x" + i.count).join("\n");
-  const deliveryCost = (() => {
-    switch (fd.get("delivery")) {
-      case "СДЭК": return 450;
-      case "Почта России": return 550;
-      case "Яндекс.Доставка": return 400;
-      default: return 0;
-    }
-  })();
-  const total = cart.reduce((s, i) => s + i.count * i.product.price, 0) + deliveryCost;
-
-  const data = {
-    fullname: fd.get("fullname"),
-    phone: fd.get("phone"),
-    telegram: fd.get("telegram"),
-    delivery: fd.get("delivery"),
-    address: fd.get("address"),
-    products: productsList,
-    total
+// ================== ДРУГИЕ КНОПКИ ==================
+menuIcon.onclick = ()=>{ categories.classList.toggle("show"); };
+categories.querySelectorAll("div").forEach(c=>{
+  c.onclick=()=>{
+    inCartScreen=false;
+    currentCategory=c.dataset.category;
+    categories.classList.remove("show");
+    renderProducts(getCurrentList());
   };
+});
 
-  try {
-    sendTelegramOrder(data);
-
-    const res = await fetch("/api/create-payment", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        amount: total,
-        order_id: Date.now(),
-        return_url: window.location.origin + "?success=true"
-      })
-    });
-
-    const json = await res.json();
-    console.log("create-payment response:", json);
-
-    if(json.payment_url){
-      cart = [];
-      renderProducts(products);
-      orderModal.style.display="none";
-
-      if(window.Telegram?.WebApp){
-        Telegram.WebApp.openLink(json.payment_url);
-      } else {
-        window.open(json.payment_url, "_blank");
-      }
-    } else {
-      alert("Ошибка создания оплаты");
-    }
-
-  } catch(err){
-    console.error("Ошибка отправки заказа:", err);
-    alert("Ошибка отправки заказа");
-  } finally {
-    isSubmitting = false;
-  }
+cartButton.onclick = ()=>{
+  inCartScreen=true;
+  renderProducts(cart.map(i=>i.product));
 };
 
-// ================== ИНИЦИАЛИЗАЦИЯ ==================
+mainTitle.onclick = ()=>{
+  inCartScreen=false;
+  renderProducts(products);
+};
+
+// ================== ЗАПУСК ==================
 renderProducts(products);
-updateCartUI();

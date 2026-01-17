@@ -167,15 +167,17 @@ orderForm.onsubmit = async e=>{
     sendTelegramOrder(data);
 
     // ЮKassa через сервер Vercel
-    const serverUrl = "https://telegram-catalog.dimas-projects-ad3af5ff.vercel.app";
-    const res = await fetch(serverUrl + "/create-payment",{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({
-        amount: total,
-        order_id: Date.now(),
-        return_url: window.location.href + "?success=true"
-      })
+    const serverUrl = "";
+  const res = await fetch("/api/create-payment", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    amount: total,
+    order_id: Date.now(),
+    return_url: window.location.origin + "?success=true"
+  })
+});
+
     });
     const json = await res.json();
     if(json.payment_url){

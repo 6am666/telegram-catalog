@@ -267,25 +267,29 @@ body.cart-mode {
   background-color: #555 !important; 
   color: #fff !important;
 }
+/* Корзина */
 .cart-icon {
   position: relative;
   background: none;
   border: none;
   cursor: pointer;
-  color: #333;
+  color: white; /* белая иконка */
+  font-size: 28px; /* увеличенный размер */
 }
 
 .cart-icon svg {
-  vertical-align: middle;
+  width: 36px; /* размер иконки */
+  height: 36px;
+  fill: white;
 }
 
 #cartCount {
   position: absolute;
-  top: -8px;
-  right: -8px;
+  top: -10px;
+  right: -10px;
   background: red;
   color: white;
   border-radius: 50%;
-  font-size: 12px;
-  padding: 2px 5px;
+  font-size: 14px;
+  padding: 3px 6px;
 }

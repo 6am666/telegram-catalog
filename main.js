@@ -196,21 +196,23 @@ document.addEventListener("click", e => {
 function updateCartUI(){
   const c = cart.reduce((s,i)=>s+i.count,0);
   const t = cart.reduce((s,i)=>s+i.count*i.product.price,0);
-  cartCount.textContent=c;
-  cartTotal.textContent=t?"Итого: "+t+" ₽":"";
-  cartTotal.style.display=inCartScreen?"block":"none";
-  checkoutButton.style.display=c&&inCartScreen?"block":"none";
-  footerButtons.style.display=inCartScreen?"none":"flex";
+
+  cartCount.textContent = c;
+  cartTotal.textContent = t ? "Итого: " + t + " ₽" : "";
+
+  // ❗ СКРЫВАЕМ КНОПКУ КОРЗИНЫ В ШАПКЕ ТОЛЬКО В КОРЗИНЕ
+  cartButton.style.display = inCartScreen ? "none" : "flex";
+
+  // Итог и кнопка оформления только в корзине
+  cartTotal.style.display = inCartScreen && c ? "block" : "none";
+  checkoutButton.style.display = inCartScreen && c ? "block" : "none";
+
+  // Футер скрываем в корзине
+  footerButtons.style.display = inCartScreen ? "none" : "flex";
+
   updateOrderSum();
 }
 
-// ================== КОРЗИНА ==================
-checkoutButton.textContent="Оформить заказ";
-checkoutButton.onclick=()=>{
-  if(!cart.length)return alert("Корзина пуста!");
-  orderModal.style.display="flex";
-  updateOrderSum();
-};
 
 // ================== ПОИСК ==================
 searchInput.oninput=()=>{const val=searchInput.value.toLowerCase(); renderProducts(getCurrentList().filter(p=>p.name.toLowerCase().includes(val)));};

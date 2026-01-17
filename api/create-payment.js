@@ -1,6 +1,7 @@
-import fetch from "node-fetch";
+// api/create-payment.js
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
@@ -11,10 +12,10 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "Missing fields" });
   }
 
-  const shopId = 1247918; // твой shopId
-  const secretKey = "live_Tm1kL9j1HluFO7DIxbZzD816Z9cHGMVX8G8REsTHcVQ"; // твой секретный ключ
+  const shopId = 1247918;
+  const secretKey = "live_Tm1kL9j1HluFO7DIxbZzD816Z9cHGMVX8G8REsTHcVQ";
 
-  // Форматируем сумму как строку "1234.00"
+  // Преобразуем сумму в строку с двумя знаками после запятой
   const amountValue = Number(amount).toFixed(2);
 
   const body = {
@@ -26,7 +27,7 @@ export default async function handler(req, res) {
   };
 
   try {
-    const response = await fetch(`https://api.yookassa.ru/v3/payments`, {
+    const response = await fetch("https://api.yookassa.ru/v3/payments", {
       method: "POST",
       headers: {
         "Authorization": "Basic " + Buffer.from(`${shopId}:${secretKey}`).toString("base64"),
@@ -35,11 +36,10 @@ export default async function handler(req, res) {
       body: JSON.stringify(body)
     });
 
-    const text = await response.text(); // всегда читаем текст
+    const text = await response.text(); // читаем текст
     let data;
-
     try {
-      data = JSON.parse(text); // пытаемся распарсить JSON
+      data = JSON.parse(text);
     } catch (err) {
       console.error("YooKassa returned non-JSON response:", text);
       return res.status(500).json({ error: "Invalid JSON from YooKassa", details: text });
@@ -53,8 +53,9 @@ export default async function handler(req, res) {
     console.log("YooKassa payment created:", data);
 
     res.status(200).json({ payment_url: data.confirmation.confirmation_url });
+
   } catch (err) {
     console.error("Server error:", err);
     res.status(500).json({ error: "Server error", details: err.message });
   }
-}
+};

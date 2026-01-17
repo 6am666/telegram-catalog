@@ -267,3 +267,25 @@ body.cart-mode {
   background-color: #555 !important; 
   color: #fff !important;
 }
+.cart-icon {
+  position: relative;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #333;
+}
+
+.cart-icon svg {
+  vertical-align: middle;
+}
+
+#cartCount {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: red;
+  color: white;
+  border-radius: 50%;
+  font-size: 12px;
+  padding: 2px 5px;
+}

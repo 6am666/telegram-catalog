@@ -262,29 +262,3 @@ body{
   background-color: #555 !important; 
   color: #fff !important;
 }
-/* ПЛАВНЫЕ ПЕРЕХОДЫ */
-#products {
-  transition: opacity 0.35s ease, transform 0.35s ease;
-}
-.products-hide {
-  opacity: 0;
-  transform: translateY(10px);
-}
-.products-show {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* ЛЕТЯЩАЯ МИНИАТЮРА */
-.fly-img {
-  position: fixed;
-  z-index: 9999;
-  pointer-events: none;
-  border-radius: 12px;
-  transition:
-    top 0.7s cubic-bezier(.4,0,.2,1),
-    left 0.7s cubic-bezier(.4,0,.2,1),
-    width 0.7s cubic-bezier(.4,0,.2,1),
-    height 0.7s cubic-bezier(.4,0,.2,1),
-    opacity 0.7s;
-}

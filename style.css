@@ -8,6 +8,11 @@ body{
   overflow-x:hidden;
 }
 
+/* 🔴 НОВЫЙ КЛАСС для фикс фона при открытой корзине */
+body.cart-mode {
+  background-attachment: fixed;
+}
+
 /* Шапка */
 .header{
   position:fixed; top:0; left:0; right:0;
@@ -60,7 +65,7 @@ body{
 .categories.show{left:0;}
 .categories div{cursor:pointer;font-size:18px;}
 
-/* Поиск */
+/* 🔴 Поиск */
 .search{
   width:100%; padding:12px; border-radius:12px; border:none;
   margin-bottom:20px; font-size:16px; display:block; background:#333; color:white;

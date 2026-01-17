@@ -38,6 +38,20 @@ body.cart-mode {
 .header .menu-icon div{
   width:36px; height:4px; background:white; border-radius:2px;
 }
+.cart-btn{
+  position:absolute; right:16px; top:16px;
+  background:transparent; color:white;
+  font-size:20px; cursor:pointer;
+  display:flex; align-items:center;
+  border:none;
+}
+.cart-count{
+  display:inline-block;
+  background:white; color:black;
+  width:22px; height:22px;
+  border-radius:50%; text-align:center; line-height:22px;
+  font-size:14px; margin-left:4px;
+}
 
 /* Контейнер */
 .container{max-width:460px; margin:80px auto 40px; padding:16px; position:relative;}
@@ -103,7 +117,7 @@ body.cart-mode {
   border-radius:12px; 
   max-width:460px; 
   width:90%; 
-  text-align:center; 
+  text-align:center;
   position:relative;
 }
 .modal-close{
@@ -131,112 +145,3 @@ body.cart-mode {
 }
 .modal-desc p{margin:0;}
 .modal-desc p span:last-child{display:block; margin-top:8px; font-weight:500;}
-
-/* ================== ФОРМА ОФОРМЛЕНИЯ ЗАКАЗА ================== */
-.order-modal{
-  display:none;
-  position:fixed;
-  z-index:200;
-  left:0; top:0;
-  width:100%; height:100%;
-  background-color:rgba(0,0,0,0.8);
-  justify-content:center;
-  align-items:center;
-}
-.order-modal-content{
-  background:#1e1e1e;
-  padding:20px;
-  border-radius:12px;
-  width:90%;
-  max-width:400px;
-  color:white;
-  display:flex;
-  flex-direction:column;
-  position:relative;
-}
-.order-modal h2{
-  text-align:center;
-  font-size:20px;
-  font-weight:bold;
-  text-transform:uppercase;
-  margin-top:0;
-  margin-bottom:12px;
-}
-.order-modal-close{
-  position:absolute;
-  top:10px;
-  right:12px;
-  font-size:28px;
-  color:red;
-  font-weight:bold;
-  cursor:pointer;
-  transition: color 0.2s;
-}
-.order-modal-close:hover{
-  color:#ff5555;
-}
-.order-modal form {
-  display:flex;
-  flex-direction:column;
-  gap:4px;
-}
-.order-modal label {
-  font-size:14px;
-  color:#fff;
-  margin-bottom:2px;
-  display:block;
-}
-.order-modal input, .order-modal select {
-  padding:10px;
-  border-radius:6px;
-  border:none;
-  font-size:14px;
-  outline:none;
-  height:36px;
-  width:100%;
-  box-sizing:border-box;
-  caret-color: black; /* черный курсор только в форме */
-}
-#orderSum {
-  color:#aaa;
-  font-weight:500;
-  text-align:left;
-  margin:6px 0 8px 0;
-}
-.order-modal button {
-  padding:12px 0;
-  border-radius:10px;
-  border:none;
-  background:#333;
-  color:white;
-  font-size:16px;
-  cursor:pointer;
-  transition: background 0.2s;
-}
-.order-modal button:hover {
-  background:#555;
-}
-
-/* Футер */
-.footer-buttons{position:relative; display:flex; gap:12px; justify-content:center; margin:12px 0;}
-.footer-btn{padding:12px 18px; border-radius:20px; background:#333; color:white; font-size:16px; text-decoration:none; text-align:center;}
-.footer-btn:hover{background:#555;}
-
-/* Кнопка оформления заказа */
-.checkout-btn{position:relative; margin:20px auto; display:none; padding:14px 20px; border-radius:20px; border:none; background:#333; color:white; font-size:16px; cursor:pointer; text-align:center;}
-
-/* DaData подсказки */
-.suggestions-suggestions {
-  background-color: #333 !important;
-  color: #fff !important;
-  z-index: 999999 !important;
-}
-.suggestions-item {
-  background-color: #333 !important; 
-  color: #fff !important;
-  cursor: pointer;
-}
-.suggestions-item:hover {
-  background-color: #555 !important; 
-  color: #fff !important;
-}

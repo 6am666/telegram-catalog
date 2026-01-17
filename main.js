@@ -63,44 +63,6 @@ const products = [
   {id:9,name:"Тестовый товар",price:10,image:"https://via.placeholder.com/150",category:"Тест",description:["Тестовый товар для проверки.","","Срок изготовления — 1 день."]}
 ];
 
-// ================== ФОРМА ОФОРМЛЕНИЯ ==================
-orderForm.innerHTML = `
-<label>ФИО</label>
-<input type="text" name="fullname" placeholder="Введите ФИО" required>
-
-<label>Адрес</label>
-<input type="text" name="address" id="addressInput" placeholder="Город, улица, дом, индекс" required>
-
-<label>Доставка</label>
-<select name="delivery" id="deliverySelect" required>
-  <option value="" disabled selected>Выберите способ доставки</option>
-  <option value="СДЭК">СДЭК — 450₽</option>
-  <option value="Почта России">Почта России — 550₽</option>
-  <option value="Яндекс.Доставка">Яндекс.Доставка — 400₽</option>
-  <option value="Самовывоз">Самовывоз</option>
-</select>
-<div id="deliveryInfo" style="color:#aaa;margin-top:4px;"></div>
-
-<label>Номер телефона</label>
-<input type="text" name="phone" placeholder="Введите номер" required>
-
-<label>Telegram ID</label>
-<input type="text" name="telegram" placeholder="@id" required>
-
-<div id="orderSum" style="color:#aaa;margin:10px 0;font-weight:500;">Итоговая сумма: 0 ₽</div>
-
-<button type="submit">Оплатить</button>
-`;
-
-// ================== DaData ==================
-$(function(){
-  $("#addressInput").suggestions({
-    token:"4563b9c9765a1a2d7bf39e1c8944f7fadae05970",
-    type:"ADDRESS",
-    hint:false
-  });
-});
-
 // ================== РАССЧЁТ СУММЫ ==================
 const deliverySelectEl = document.getElementById("deliverySelect");
 const deliveryInfoEl = document.getElementById("deliveryInfo");
@@ -121,7 +83,7 @@ function updateOrderSum() {
 }
 deliverySelectEl.addEventListener("change", updateOrderSum);
 
-// ================== EMAIL + TELEGRAM + ЮKassa ==================
+// ================== ОФОРМЛЕНИЕ ЗАКАЗА + YooKassa ==================
 orderForm.onsubmit = async e => {
   e.preventDefault();
   if (isSubmitting) return;
@@ -140,7 +102,7 @@ orderForm.onsubmit = async e => {
     }
   })();
 
-  const total = cart.reduce((s,i)=>s+i.count*i.product.price,0)+deliveryCost;
+  const total = cart.reduce((s, i) => s + i.count * i.product.price, 0) + deliveryCost;
 
   const data = {
     fullname: fd.get("fullname"),
@@ -154,49 +116,53 @@ orderForm.onsubmit = async e => {
 
   try {
     // Email + Telegram
-    await emailjs.send("service_6drenuw","template_90b82bq",data);
+    await emailjs.send("service_6drenuw", "template_90b82bq", data);
     sendTelegramOrder(data);
 
     // YooKassa
-    const res = await fetch("/api/create-payment",{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({
+    const res = await fetch("/api/create-payment", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
         amount: total,
         order_id: Date.now(),
-        return_url: window.location.origin+"?success=true"
+        return_url: window.location.origin + "?success=true"
       })
     });
 
-    const json = await res.json();
-    console.log("create-payment response:",json);
+    const text = await res.text();
+    let json;
+    try { json = JSON.parse(text); } 
+    catch(err) { console.error("Invalid JSON from server:", text); alert("Ошибка сервера. Смотри консоль."); return; }
 
-    if(json.payment_url){
-      cart=[];
+    console.log("create-payment response:", json);
+
+    if (json.payment_url) {
+      cart = [];
       renderProducts(products);
       updateOrderSum();
-      orderModal.style.display="none";
+      orderModal.style.display = "none";
 
-      if(window.Telegram?.WebApp?.openLink){
+      if (window.Telegram?.WebApp?.openLink) {
         Telegram.WebApp.openLink(json.payment_url);
       } else {
-        window.open(json.payment_url,"_blank");
+        window.open(json.payment_url, "_blank");
       }
     } else {
-      console.error("Ошибка создания оплаты:",json);
+      console.error("Ошибка создания оплаты:", json);
       alert("Ошибка создания оплаты. Подробности в консоли.");
     }
 
-  } catch(err){
-    console.error("Ошибка отправки заказа:",err);
+  } catch (err) {
+    console.error("Ошибка отправки заказа:", err);
     alert("Произошла ошибка при оформлении заказа. Попробуйте ещё раз.");
   } finally {
-    isSubmitting=false;
+    isSubmitting = false;
   }
 };
 
 // ================== КНОПКА ЗАКРЫТИЯ ==================
-orderClose.onclick = ()=>{ orderModal.style.display="none"; document.activeElement.blur(); };
+orderClose.onclick = () => { orderModal.style.display="none"; document.activeElement.blur(); };
 orderModal.onclick = e => { if(e.target===orderModal){ orderModal.style.display="none"; document.activeElement.blur(); } };
 
 // ================== ГАМБУРГЕР ==================
@@ -245,12 +211,7 @@ function getCurrentList(){ if(inCartScreen)return cart.map(i=>i.product); if(cur
 
 // ================== КАТЕГОРИИ ==================
 categories.querySelectorAll("div").forEach(c=>{
-  c.onclick=()=>{
-    inCartScreen=false; document.body.classList.remove("cart-mode");
-    currentCategory=c.dataset.category;
-    renderProducts(getCurrentList());
-    categories.classList.remove("show");
-  };
+  c.onclick=()=>{ inCartScreen=false; document.body.classList.remove("cart-mode"); currentCategory=c.dataset.category; renderProducts(getCurrentList()); categories.classList.remove("show"); };
 });
 mainTitle.onclick=()=>{ inCartScreen=false; document.body.classList.remove("cart-mode"); currentCategory="Главная"; renderProducts(products); };
 cartButton.onclick=()=>{ inCartScreen=true; document.body.classList.add("cart-mode"); renderProducts(cart.map(i=>i.product)); };
@@ -260,7 +221,7 @@ function updateCartUI(){
   const c = cart.reduce((s,i)=>s+i.count,0);
   const t = cart.reduce((s,i)=>s+i.count*i.product.price,0);
   cartCount.textContent=c;
-  cartTotal.textContent=t?"Итого: "+t+" ₽":"";  
+  cartTotal.textContent=t?"Итого: "+t+" ₽":""; 
   cartTotal.style.display=inCartScreen?"block":"none";
   checkoutButton.style.display=c&&inCartScreen?"block":"none";
   footerButtons.style.display=inCartScreen?"none":"flex";
@@ -272,7 +233,7 @@ checkoutButton.textContent="Оформить заказ";
 checkoutButton.onclick=()=>{ if(!cart.length)return alert("Корзина пуста!"); orderModal.style.display="flex"; updateOrderSum(); };
 
 // ================== ПОИСК ==================
-searchInput.oninput=()=>{ const val=searchInput.value.toLowerCase(); renderProducts(getCurrentList().filter(p=>p.name.toLowerCase().includes(val)); };
+searchInput.oninput=()=>{ const val=searchInput.value.toLowerCase(); renderProducts(getCurrentList().filter(p=>p.name.toLowerCase().includes(val))); };
 
 // ================== СТАРТ ==================
 renderProducts(products);

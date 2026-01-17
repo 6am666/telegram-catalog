@@ -1,7 +1,9 @@
 import fetch from "node-fetch";
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
 
   const { amount, order_id, return_url } = req.body;
 
@@ -23,6 +25,7 @@ export default async function handler(req, res) {
 
     const data = await response.json();
     res.status(200).json({ payment_url: data.confirmation?.confirmation_url || null });
+
   } catch (err) {
     console.error("Ошибка на сервере:", err);
     res.status(500).json({ error: "Server error" });

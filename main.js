@@ -153,10 +153,18 @@ orderForm.onsubmit=async e=>{
   try{
     sendTelegramOrder(data);
 
-    const res = await fetch("/api/create-payment",{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({amount:total, order_id:Date.now(), return_url:window.location.href+"?success=true"})
+   const API_URL = "https://telegram-catalog-alpha.vercel.app/api/create-payment";
+
+const res = await fetch(API_URL, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    amount: total,
+    order_id: Date.now(),
+    return_url: "https://telegram-catalog-alpha.vercel.app/"
+  })
+});
+
     });
     const json=await res.json();
     console.log("create-payment response:",json);

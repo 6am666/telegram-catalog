@@ -1,20 +1,29 @@
-// Для Vercel используем динамический fetch, без require/import
-const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+// /api/create-payment.js
+import fetch from "node-fetch";
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
 
   try {
     const { amount, order_id, return_url } = req.body;
+
     if (!amount || !order_id || !return_url) {
       return res.status(400).json({ error: "Missing fields" });
     }
 
+    // === Настройки магазина ===
     const shopId = 1247918; // твой shopId
-    const secretKey = "live_Tm1kL9j1HluFO7DIxbZzD816Z9cHGMVX8G8REsTHcVQ";
+    const secretKey = live_Tm1kL9j1HluFO7DIxbZzD816Z9cHGMVX8G8REsTHcVQ; // хранится в Vercel env
+
+    if (!secretKey) {
+      console.error("YOOKASSA_SECRET_KEY is not set in environment");
+      return res.status(500).json({ error: "Server misconfiguration" });
+    }
 
     const body = {
-      amount: { value: amount.toString(), currency: "RUB" },
+      amount: { value: amount.toFixed(2), currency: "RUB" },
       confirmation: { type: "redirect", return_url },
       capture: true,
       description: `Заказ №${order_id}`,
@@ -30,24 +39,24 @@ export default async function handler(req, res) {
       body: JSON.stringify(body)
     });
 
-    const text = await response.text();
-    let data;
-    try { data = JSON.parse(text); } 
-    catch(err) { 
-      console.error("YooKassa invalid JSON:", text); 
-      return res.status(500).json({ error: "Invalid JSON from YooKassa", details: text }); 
-    }
+    const data = await response.json();
 
     if (!response.ok) {
-      console.error("YooKassa error:", data);
-      return res.status(500).json({ error: "YooKassa error", details: data });
+      console.error("YooKassa API error:", data);
+      return res.status(500).json({ error: "YooKassa API error", details: data });
     }
 
-    // Возвращаем ссылку на оплату
-    return res.status(200).json({ payment_url: data.confirmation.confirmation_url });
+    if (!data.confirmation || !data.confirmation.confirmation_url) {
+      console.error("No confirmation URL in response:", data);
+      return res.status(500).json({ error: "No confirmation URL", details: data });
+    }
 
-  } catch(err) {
+    console.log("YooKassa payment created:", data.id);
+
+    res.status(200).json({ payment_url: data.confirmation.confirmation_url });
+
+  } catch (err) {
     console.error("Server error:", err);
-    return res.status(500).json({ error: "Server error", details: err.message });
+    res.status(500).json({ error: "Server error", details: err.message });
   }
 }

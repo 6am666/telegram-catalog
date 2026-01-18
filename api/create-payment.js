@@ -15,7 +15,7 @@ export default async function handler(req, res) {
 
     // ====== НАСТРОЙКИ YOOKASSA ======
     const shopId = "1247918";
-    const secretKey = process.env.YOOKASSA_SECRET_KEY;
+    const secretKey = "live_Tm1kL9j1HluFO7DIxbZzD816Z9cHGMVX8G8REsTHcVQ";
 
     if (!secretKey) {
       return res.status(500).json({ error: "YooKassa secret key not set" });
@@ -82,3 +82,4 @@ export default async function handler(req, res) {
     });
   }
 }
+

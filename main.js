@@ -156,7 +156,7 @@ orderForm.onsubmit=async e=>{
   try{
     sendTelegramOrder(data);
 
-    // ================== FIX для Mini App ==================
+    // ======== FIX для Mini App ========
     const res = await fetch(API_CREATE_PAYMENT,{
       method:"POST",
       headers:{"Content-Type":"application/json"},
@@ -169,8 +169,9 @@ orderForm.onsubmit=async e=>{
     if(json.payment_url){
       cart=[]; renderProducts(products); updateCartUI();
       orderModal.style.display="none";
+      document.activeElement.blur();
 
-      // ================== FIX для Mini App ==================
+      // ======== FIX для Mini App ========
       if (window.Telegram?.WebApp) {
         Telegram.WebApp.openLink(json.payment_url);
       } else {
@@ -185,7 +186,57 @@ orderForm.onsubmit=async e=>{
 };
 
 // ================== РЕНДЕР ==================
-// … остальной код без изменений …
+function renderProducts(list){
+  productsEl.innerHTML="";
+  list.forEach(p=>{
+    const card=document.createElement("div"); card.className="product";
+    const img=document.createElement("img"); img.src=p.image; img.onclick=()=>openModal(p);
+    const title=document.createElement("h3"); title.textContent=p.name;
+    const price=document.createElement("p"); price.textContent=p.price+" ₽";
+
+    const controls=document.createElement("div"); controls.className="count-block";
+    const item=cart.find(i=>i.product.id===p.id);
+
+    if(item){
+      const minus=document.createElement("button"); minus.textContent="–"; minus.onclick=e=>{e.stopPropagation();removeFromCart(p)};
+      const count=document.createElement("div"); count.className="count-number"; count.textContent=item.count;
+      const plus=document.createElement("button"); plus.textContent="+"; plus.onclick=e=>{e.stopPropagation();addToCart(p)};
+      controls.append(minus,count,plus);
+    }else{
+      const btn=document.createElement("button"); btn.textContent="В корзину"; btn.onclick=e=>{e.stopPropagation();addToCart(p)};
+      controls.appendChild(btn);
+    }
+    card.append(img,title,price,controls);
+    productsEl.appendChild(card);
+  });
+  updateCartUI();
+}
+
+// ================== ДОБАВЛЕНИЕ/УДАЛЕНИЕ ==================
+function addToCart(p){ const i = cart.find(x=>x.product.id===p.id); i?i.count++:cart.push({product:p,count:1}); renderProducts(getCurrentList()); }
+function removeFromCart(p){ const i = cart.find(x=>x.product.id===p.id); if(!i)return; i.count--; if(i.count===0)cart=cart.filter(x=>x!==i); renderProducts(getCurrentList()); }
+
+// ================== МОДАЛКА ==================
+function openModal(p){ modalImage.src=p.image; modalTitle.textContent=p.name; modalPrice.textContent=p.price+" ₽"; modalDescription.innerHTML=p.description.join("<br>"); modal.style.display="flex"; }
+modalClose.onclick=()=>modal.style.display="none";
+modal.onclick=e=>{if(e.target===modal)modal.style.display="none";}
+
+// ================== GET LIST ==================
+function getCurrentList(){ if(inCartScreen)return cart.map(i=>i.product); if(currentCategory==="Главная")return products; return products.filter(p=>p.category===currentCategory); }
+
+// ================== КАТЕГОРИИ ==================
+categories.querySelectorAll("div").forEach(c=>{
+  c.onclick=()=>{
+    inCartScreen=false; document.body.classList.remove("cart-mode");
+    currentCategory=c.dataset.category;
+    renderProducts(getCurrentList());
+    categories.classList.remove("show");
+  };
+});
+mainTitle.onclick=()=>{ inCartScreen=false; document.body.classList.remove("cart-mode"); currentCategory="Главная"; renderProducts(products); };
+cartButton.onclick=()=>{ inCartScreen=true; document.body.classList.add("cart-mode"); renderProducts(cart.map(i=>i.product)); };
+
+// ================== СТАРТ ==================
 renderProducts(products);
 updateCartUI();
 updateOrderSum();

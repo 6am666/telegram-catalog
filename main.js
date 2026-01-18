@@ -165,8 +165,14 @@ orderForm.onsubmit=async e=>{
       cart=[]; renderProducts(products); updateCartUI();
       orderModal.style.display="none";
 
-      if(window.Telegram?.WebApp) Telegram.WebApp.openLink(json.payment_url);
-      else window.open(json.payment_url,"_blank");
+      if (window.Telegram && Telegram.WebApp && typeof Telegram.WebApp.openLink === "function") {
+  Telegram.WebApp.openLink(json.payment_url, {
+    try_instant_view: false
+  });
+} else {
+  window.open(json.payment_url, "_blank", "noopener,noreferrer");
+}
+
     } else alert("Ошибка создания оплаты");
   }catch(err){
     console.error("Ошибка оплаты:",err);

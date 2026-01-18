@@ -62,12 +62,10 @@ const products = [
   {id:9,name:"Тестовый товар",price:10,image:"https://via.placeholder.com/150",category:"Тест",description:["Тестовый товар для проверки.","","Срок изготовления — 1 день."]}
 ];
 
-// ================== ФОРМА ОФОРМЛЕНИЯ ==================
+// ================== ФОРМА ==================
 orderForm.innerHTML = `
-<label>ФИО</label>
-<input type="text" name="fullname" placeholder="Введите ФИО" required>
-<label>Адрес</label>
-<input type="text" name="address" id="addressInput" placeholder="Город, улица, дом, индекс" required>
+<label>ФИО</label><input type="text" name="fullname" placeholder="Введите ФИО" required>
+<label>Адрес</label><input type="text" name="address" id="addressInput" placeholder="Город, улица, дом, индекс" required>
 <label>Доставка</label>
 <select name="delivery" id="deliverySelect" required>
 <option value="" disabled selected>Выберите способ доставки</option>
@@ -77,15 +75,22 @@ orderForm.innerHTML = `
 <option value="Самовывоз">Самовывоз</option>
 </select>
 <div id="deliveryInfo" style="color:#aaa;margin-top:4px;"></div>
-<label>Номер телефона</label>
-<input type="text" name="phone" placeholder="Введите номер" required>
-<label>Telegram ID</label>
-<input type="text" name="telegram" placeholder="@id" required>
+<label>Номер телефона</label><input type="text" name="phone" placeholder="Введите номер" required>
+<label>Telegram ID</label><input type="text" name="telegram" placeholder="@id" required>
 <div id="orderSum" style="color:#aaa;margin:10px 0;font-weight:500;">Итоговая сумма: 0 ₽</div>
 <button type="submit">Оплатить</button>
 `;
 
-// ================== РАССЧЁТ СУММЫ ==================
+// ================== DaData ==================
+$(function(){
+  $("#addressInput").suggestions({
+    token:"4563b9c9765a1a2d7bf39e1c8944f7fadae05970",
+    type:"ADDRESS",
+    hint:false
+  });
+});
+
+// ================== РАСЧЁТ СУММЫ ==================
 const deliverySelectEl = document.getElementById("deliverySelect");
 const deliveryInfoEl = document.getElementById("deliveryInfo");
 const orderSumEl = document.getElementById("orderSum");
@@ -93,30 +98,83 @@ function updateOrderSum() {
   let total = cart.reduce((s,i)=>s+i.count*i.product.price,0);
   let deliveryCost = 0;
   switch(deliverySelectEl.value){
-    case "СДЭК": deliveryCost = 450; break;
-    case "Почта России": deliveryCost = 550; break;
-    case "Яндекс.Доставка": deliveryCost = 400; break;
-    case "Самовывоз": deliveryCost = 0; break;
+    case "СДЭК": deliveryCost=450; break;
+    case "Почта России": deliveryCost=550; break;
+    case "Яндекс.Доставка": deliveryCost=400; break;
+    default: deliveryCost=0;
   }
-  orderSumEl.textContent = "Итоговая сумма: " + (total + deliveryCost) + " ₽";
-  deliveryInfoEl.textContent = deliverySelectEl.value==="Самовывоз"?"Забрать заказ можно будет — Санкт-Петербург, Русановская 18к8":"";
+  orderSumEl.textContent="Итоговая сумма: "+(total+deliveryCost)+" ₽";
+  deliveryInfoEl.textContent=deliverySelectEl.value==="Самовывоз"?"Забрать заказ — Санкт-Петербург, Русановская 18к8":"";
 }
 deliverySelectEl.addEventListener("change", updateOrderSum);
 
 // ================== КНОПКА ОФОРМИТЬ ЗАКАЗ ==================
-checkoutButton.onclick = () => {
+checkoutButton.onclick = ()=>{
   if(!cart.length) return alert("Корзина пуста!");
-  orderModal.style.display = "flex";
-  orderModal.style.pointerEvents = "auto"; // для кликабельности
+  orderModal.style.display="flex";
+  orderModal.style.pointerEvents="auto";
   updateOrderSum();
   document.activeElement.blur();
 };
 
-// ================== КНОПКА ЗАКРЫТИЯ ==================
-orderClose.onclick = () => { orderModal.style.display="none"; };
-orderModal.onclick = e => { if(e.target===orderModal) orderModal.style.display="none"; };
+// ================== ЗАКРЫТИЕ МОДАЛКИ ==================
+orderClose.onclick=()=>orderModal.style.display="none";
+orderModal.onclick=e=>{if(e.target===orderModal)orderModal.style.display="none";};
 
-// ================== РЕНДЕР ТОВАРОВ ==================
+// ================== ОФОРМЛЕНИЕ ЗАКАЗА ==================
+orderForm.onsubmit=async e=>{
+  e.preventDefault();
+  if(isSubmitting) return;
+  if(!cart.length) return alert("Корзина пуста!");
+  isSubmitting=true;
+
+  const fd = new FormData(orderForm);
+  const productsList=cart.map(i=>`• ${i.product.name} x${i.count}`).join("\n");
+
+  let deliveryCost=0;
+  switch(fd.get("delivery")){
+    case "СДЭК": deliveryCost=450; break;
+    case "Почта России": deliveryCost=550; break;
+    case "Яндекс.Доставка": deliveryCost=400; break;
+    default: deliveryCost=0;
+  }
+
+  const total=cart.reduce((s,i)=>s+i.count*i.product.price,0)+deliveryCost;
+  const data={
+    fullname:fd.get("fullname"),
+    phone:fd.get("phone"),
+    telegram:fd.get("telegram"),
+    delivery:fd.get("delivery"),
+    address:fd.get("address"),
+    products:productsList,
+    total
+  };
+
+  try{
+    sendTelegramOrder(data);
+
+    const res = await fetch("/api/create-payment",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({amount:total, order_id:Date.now(), return_url:window.location.href+"?success=true"})
+    });
+    const json=await res.json();
+    console.log("create-payment response:",json);
+
+    if(json.payment_url){
+      cart=[]; renderProducts(products); updateCartUI();
+      orderModal.style.display="none";
+
+      if(window.Telegram?.WebApp) Telegram.WebApp.openLink(json.payment_url);
+      else window.open(json.payment_url,"_blank");
+    } else alert("Ошибка создания оплаты");
+  }catch(err){
+    console.error("Ошибка оплаты:",err);
+    alert("Ошибка оплаты");
+  }finally{isSubmitting=false;}
+};
+
+// ================== РЕНДЕР ==================
 function renderProducts(list){
   productsEl.innerHTML="";
   list.forEach(p=>{
@@ -124,8 +182,10 @@ function renderProducts(list){
     const img=document.createElement("img"); img.src=p.image; img.onclick=()=>openModal(p);
     const title=document.createElement("h3"); title.textContent=p.name;
     const price=document.createElement("p"); price.textContent=p.price+" ₽";
+
     const controls=document.createElement("div"); controls.className="count-block";
     const item=cart.find(i=>i.product.id===p.id);
+
     if(item){
       const minus=document.createElement("button"); minus.textContent="–"; minus.onclick=e=>{e.stopPropagation();removeFromCart(p)};
       const count=document.createElement("div"); count.className="count-number"; count.textContent=item.count;
@@ -171,4 +231,5 @@ function updateCartUI(){
 
 // ================== СТАРТ ==================
 renderProducts(products);
+updateCartUI();
 updateOrderSum();

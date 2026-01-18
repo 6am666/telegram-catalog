@@ -27,12 +27,16 @@ const orderClose = document.getElementById("orderClose");
 const orderForm = document.getElementById("orderForm");
 
 // ================== API ==================
-const API_CREATE_PAYMENT =
-  "https://telegram-catalog-alpha.vercel.app/api/create-payment";
+const API_CREATE_PAYMENT = "https://telegram-catalog-alpha.vercel.app/api/create-payment";
 
 // ================== TELEGRAM ==================
 const TG_BOT_TOKEN = "7999576459:AAHmaw0x4Ux_pXaL2VjxVlqYQByWVVHVtx4";
 const TG_CHAT_IDS = ["531170149", "496792657"];
+
+if (window.Telegram?.WebApp) {
+  Telegram.WebApp.ready();
+  Telegram.WebApp.expand();
+}
 
 function sendTelegramOrder(order) {
   const text =
@@ -46,14 +50,11 @@ function sendTelegramOrder(order) {
     "СУММА: " + order.total + " ₽";
 
   TG_CHAT_IDS.forEach(chat_id => {
-    fetch(
-      "https://api.telegram.org/bot" +
-        TG_BOT_TOKEN +
-        "/sendMessage?chat_id=" +
-        encodeURIComponent(chat_id) +
-        "&text=" +
-        encodeURIComponent(text)
-    ).catch(() => {});
+    const url =
+      "https://api.telegram.org/bot" + TG_BOT_TOKEN +
+      "/sendMessage?chat_id=" + encodeURIComponent(chat_id) +
+      "&text=" + encodeURIComponent(text);
+    fetch(url).catch(() => {});
   });
 }
 
@@ -67,8 +68,27 @@ const products = [
   {id:6,name:"Обвес Lighter",price:3600,image:"https://i.pinimg.com/736x/e8/cb/c2/e8cbc2287025b23930c20e030755a0b5.jpg",category:"Обвесы",description:["Материал изделия:","Фурнитура из нержавеющей стали;","Хирургическая и нержавеющая сталь.","","Срок изготовления — до 5 рабочих дней."]},
   {id:7,name:"Обвес Star",price:2000,image:"https://i.pinimg.com/736x/16/36/75/163675cf410dfc51ef97238bbbab1056.jpg",category:"Обвесы",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
   {id:8,name:"Серьги Moonlight",price:2000,image:"https://i.pinimg.com/736x/93/e4/e5/93e4e5ee7594f6ef436f8b994ef04016.jpg",category:"Серьги",description:["Материал изделия:","Лунные бусины;","Хирургическая сталь;","Фурнитура из нержавеющей и хирургической стали.","","Срок изготовления — до 5 рабочих дней."]},
-  {id:9,name:"Тестовый товар",price:10,image:"https://via.placeholder.com/150",category:"Тест",description:["Тест"] }
+  {id:9,name:"Тестовый товар",price:10,image:"https://via.placeholder.com/150",category:"Тест",description:["Тестовый товар"]},
 ];
+
+// ================== ФОРМА ==================
+orderForm.innerHTML = `
+<label>ФИО</label><input type="text" name="fullname" required>
+<label>Адрес</label><input type="text" name="address" id="addressInput" required>
+<label>Доставка</label>
+<select name="delivery" id="deliverySelect" required>
+<option value="" disabled selected>Выберите способ доставки</option>
+<option value="СДЭК">СДЭК — 450₽</option>
+<option value="Почта России">Почта России — 550₽</option>
+<option value="Яндекс.Доставка">Яндекс.Доставка — 400₽</option>
+<option value="Самовывоз">Самовывоз</option>
+</select>
+<div id="deliveryInfo" style="color:#aaa;margin-top:4px;"></div>
+<label>Телефон</label><input type="text" name="phone" required>
+<label>Telegram ID</label><input type="text" name="telegram" required>
+<div id="orderSum" style="margin:10px 0;">Итоговая сумма: 0 ₽</div>
+<button type="submit">Оплатить</button>
+`;
 
 // ================== ОФОРМЛЕНИЕ ЗАКАЗА ==================
 orderForm.onsubmit = async e => {
@@ -77,21 +97,14 @@ orderForm.onsubmit = async e => {
   isSubmitting = true;
 
   const fd = new FormData(orderForm);
-
-  const productsList = cart
-    .map(i => `• ${i.product.name} x${i.count}`)
-    .join("\n");
+  const productsList = cart.map(i => `• ${i.product.name} x${i.count}`).join("\n");
 
   let deliveryCost = 0;
-  switch (fd.get("delivery")) {
-    case "СДЭК": deliveryCost = 450; break;
-    case "Почта России": deliveryCost = 550; break;
-    case "Яндекс.Доставка": deliveryCost = 400; break;
-  }
+  if (fd.get("delivery") === "СДЭК") deliveryCost = 450;
+  if (fd.get("delivery") === "Почта России") deliveryCost = 550;
+  if (fd.get("delivery") === "Яндекс.Доставка") deliveryCost = 400;
 
-  const total =
-    cart.reduce((s, i) => s + i.count * i.product.price, 0) +
-    deliveryCost;
+  const total = cart.reduce((s, i) => s + i.count * i.product.price, 0) + deliveryCost;
 
   sendTelegramOrder({
     fullname: fd.get("fullname"),
@@ -117,17 +130,15 @@ orderForm.onsubmit = async e => {
     const json = await res.json();
     if (!json.payment_url) throw new Error();
 
-    orderModal.style.display = "none";
     cart = [];
     renderProducts(products);
     updateCartUI();
+    orderModal.style.display = "none";
 
-    if (window.Telegram && Telegram.WebApp) {
-      Telegram.WebApp.openLink(json.payment_url, {
-        try_instant_view: false
-      });
+    if (window.Telegram?.WebApp) {
+      Telegram.WebApp.openLink(json.payment_url);
     } else {
-      window.open(json.payment_url, "_blank", "noopener,noreferrer");
+      window.location.href = json.payment_url;
     }
   } catch {
     alert("Ошибка оплаты");
@@ -145,6 +156,7 @@ function renderProducts(list) {
     card.innerHTML = `<img src="${p.image}"><h3>${p.name}</h3><p>${p.price} ₽</p>`;
     productsEl.appendChild(card);
   });
+  updateCartUI();
 }
 
 function updateCartUI() {
@@ -152,3 +164,4 @@ function updateCartUI() {
 }
 
 renderProducts(products);
+updateCartUI();

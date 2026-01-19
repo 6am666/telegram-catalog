@@ -1,83 +1,94 @@
-module.exports = async function handler(req, res) {
-  console.log("BODY:", req.body);
-  console.log("ENV SECRET:", !!process.env.YOOKASSA_SECRET_KEY);
+import fetch from "node-fetch";
+import crypto from "crypto";
+
+export default async function handler(req, res) {
+  // ===== CORS (на всякий случай) =====
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
 
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
+  console.log("BODY:", req.body);
+  console.log("ENV SECRET EXISTS:", !!process.env.YOOKASSA_SECRET_KEY);
+
   try {
     const { amount, order_id, return_url } = req.body;
 
-    if (!amount || !order_id) {
-      return res.status(400).json({ error: "Missing amount or order_id" });
+    if (!amount || amount <= 0) {
+      return res.status(400).json({ error: "Invalid amount" });
     }
 
     const shopId = process.env.YOOKASSA_SHOP_ID;
     const secretKey = process.env.YOOKASSA_SECRET_KEY;
 
     if (!shopId || !secretKey) {
-      return res.status(500).json({
-        error: "YooKassa credentials missing",
-        shopId: !!shopId,
-        secretKey: !!secretKey
-      });
+      return res.status(500).json({ error: "YooKassa keys not set" });
     }
+
+    const idempotenceKey = crypto.randomUUID();
+
+    const payload = {
+      amount: {
+        value: amount.toFixed(2),
+        currency: "RUB"
+      },
+      confirmation: {
+        type: "redirect",
+        return_url: return_url || "https://google.com"
+      },
+      capture: true,
+      description: `Заказ #${order_id || Date.now()}`
+    };
 
     const auth = Buffer.from(`${shopId}:${secretKey}`).toString("base64");
 
-    const response = await fetch("https://api.yookassa.ru/v3/payments", {
+    const ykRes = await fetch("https://api.yookassa.ru/v3/payments", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Idempotence-Key": String(order_id),
-        "Authorization": `Basic ${auth}`
+        "Authorization": `Basic ${auth}`,
+        "Idempotence-Key": idempotenceKey
       },
-      body: JSON.stringify({
-        amount: {
-          value: amount.toFixed(2),
-          currency: "RUB"
-        },
-        confirmation: {
-          type: "redirect",
-          return_url: return_url || "https://example.com"
-        },
-        capture: true,
-        description: `Заказ #${order_id}`
-      })
+      body: JSON.stringify(payload)
     });
 
-    const text = await response.text();
+    const ykData = await ykRes.json();
 
-    let data;
-    try {
-      data = JSON.parse(text);
-    } catch (e) {
-      console.error("YooKassa non-JSON:", text);
+    console.log("YooKassa response:", ykData);
+
+    if (!ykRes.ok) {
       return res.status(500).json({
-        error: "YooKassa returned non-JSON",
-        raw: text
+        error: "YooKassa error",
+        details: ykData
       });
     }
 
-    if (!response.ok) {
-      console.error("YooKassa error:", data);
+    const paymentUrl = ykData?.confirmation?.confirmation_url;
+
+    if (!paymentUrl) {
       return res.status(500).json({
-        error: "YooKassa API error",
-        details: data
+        error: "No confirmation_url",
+        details: ykData
       });
     }
 
+    // ===== ВОТ ЕДИНСТВЕННО ЧТО НУЖНО MINI APP =====
     return res.status(200).json({
-      payment_id: data.id,
-      payment_url: data.confirmation?.confirmation_url
+      payment_url: paymentUrl
     });
 
   } catch (err) {
     console.error("Server error:", err);
     return res.status(500).json({
       error: "Server error",
-      details: err.message
+      message: err.message
     });
   }
-};
+}

@@ -86,6 +86,7 @@ categories.querySelectorAll("div").forEach(cat => {
   cat.onclick = () => {
     currentCategory = cat.dataset.category;
     inCartScreen = false;
+    document.body.classList.remove("cart-mode");
     renderProducts(getCurrentList());
     categories.classList.remove("show");
   };
@@ -101,13 +102,25 @@ function updateOrderSum(){
   if(deliverySelectEl.value === "Почта России") total += 550;
   orderSumEl.textContent = "Итого: " + total + " ₽";
 }
+deliverySelectEl.addEventListener("change", updateOrderSum);
 
-deliverySelectEl.onchange = updateOrderSum;
+// ================== КОРЗИНА ==================
+cartButton.onclick=()=>{
+  inCartScreen=true;
+  document.body.classList.add("cart-mode");
+  renderProducts(cart.map(i=>i.product));
+};
+mainTitle.onclick=()=>{
+  inCartScreen=false;
+  document.body.classList.remove("cart-mode");
+  currentCategory="Главная";
+  renderProducts(products);
+};
 
-// ================== ОПЛАТА (КЛЮЧЕВОЕ) ==================
+// ================== ОПЛАТА (ПОЧИНЕНО) ==================
 orderForm.addEventListener("submit", async e => {
   e.preventDefault();
-  if(isSubmitting) return;
+  if(isSubmitting || !cart.length) return;
   isSubmitting = true;
 
   let total = cart.reduce((s,i)=>s+i.count*i.product.price,0);
@@ -129,12 +142,7 @@ orderForm.addEventListener("submit", async e => {
     );
 
     const json = await res.json();
-
-    if (!json.payment_url) {
-      alert("Ошибка создания оплаты");
-      isSubmitting = false;
-      return;
-    }
+    if(!json.payment_url) return alert("Ошибка создания оплаты");
 
     Telegram.WebApp.openLink(json.payment_url);
 
@@ -145,28 +153,87 @@ orderForm.addEventListener("submit", async e => {
   }
 });
 
-// ================== РЕНДЕР ==================
+// ================== РЕНДЕР ТОВАРОВ ==================
 function renderProducts(list){
   productsEl.innerHTML="";
   list.forEach(p=>{
-    const d=document.createElement("div");
-    d.className="product";
-    d.innerHTML=`<img src="${p.image}"><h3>${p.name}</h3><p>${p.price} ₽</p>`;
-    d.onclick=()=>addToCart(p);
-    productsEl.appendChild(d);
+    const card=document.createElement("div");
+    card.className="product";
+
+    const img=document.createElement("img");
+    img.src=p.image;
+    img.onclick=()=>openModal(p);
+
+    const title=document.createElement("h3");
+    title.textContent=p.name;
+
+    const price=document.createElement("p");
+    price.textContent=p.price+" ₽";
+
+    const controls=document.createElement("div");
+    controls.className="count-block";
+
+    const item=cart.find(i=>i.product.id===p.id);
+    if(item){
+      const minus=document.createElement("button");
+      minus.textContent="–";
+      minus.onclick=e=>{e.stopPropagation();removeFromCart(p)};
+      const count=document.createElement("div");
+      count.textContent=item.count;
+      const plus=document.createElement("button");
+      plus.textContent="+";
+      plus.onclick=e=>{e.stopPropagation();addToCart(p)};
+      controls.append(minus,count,plus);
+    }else{
+      const btn=document.createElement("button");
+      btn.textContent="В корзину";
+      btn.onclick=e=>{e.stopPropagation();addToCart(p)};
+      controls.append(btn);
+    }
+
+    card.append(img,title,price,controls);
+    productsEl.appendChild(card);
   });
+  updateCartUI();
 }
 
+// ================== КОРЗИНА ==================
+function updateCartUI(){
+  cartCount.textContent = cart.reduce((s,i)=>s+i.count,0);
+  cartTotal.textContent = cart.length
+    ? "Итого: "+cart.reduce((s,i)=>s+i.count*i.product.price,0)+" ₽"
+    : "";
+}
+
+// ================== HELPERS ==================
 function addToCart(p){
   const i=cart.find(x=>x.product.id===p.id);
   i?i.count++:cart.push({product:p,count:1});
-  updateOrderSum();
+  renderProducts(getCurrentList());
 }
-
+function removeFromCart(p){
+  const i=cart.find(x=>x.product.id===p.id);
+  if(!i) return;
+  i.count--;
+  if(!i.count) cart=cart.filter(x=>x!==i);
+  renderProducts(getCurrentList());
+}
 function getCurrentList(){
+  if(inCartScreen) return cart.map(i=>i.product);
   if(currentCategory==="Главная") return products;
   return products.filter(p=>p.category===currentCategory);
 }
+
+// ================== МОДАЛКА ==================
+function openModal(p){
+  modalImage.src=p.image;
+  modalTitle.textContent=p.name;
+  modalPrice.textContent=p.price+" ₽";
+  modalDescription.innerHTML=p.description.join("<br>");
+  modal.style.display="flex";
+}
+modalClose.onclick=()=>modal.style.display="none";
+modal.onclick=e=>{if(e.target===modal) modal.style.display="none";}
 
 // ================== СТАРТ ==================
 renderProducts(products);

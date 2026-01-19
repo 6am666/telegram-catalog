@@ -2,7 +2,6 @@
 let cart = [];
 let inCartScreen = false;
 let currentCategory = "Главная";
-let isSubmitting = false;
 
 const productsEl = document.getElementById("products");
 const searchInput = document.getElementById("searchInput");
@@ -10,7 +9,7 @@ const cartButton = document.getElementById("cartButton");
 const cartCount = document.getElementById("cartCount");
 const cartTotal = document.getElementById("cartTotal");
 const checkoutButton = document.getElementById("checkoutButton");
-const categories = document.getElementById("categories");
+const categoriesEl = document.getElementById("categories");
 const mainTitle = document.getElementById("mainTitle");
 const menuIcon = document.getElementById("menuIcon");
 const footerButtons = document.getElementById("footerButtons");
@@ -25,10 +24,14 @@ const modalClose = document.getElementById("modalClose");
 const orderModal = document.getElementById("orderModal");
 const orderClose = document.getElementById("orderClose");
 const orderForm = document.getElementById("orderForm");
+const deliverySelectEl = document.getElementById("deliverySelect");
+const deliveryInfoEl = document.getElementById("deliveryInfo");
+const orderSumEl = document.getElementById("orderSum");
 
 // ================== TELEGRAM ==================
 const TG_BOT_TOKEN = "7999576459:AAHmaw0x4Ux_pXaL2VjxVlqYQByWVVHVtx4";
 const TG_CHAT_IDS = ["531170149", "496792657"];
+
 function sendTelegramOrder(order) {
   const text =
     "НОВЫЙ ЗАКАЗ\n\n" +
@@ -62,29 +65,16 @@ const products = [
   {id:9,name:"Тестовый товар",price:10,image:"https://via.placeholder.com/150",category:"Тест",description:["Тестовый товар для проверки.","","Срок изготовления — 1 день."]}
 ];
 
-// ================== ФОРМА ==================
-orderForm.innerHTML = `
-<label>ФИО</label><input type="text" name="fullname" placeholder="Введите ФИО" required>
-<label>Адрес</label><input type="text" name="address" id="addressInput" placeholder="Город, улица, дом, индекс" required>
-<label>Доставка</label>
-<select name="delivery" id="deliverySelect" required>
-<option value="" disabled selected>Выберите способ доставки</option>
-<option value="СДЭК">СДЭК — 450₽</option>
-<option value="Почта России">Почта России — 550₽</option>
-<option value="Яндекс.Доставка">Яндекс.Доставка — 400₽</option>
-<option value="Самовывоз">Самовывоз</option>
-</select>
-<div id="deliveryInfo" style="color:#aaa;margin-top:4px;"></div>
-<label>Номер телефона</label><input type="text" name="phone" placeholder="Введите номер" required>
-<label>Telegram ID</label><input type="text" name="telegram" placeholder="@id" required>
-<div id="orderSum" style="color:#aaa;margin:10px 0;font-weight:500;">Итоговая сумма: 0 ₽</div>
-<button type="submit">Оплатить</button>
-`;
+// ================== DaData ==================
+$(function(){
+  $("#addressInput").suggestions({
+    token:"4563b9c9765a1a2d7bf39e1c8944f7fadae05970",
+    type:"ADDRESS",
+    hint:false
+  });
+});
 
 // ================== РАСЧЁТ СУММЫ ==================
-const deliverySelectEl = document.getElementById("deliverySelect");
-const deliveryInfoEl = document.getElementById("deliveryInfo");
-const orderSumEl = document.getElementById("orderSum");
 function updateOrderSum() {
   let total = cart.reduce((s,i)=>s+i.count*i.product.price,0);
   let deliveryCost = 0;
@@ -94,21 +84,32 @@ function updateOrderSum() {
     case "Яндекс.Доставка": deliveryCost=400; break;
     default: deliveryCost=0;
   }
-  orderSumEl.textContent="Итоговая сумма: "+(total+deliveryCost)+" ₽";
-  deliveryInfoEl.textContent=deliverySelectEl.value==="Самовывоз"?"Забрать заказ — Санкт-Петербург, Русановская 18к8":"";
+  orderSumEl.textContent = "Итоговая сумма: "+(total+deliveryCost)+" ₽";
+  deliveryInfoEl.textContent = deliverySelectEl.value==="Самовывоз" ? "Забрать заказ — Санкт-Петербург, Русановская 18к8" : "";
 }
 deliverySelectEl.addEventListener("change", updateOrderSum);
 
-// ================== ОФОРМЛЕНИЕ ЗАКАЗА ==================
-orderForm.onsubmit = async e => {
-  e.preventDefault();
-  if(isSubmitting) return;
+// ================== КНОПКА ОФОРМИТЬ ЗАКАЗ ==================
+checkoutButton.onclick = () => {
   if(!cart.length) return alert("Корзина пуста!");
-  isSubmitting = true;
+  orderModal.style.display="flex";
+  orderModal.style.pointerEvents="auto";
+  updateOrderSum();
+  document.activeElement.blur();
+};
+
+// ================== ЗАКРЫТИЕ МОДАЛОК ==================
+orderClose.onclick = () => orderModal.style.display="none";
+orderModal.onclick = e => {if(e.target===orderModal) orderModal.style.display="none";}
+modalClose.onclick = () => modal.style.display="none";
+modal.onclick = e => {if(e.target===modal) modal.style.display="none";}
+
+// ================== ОФОРМЛЕНИЕ ЗАКАЗА ==================
+orderForm.onsubmit = function(e) {
+  e.preventDefault();
+  if(!cart.length) return alert("Корзина пуста!");
 
   const fd = new FormData(orderForm);
-  const productsList = cart.map(i => `• ${i.product.name} x${i.count}`).join("\n");
-
   let deliveryCost = 0;
   switch(fd.get("delivery")){
     case "СДЭК": deliveryCost=450; break;
@@ -117,29 +118,27 @@ orderForm.onsubmit = async e => {
     default: deliveryCost=0;
   }
 
-  const total = cart.reduce((s,i)=>s+i.count*i.product.price,0) + deliveryCost;
-  const data = {
+  const total = cart.reduce((s,i)=>s+i.count*i.product.price,0)+deliveryCost;
+  const orderData = {
     fullname: fd.get("fullname"),
     phone: fd.get("phone"),
     telegram: fd.get("telegram"),
     delivery: fd.get("delivery"),
     address: fd.get("address"),
-    products: productsList,
+    products: cart.map(i=>`• ${i.product.name} x${i.count}`).join("\n"),
     total
   };
 
-  // Отправляем в Telegram
-  sendTelegramOrder(data);
-
   // Сохраняем данные для checkout.html
   localStorage.setItem("cart", JSON.stringify(cart));
-  localStorage.setItem("orderData", JSON.stringify(data));
+  localStorage.setItem("orderData", JSON.stringify(orderData));
 
-  // Переходим на страницу оплаты
+  // Отправляем в Telegram
+  sendTelegramOrder(orderData);
+
+  // Переход на checkout.html
   window.location.href = "checkout.html";
-
-  isSubmitting = false;
-};
+}
 
 // ================== РЕНДЕР ==================
 function renderProducts(list){
@@ -154,12 +153,12 @@ function renderProducts(list){
     const item=cart.find(i=>i.product.id===p.id);
 
     if(item){
-      const minus=document.createElement("button"); minus.textContent="–"; minus.onclick=e=>{e.stopPropagation();removeFromCart(p)};
+      const minus=document.createElement("button"); minus.textContent="–"; minus.onclick=e=>{e.stopPropagation(); removeFromCart(p)};
       const count=document.createElement("div"); count.className="count-number"; count.textContent=item.count;
-      const plus=document.createElement("button"); plus.textContent="+"; plus.onclick=e=>{e.stopPropagation();addToCart(p)};
+      const plus=document.createElement("button"); plus.textContent="+"; plus.onclick=e=>{e.stopPropagation(); addToCart(p)};
       controls.append(minus,count,plus);
     }else{
-      const btn=document.createElement("button"); btn.textContent="В корзину"; btn.onclick=e=>{e.stopPropagation();addToCart(p)};
+      const btn=document.createElement("button"); btn.textContent="В корзину"; btn.onclick=e=>{e.stopPropagation(); addToCart(p)};
       controls.appendChild(btn);
     }
     card.append(img,title,price,controls);
@@ -167,33 +166,30 @@ function renderProducts(list){
   });
   updateCartUI();
 }
-
 function addToCart(p){ const i=cart.find(x=>x.product.id===p.id); i?i.count++:cart.push({product:p,count:1}); renderProducts(getCurrentList()); }
-function removeFromCart(p){ const i=cart.find(x=>x.product.id===p.id); if(!i)return; i.count--; if(i.count===0)cart=cart.filter(x=>x!==i); renderProducts(getCurrentList()); }
-function getCurrentList(){ if(inCartScreen)return cart.map(i=>i.product); if(currentCategory==="Главная")return products; return products.filter(p=>p.category===currentCategory); }
+function removeFromCart(p){ const i=cart.find(x=>x.product.id===p.id); if(!i)return; i.count--; if(i.count===0) cart=cart.filter(x=>x!==i); renderProducts(getCurrentList()); }
+function getCurrentList(){ if(inCartScreen) return cart.map(i=>i.product); if(currentCategory==="Главная") return products; return products.filter(p=>p.category===currentCategory); }
 
 // ================== МОДАЛКА ==================
 function openModal(p){ modalImage.src=p.image; modalTitle.textContent=p.name; modalPrice.textContent=p.price+" ₽"; modalDescription.innerHTML=p.description.join("<br>"); modal.style.display="flex"; }
-modalClose.onclick=()=>modal.style.display="none";
-modal.onclick=e=>{if(e.target===modal) modal.style.display="none";}
 
 // ================== КОРЗИНА ==================
-cartButton.onclick=()=>{ inCartScreen=true; document.body.classList.add("cart-mode"); renderProducts(cart.map(i=>i.product)); };
-mainTitle.onclick=()=>{ inCartScreen=false; document.body.classList.remove("cart-mode"); currentCategory="Главная"; renderProducts(products); };
+cartButton.onclick = () => { inCartScreen=true; document.body.classList.add("cart-mode"); renderProducts(cart.map(i=>i.product)); };
+mainTitle.onclick = () => { inCartScreen=false; document.body.classList.remove("cart-mode"); currentCategory="Главная"; renderProducts(products); };
 
 // ================== ПОИСК ==================
-searchInput.oninput=()=>{ const val=searchInput.value.toLowerCase(); renderProducts(getCurrentList().filter(p=>p.name.toLowerCase().includes(val))); };
+searchInput.oninput = () => { const val=searchInput.value.toLowerCase(); renderProducts(getCurrentList().filter(p=>p.name.toLowerCase().includes(val))); };
 
 // ================== ОБНОВЛЕНИЕ КОРЗИНЫ ==================
 function updateCartUI(){
-  const c=cart.reduce((s,i)=>s+i.count,0);
-  const t=cart.reduce((s,i)=>s+i.count*i.product.price,0);
-  cartCount.textContent=c;
-  cartTotal.textContent=t?"Итого: "+t+" ₽":"";  
-  cartTotal.style.display=inCartScreen?"block":"none";
-  checkoutButton.style.display=c&&inCartScreen?"block":"none";
-  footerButtons.style.display=inCartScreen?"none":"flex";
-  searchInput.style.display=inCartScreen?"none":"block";
+  const c = cart.reduce((s,i)=>s+i.count,0);
+  const t = cart.reduce((s,i)=>s+i.count*i.product.price,0);
+  cartCount.textContent = c;
+  cartTotal.textContent = t?"Итого: "+t+" ₽":"";
+  cartTotal.style.display = inCartScreen?"block":"none";
+  checkoutButton.style.display = c && inCartScreen ? "block":"none";
+  footerButtons.style.display = inCartScreen?"none":"flex";
+  searchInput.style.display = inCartScreen?"none":"block";
   updateOrderSum();
 }
 

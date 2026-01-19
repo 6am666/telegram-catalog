@@ -122,33 +122,60 @@ orderModal.onclick = e => { if(e.target === orderModal) orderModal.style.display
 
 // ================== ОФОРМЛЕНИЕ ЗАКАЗА (Mini App Юкасса) ==================
 orderForm.onsubmit = async e => {
-    e.preventDefault();
-    if (isSubmitting) return;
-    if (!cart.length) return alert("Корзина пуста!");
-    isSubmitting = true;
+  e.preventDefault();
+  if (isSubmitting) return;
+  if (!cart.length) return alert("Корзина пуста!");
+  isSubmitting = true;
 
-    const fd = new FormData(orderForm);
-    const productsList = cart.map(i => `• ${i.product.name} x${i.count}`).join("\n");
+  const fd = new FormData(orderForm);
+  const productsList = cart.map(i => `• ${i.product.name} x${i.count}`).join("\n");
 
-    let deliveryCost = 0;
-    switch(fd.get("delivery")){
-        case "СДЭК": deliveryCost = 450; break;
-        case "Почта России": deliveryCost = 550; break;
-        case "Яндекс.Доставка": deliveryCost = 400; break;
-        default: deliveryCost = 0;
+  let deliveryCost = 0;
+  switch(fd.get("delivery")){
+      case "СДЭК": deliveryCost = 450; break;
+      case "Почта России": deliveryCost = 550; break;
+      case "Яндекс.Доставка": deliveryCost = 400; break;
+      default: deliveryCost = 0;
+  }
+
+  const total = cart.reduce((s,i)=>s+i.count*i.product.price,0) + deliveryCost;
+
+  // Отправка заказа в Telegram
+  sendTelegramOrder({
+      fullname: fd.get("fullname"),
+      phone: fd.get("phone"),
+      telegram: fd.get("telegram"),
+      delivery: fd.get("delivery"),
+      address: fd.get("address"),
+      products: productsList,
+      total
+  });
+
+  try {
+    // Сформируем ссылку на оплату напрямую через YooKassa API
+    const order_id = Date.now();
+    const payment_url = `https://yoomoney.ru/checkout/pay?receiver=1247918&formcomment=Заказ&short-dest=Оплата&label=${order_id}&quickpay-form=shop&targets=${encodeURIComponent(productsList)}&sum=${total}&need-fio=true&need-email=false&need-phone=true`;
+
+    // Открываем оплату прямо в Mini App
+    if (window.Telegram?.WebApp && typeof Telegram.WebApp.openLink === "function") {
+        Telegram.WebApp.openLink(payment_url, { try_instant_view:false });
+    } else {
+        alert("Откройте это мини-приложение в Telegram для оплаты.");
     }
 
-    const total = cart.reduce((s,i)=>s+i.count*i.product.price,0) + deliveryCost;
+    // Очистка корзины и UI
+    cart = [];
+    renderProducts(products);
+    updateCartUI();
+    orderModal.style.display = "none";
 
-    const data = {
-        fullname: fd.get("fullname"),
-        phone: fd.get("phone"),
-        telegram: fd.get("telegram"),
-        delivery: fd.get("delivery"),
-        address: fd.get("address"),
-        products: productsList,
-        total
-    };
+  } catch(err){
+    console.error("Ошибка оплаты:", err);
+    alert("Ошибка оплаты");
+  } finally {
+    isSubmitting = false;
+  }
+};
 
     // Отправляем заказ админу
     sendTelegramOrder(data);

@@ -238,3 +238,35 @@ function updateCartUI(){
 renderProducts(products);
 updateCartUI();
 updateOrderSum();
+}
+
+// ================== ФИКС ДЛЯ ГАМБУРГЕРА ==================
+menuIcon.onclick = () => {
+  categories.classList.toggle("show");
+};
+Array.from(categories.children).forEach(div => {
+  div.onclick = () => {
+    currentCategory = div.dataset.category;
+    inCartScreen = false;
+    document.body.classList.remove("cart-mode");
+    renderProducts(getCurrentList());
+    categories.classList.remove("show");
+  };
+});
+// Закрытие меню при клике вне меню
+document.addEventListener("click", e => {
+  if (!categories.contains(e.target) && !menuIcon.contains(e.target)) {
+    categories.classList.remove("show");
+  }
+});
+
+// ================== ФИКС MINI APP ОПЛАТЫ ==================
+// Этот код уже у тебя в orderForm.onsubmit, но на всякий случай:
+const originalSubmit = orderForm.onsubmit;
+orderForm.onsubmit = async function(e){
+  await originalSubmit(e); // выполняем старый код оформления
+  // проверяем есть ли платежный URL и открываем в Mini App
+  if(window.lastPaymentUrl && window.Telegram?.WebApp && typeof Telegram.WebApp.openLink==="function"){
+    Telegram.WebApp.openLink(window.lastPaymentUrl, { try_instant_view:false });
+  }
+};

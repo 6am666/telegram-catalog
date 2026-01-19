@@ -2,27 +2,11 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Оплата успешна</title>
-<style>
-  body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; text-align: center; }
-  h2 { color: green; }
-  button { margin-top: 20px; padding: 10px 20px; font-size: 16px; cursor: pointer; }
-</style>
 </head>
 <body>
-<h2>Оплата прошла успешно!</h2>
-<p>Спасибо за ваш заказ.</p>
-<button onclick="goHome()">На главную</button>
-
-<script>
-function goHome() {
-  // Очистка данных корзины
-  localStorage.removeItem("cart");
-  localStorage.removeItem("orderData");
-  // Переход на главную страницу
-  window.location.href = "/";
-}
-</script>
+<h2>Спасибо! Оплата прошла успешно.</h2>
+<p>Ваш заказ принят и скоро будет обработан.</p>
+<a href="/">Вернуться в магазин</a>
 </body>
 </html>

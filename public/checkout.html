@@ -2,48 +2,43 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Оплата заказа</title>
-<style>
-  body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; text-align: center; }
-  h2 { color: #333; }
-</style>
-</head>
-<body>
-<h2>Подготовка платежа...</h2>
-<p>Пожалуйста, подождите, вы будете перенаправлены на страницу оплаты.</p>
-
 <script>
-(async () => {
-  try {
-    // Получаем данные заказа из localStorage
-    const orderData = JSON.parse(localStorage.getItem("orderData"));
-    if (!orderData) throw new Error("Нет данных для оплаты");
+document.addEventListener("DOMContentLoaded", async () => {
+  const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+  const orderData = JSON.parse(localStorage.getItem("orderData") || "{}");
 
-    // Вызываем твой API create-payment.js
+  if (!cart.length || !orderData.total) {
+    document.body.innerHTML = "<h2>Корзина пуста или данные заказа отсутствуют</h2>";
+    return;
+  }
+
+  try {
     const res = await fetch("/api/create-payment", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {"Content-Type": "application/json"},
       body: JSON.stringify({
         amount: orderData.total,
         order_id: Date.now(),
         return_url: window.location.origin + "/success.html"
       })
     });
-
     const json = await res.json();
 
-    if (json.payment_url) {
-      // Редирект на YooKassa
-      window.location.href = json.payment_url;
+    if(json.payment_url) {
+      window.location.href = json.payment_url;  // редирект на YooKassa
     } else {
-      throw new Error("Не удалось создать платеж");
+      document.body.innerHTML = "<h2>Ошибка создания оплаты</h2>";
+      console.error(json);
     }
-  } catch (err) {
-    document.body.innerHTML = "<h2>Ошибка создания платежа</h2><p>" + err.message + "</p>";
+  } catch(err) {
+    document.body.innerHTML = "<h2>Ошибка при оплате</h2>";
     console.error(err);
   }
-})();
+});
 </script>
+</head>
+<body>
+<h2>Подготовка к оплате...</h2>
 </body>
 </html>

@@ -120,11 +120,11 @@ checkoutButton.onclick = ()=>{
 orderClose.onclick = ()=> orderModal.style.display="none";
 orderModal.onclick = e => { if(e.target === orderModal) orderModal.style.display="none"; };
 
-// ================== ОФОРМЛЕНИЕ ЗАКАЗА (YooKassa Mini App) ==================
+// ================== ОФОРМЛЕНИЕ ЗАКАЗА (Рабочий вариант YooKassa) ==================
 orderForm.onsubmit = async e => {
   e.preventDefault();
-  if (isSubmitting) return;
-  if (!cart.length) return alert("Корзина пуста!");
+  if(isSubmitting) return;
+  if(!cart.length) return alert("Корзина пуста!");
   isSubmitting = true;
 
   const fd = new FormData(orderForm);
@@ -140,8 +140,7 @@ orderForm.onsubmit = async e => {
 
   const total = cart.reduce((s,i)=>s+i.count*i.product.price,0) + deliveryCost;
 
-  // Отправка заказа в Telegram
-  sendTelegramOrder({
+  const data = {
       fullname: fd.get("fullname"),
       phone: fd.get("phone"),
       telegram: fd.get("telegram"),
@@ -149,40 +148,38 @@ orderForm.onsubmit = async e => {
       address: fd.get("address"),
       products: productsList,
       total
-  });
+  };
+
+  // Отправляем заказ админу
+  sendTelegramOrder(data);
 
   try {
-    const order_id = Date.now();
-    const payment_url = `https://yoomoney.ru/checkout/pay?receiver=1247918&formcomment=Заказ&short-dest=Оплата&label=${order_id}&quickpay-form=shop&targets=${encodeURIComponent(productsList)}&sum=${total}&need-fio=true&need-email=false&need-phone=true`;
+      const shopId = "1247918";
+      const orderId = Date.now();
+      const amount = total;
 
-    if (window.Telegram?.WebApp && typeof Telegram.WebApp.openLink === "function") {
-        Telegram.WebApp.openLink(payment_url, { try_instant_view:false });
-    } else {
-        alert("Откройте это мини-приложение в Telegram для оплаты.");
-    }
+      const paymentUrl = `https://yoomoney.ru/checkout/payments/shop?shopId=${shopId}&scid=0&sum=${amount}&customerNumber=${orderId}&paymentType=AC`;
 
-    cart = [];
-    renderProducts(products);
-    updateCartUI();
-    orderModal.style.display = "none";
+      if(window.Telegram?.WebApp && typeof Telegram.WebApp.openLink === "function"){
+          Telegram.WebApp.openLink(paymentUrl, { try_instant_view:false });
+      } else {
+          window.open(paymentUrl, "_blank", "noopener,noreferrer");
+      }
+
+      cart = [];
+      renderProducts(products);
+      updateCartUI();
+      orderModal.style.display="none";
 
   } catch(err){
-    console.error("Ошибка оплаты:", err);
-    alert("Ошибка оплаты");
+      console.error("Ошибка оплаты:", err);
+      alert("Ошибка оплаты");
   } finally {
-    isSubmitting = false;
+      isSubmitting = false;
   }
 };
 
-// =================== Обработка возврата после оплаты ===================
-window.addEventListener('load', () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  if(urlParams.get('success') === 'true') {
-      alert("Оплата прошла успешно! ✅");
-  }
-});
-
-// ================== РЕНДЕР ==================
+// =================== РЕНДЕР ==================
 function renderProducts(list){
   productsEl.innerHTML="";
   list.forEach(p=>{

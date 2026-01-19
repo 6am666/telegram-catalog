@@ -127,7 +127,7 @@ orderClose.onclick = ()=>orderModal.style.display="none";
 orderModal.onclick = e=>{if(e.target===orderModal) orderModal.style.display="none";};
 
 // ================== BASE URL ==================
-const BASE_URL = "https://telegram-catalog-alpha.vercel.app";
+const BASE_URL = "https://telegram-catalog-alpha.vercel.app/";
 
 // ================== ОФОРМЛЕНИЕ ЗАКАЗА ==================
 orderForm.onsubmit = async e => {

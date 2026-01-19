@@ -120,7 +120,7 @@ checkoutButton.onclick = ()=>{
 orderClose.onclick = ()=> orderModal.style.display="none";
 orderModal.onclick = e => { if(e.target === orderModal) orderModal.style.display="none"; };
 
-// ================== ОФОРМЛЕНИЕ ЗАКАЗА (Mini App Юкасса) ==================
+// ================== ОФОРМЛЕНИЕ ЗАКАЗА (YooKassa Mini App) ==================
 orderForm.onsubmit = async e => {
   e.preventDefault();
   if (isSubmitting) return;
@@ -152,18 +152,15 @@ orderForm.onsubmit = async e => {
   });
 
   try {
-    // Сформируем ссылку на оплату напрямую через YooKassa API
     const order_id = Date.now();
     const payment_url = `https://yoomoney.ru/checkout/pay?receiver=1247918&formcomment=Заказ&short-dest=Оплата&label=${order_id}&quickpay-form=shop&targets=${encodeURIComponent(productsList)}&sum=${total}&need-fio=true&need-email=false&need-phone=true`;
 
-    // Открываем оплату прямо в Mini App
     if (window.Telegram?.WebApp && typeof Telegram.WebApp.openLink === "function") {
         Telegram.WebApp.openLink(payment_url, { try_instant_view:false });
     } else {
         alert("Откройте это мини-приложение в Telegram для оплаты.");
     }
 
-    // Очистка корзины и UI
     cart = [];
     renderProducts(products);
     updateCartUI();
@@ -175,42 +172,6 @@ orderForm.onsubmit = async e => {
   } finally {
     isSubmitting = false;
   }
-};
-
-    // Отправляем заказ админу
-    sendTelegramOrder(data);
-
-    try {
-        const res = await fetch("/api/create-payment", {
-            method: "POST",
-            headers: {"Content-Type":"application/json"},
-            body: JSON.stringify({
-                amount: total,
-                order_id: Date.now()
-            })
-        });
-
-        const json = await res.json();
-        if (!json.payment_url) {
-            alert("Ошибка создания оплаты");
-            return;
-        }
-
-        // Очистка корзины и UI
-        cart = [];
-        renderProducts(products);
-        updateCartUI();
-        orderModal.style.display = "none";
-
-        // Открываем оплату через Mini App Telegram
-        Telegram.WebApp.openLink(json.payment_url, { try_instant_view:false });
-
-    } catch(err) {
-        console.error("Ошибка оплаты:", err);
-        alert("Ошибка оплаты");
-    } finally {
-        isSubmitting = false;
-    }
 };
 
 // =================== Обработка возврата после оплаты ===================

@@ -120,7 +120,7 @@ checkoutButton.onclick = ()=>{
 orderClose.onclick = ()=> orderModal.style.display="none";
 orderModal.onclick = e => { if(e.target === orderModal) orderModal.style.display="none"; };
 
-// ================== ОФОРМЛЕНИЕ ЗАКАЗА (Рабочий вариант YooKassa) ==================
+// ================== ОФОРМЛЕНИЕ ЗАКАЗА (YooKassa) ==================
 orderForm.onsubmit = async e => {
   e.preventDefault();
   if(isSubmitting) return;
@@ -158,6 +158,7 @@ orderForm.onsubmit = async e => {
       const orderId = Date.now();
       const amount = total;
 
+      // YooKassa payment URL
       const paymentUrl = `https://yoomoney.ru/checkout/payments/shop?shopId=${shopId}&scid=0&sum=${amount}&customerNumber=${orderId}&paymentType=AC`;
 
       if(window.Telegram?.WebApp && typeof Telegram.WebApp.openLink === "function"){

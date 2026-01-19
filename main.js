@@ -120,53 +120,70 @@ checkoutButton.onclick = ()=>{
 orderClose.onclick = ()=> orderModal.style.display="none";
 orderModal.onclick = e => { if(e.target === orderModal) orderModal.style.display="none"; };
 
-// ================== ОФОРМЛЕНИЕ ЗАКАЗА (Mini App friendly) ==================
+// ================== ОФОРМЛЕНИЕ ЗАКАЗА (Mini App Юкасса) ==================
 orderForm.onsubmit = async e => {
-  e.preventDefault();
-  if (isSubmitting) return;
-  if (!cart.length) return alert("Корзина пуста!");
-  isSubmitting = true;
+    e.preventDefault();
+    if (isSubmitting) return;
+    if (!cart.length) return alert("Корзина пуста!");
+    isSubmitting = true;
 
-  const fd = new FormData(orderForm);
-  const productsList = cart.map(i => `• ${i.product.name} x${i.count}`).join("\n");
+    const fd = new FormData(orderForm);
+    const productsList = cart.map(i => `• ${i.product.name} x${i.count}`).join("\n");
 
-  let deliveryCost = 0;
-  switch(fd.get("delivery")){
-      case "СДЭК": deliveryCost = 450; break;
-      case "Почта России": deliveryCost = 550; break;
-      case "Яндекс.Доставка": deliveryCost = 400; break;
-      default: deliveryCost = 0;
-  }
+    let deliveryCost = 0;
+    switch(fd.get("delivery")){
+        case "СДЭК": deliveryCost = 450; break;
+        case "Почта России": deliveryCost = 550; break;
+        case "Яндекс.Доставка": deliveryCost = 400; break;
+        default: deliveryCost = 0;
+    }
 
-  const total = cart.reduce((s,i)=>s+i.count*i.product.price,0) + deliveryCost;
+    const total = cart.reduce((s,i)=>s+i.count*i.product.price,0) + deliveryCost;
 
-  const data = {
-      fullname: fd.get("fullname"),
-      phone: fd.get("phone"),
-      telegram: fd.get("telegram"),
-      delivery: fd.get("delivery"),
-      address: fd.get("address"),
-      products: productsList,
-      total
-  };
+    const data = {
+        fullname: fd.get("fullname"),
+        phone: fd.get("phone"),
+        telegram: fd.get("telegram"),
+        delivery: fd.get("delivery"),
+        address: fd.get("address"),
+        products: productsList,
+        total
+    };
 
-  // Отправляем заказ админу
-  sendTelegramOrder(data);
+    // Отправляем заказ админу
+    sendTelegramOrder(data);
 
-  try {
-      // Mini App Telegram Open Link
-      if (window.Telegram?.WebApp && typeof Telegram.WebApp.openLink === "function") {
-          const payment_url = `https://telegram-catalog-alpha.vercel.app/api/create-payment?amount=${total}&order_id=${Date.now()}`;
-          Telegram.WebApp.openLink(payment_url, { try_instant_view:false });
-      } else {
-          alert("Откройте этот мини-приложение в Telegram для оплаты.");
-      }
-  } catch(err){
-      console.error("Ошибка оплаты:", err);
-      alert("Ошибка оплаты");
-  } finally {
-      isSubmitting = false;
-  }
+    try {
+        const res = await fetch("/api/create-payment", {
+            method: "POST",
+            headers: {"Content-Type":"application/json"},
+            body: JSON.stringify({
+                amount: total,
+                order_id: Date.now()
+            })
+        });
+
+        const json = await res.json();
+        if (!json.payment_url) {
+            alert("Ошибка создания оплаты");
+            return;
+        }
+
+        // Очистка корзины и UI
+        cart = [];
+        renderProducts(products);
+        updateCartUI();
+        orderModal.style.display = "none";
+
+        // Открываем оплату через Mini App Telegram
+        Telegram.WebApp.openLink(json.payment_url, { try_instant_view:false });
+
+    } catch(err) {
+        console.error("Ошибка оплаты:", err);
+        alert("Ошибка оплаты");
+    } finally {
+        isSubmitting = false;
+    }
 };
 
 // =================== Обработка возврата после оплаты ===================

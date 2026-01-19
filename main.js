@@ -123,8 +123,8 @@ orderModal.onclick = e => { if(e.target === orderModal) orderModal.style.display
 // ================== ОФОРМЛЕНИЕ ЗАКАЗА (Mini App friendly) ==================
 orderForm.onsubmit = async e => {
   e.preventDefault();
-  if(isSubmitting) return;
-  if(!cart.length) return alert("Корзина пуста!");
+  if (isSubmitting) return;
+  if (!cart.length) return alert("Корзина пуста!");
   isSubmitting = true;
 
   const fd = new FormData(orderForm);
@@ -139,6 +139,7 @@ orderForm.onsubmit = async e => {
   }
 
   const total = cart.reduce((s,i)=>s+i.count*i.product.price,0) + deliveryCost;
+
   const data = {
       fullname: fd.get("fullname"),
       phone: fd.get("phone"),
@@ -149,25 +150,25 @@ orderForm.onsubmit = async e => {
       total
   };
 
-  try{
-      sendTelegramOrder(data);
+  // Отправляем заказ админу
+  sendTelegramOrder(data);
 
-      const res = await fetch("/api/create-payment", {
-          method: "POST",
-          headers: {"Content-Type":"application/json"},
-          body: JSON.stringify({
-              amount: total,
-              order_id: Date.now(),
-              return_url: "https://telegram-catalog-alpha.vercel.app/?success=true"
-          })
-      });
-      const json = await res.json();
-      console.log("create-payment response:", json);
-
-      if(!json.payment_url){
-          alert("Ошибка создания оплаты");
-          return;
+  try {
+      // Mini App Telegram Open Link (тестовый / рабочий)
+      if (window.Telegram?.WebApp && typeof Telegram.WebApp.openLink === "function") {
+          const payment_url = `https://telegram-catalog-alpha.vercel.app/api/create-payment?amount=${total}&order_id=${Date.now()}`;
+          Telegram.WebApp.openLink(payment_url, { try_instant_view:false });
+      } else {
+          // fallback для браузера
+          alert("Откройте этот мини-приложение в Telegram для оплаты.");
       }
+  } catch(err){
+      console.error("Ошибка оплаты:", err);
+      alert("Ошибка оплаты");
+  } finally {
+      isSubmitting = false;
+  }
+};
 
       // Очистка корзины и UI
       cart=[];

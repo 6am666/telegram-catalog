@@ -154,12 +154,11 @@ orderForm.onsubmit = async e => {
   sendTelegramOrder(data);
 
   try {
-      // Mini App Telegram Open Link (тестовый / рабочий)
+      // Mini App Telegram Open Link
       if (window.Telegram?.WebApp && typeof Telegram.WebApp.openLink === "function") {
           const payment_url = `https://telegram-catalog-alpha.vercel.app/api/create-payment?amount=${total}&order_id=${Date.now()}`;
           Telegram.WebApp.openLink(payment_url, { try_instant_view:false });
       } else {
-          // fallback для браузера
           alert("Откройте этот мини-приложение в Telegram для оплаты.");
       }
   } catch(err){
@@ -170,32 +169,10 @@ orderForm.onsubmit = async e => {
   }
 };
 
-      // Очистка корзины и UI
-      cart=[];
-      renderProducts(products);
-      updateCartUI();
-      orderModal.style.display="none";
-
-      // =================== Mini App openLink ===================
-      if(window.Telegram?.WebApp && typeof Telegram.WebApp.openLink === "function"){
-          Telegram.WebApp.openLink(json.payment_url, { try_instant_view:false });
-      } else {
-          window.open(json.payment_url, "_blank", "noopener,noreferrer");
-      }
-
-  } catch(err){
-      console.error("Ошибка оплаты:", err);
-      alert("Ошибка оплаты");
-  } finally{
-      isSubmitting = false;
-  }
-};
-
 // =================== Обработка возврата после оплаты ===================
 window.addEventListener('load', () => {
   const urlParams = new URLSearchParams(window.location.search);
   if(urlParams.get('success') === 'true') {
-      // Показываем модальное окно успешной оплаты
       alert("Оплата прошла успешно! ✅");
   }
 });

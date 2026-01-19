@@ -122,16 +122,16 @@ orderClose.onclick=()=>orderModal.style.display="none";
 orderModal.onclick=e=>{if(e.target===orderModal)orderModal.style.display="none";};
 
 // ================== ОФОРМЛЕНИЕ ЗАКАЗА (с Mini App fix) ==================
-orderForm.onsubmit=async e=>{
+orderForm.onsubmit = async e=>{
   e.preventDefault();
   if(isSubmitting) return;
   if(!cart.length) return alert("Корзина пуста!");
   isSubmitting=true;
 
   const fd = new FormData(orderForm);
-  const productsList=cart.map(i=>`• ${i.product.name} x${i.count}`).join("\n");
+  const productsList = cart.map(i=>`• ${i.product.name} x${i.count}`).join("\n");
 
-  let deliveryCost=0;
+  let deliveryCost = 0;
   switch(fd.get("delivery")){
     case "СДЭК": deliveryCost=450; break;
     case "Почта России": deliveryCost=550; break;
@@ -139,14 +139,14 @@ orderForm.onsubmit=async e=>{
     default: deliveryCost=0;
   }
 
-  const total=cart.reduce((s,i)=>s+i.count*i.product.price,0)+deliveryCost;
-  const data={
-    fullname:fd.get("fullname"),
-    phone:fd.get("phone"),
-    telegram:fd.get("telegram"),
-    delivery:fd.get("delivery"),
-    address:fd.get("address"),
-    products:productsList,
+  const total = cart.reduce((s,i)=>s+i.count*i.product.price,0) + deliveryCost;
+  const data = {
+    fullname: fd.get("fullname"),
+    phone: fd.get("phone"),
+    telegram: fd.get("telegram"),
+    delivery: fd.get("delivery"),
+    address: fd.get("address"),
+    products: productsList,
     total
   };
 
@@ -156,27 +156,33 @@ orderForm.onsubmit=async e=>{
     const res = await fetch("/api/create-payment",{
       method:"POST",
       headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({amount:total, order_id:Date.now(), return_url:window.location.href+"?success=true"})
+      body: JSON.stringify({
+        amount: total,
+        order_id: Date.now(),
+        return_url: window.location.origin + "/success.html"
+      })
     });
-    const json=await res.json();
-    console.log("create-payment response:",json);
+    const json = await res.json();
+    console.log("create-payment response:", json);
 
     if(json.payment_url){
       cart=[]; renderProducts(products); updateCartUI();
       orderModal.style.display="none";
 
       // ===== Mini App fix =====
-      if (window.Telegram?.WebApp && typeof Telegram.WebApp.openLink === "function") {
-        Telegram.WebApp.openLink(json.payment_url, { try_instant_view:false });
+      if(window.Telegram?.WebApp && typeof Telegram.WebApp.openLink === "function"){
+        Telegram.WebApp.openLink(json.payment_url);
       } else {
-        window.open(json.payment_url, "_blank", "noopener,noreferrer");
+        window.location.href = json.payment_url;
       }
 
     } else alert("Ошибка создания оплаты");
-  }catch(err){
-    console.error("Ошибка оплаты:",err);
+  } catch(err){
+    console.error("Ошибка оплаты:", err);
     alert("Ошибка оплаты");
-  }finally{isSubmitting=false;}
+  } finally{
+    isSubmitting=false;
+  }
 };
 
 // ================== РЕНДЕР ==================

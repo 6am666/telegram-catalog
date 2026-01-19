@@ -15,7 +15,7 @@
 <div class="header">
   <div class="menu-icon" id="menuIcon"><div></div><div></div><div></div></div>
   <h1 id="mainTitle">Chronicle Chains</h1>
-  <button class="cart-btn" id="cartButton">🛒<span id="cartCount">0</span></button>
+  <button class="cart-btn" id="cartButton">🛒<span id="cartCount" class="cart-count">0</span></button>
 </div>
 
 <div class="container">
@@ -26,6 +26,7 @@
     <div data-category="Кулоны">Кулоны</div>
     <div data-category="Серьги">Серьги</div>
     <div data-category="Обвесы">Обвесы</div>
+    <div data-category="Аксессуары для волос">Аксессуары для волос</div>
   </div>
 
   <input type="text" class="search" placeholder="Мне нужно..." id="searchInput">
@@ -56,30 +57,7 @@
   <div class="order-modal-content">
     <span class="order-modal-close" id="orderClose">&times;</span>
     <h2>Оформление заказа</h2>
-    <form id="orderForm">
-      <label>ФИО</label>
-      <input type="text" name="fullname" placeholder="Введите ваше ФИО" required>
-
-      <label>Адрес</label>
-      <input type="text" id="addressInput" name="address" placeholder="Город, улица, дом, квартира, индекс" required>
-
-      <label>Доставка</label>
-      <select name="delivery" id="deliverySelect" required>
-        <option value="" disabled selected>Выберите способ доставки</option>
-        <option value="СДЭК">СДЭК — 450₽</option>
-        <option value="Почта России">Почта России — 550₽</option>
-        <option value="Яндекс.Доставка">Яндекс.Доставка — 400₽</option>
-        <option value="Самовывоз">Самовывоз</option>
-      </select>
-
-      <div id="deliveryInfo" style="color:#aaa;margin-top:4px;"></div>
-
-      <label>Телефон или ник в Telegram</label>
-      <input type="text" name="phone" placeholder="Введите телефон или ник" required>
-
-      <div id="orderSum" style="color:#aaa;margin:10px 0;font-weight:500;">Итоговая сумма: 0 ₽</div>
-      <button type="submit">Оплатить</button>
-    </form>
+    <form id="orderForm"></form>
   </div>
 </div>
 

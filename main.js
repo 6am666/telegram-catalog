@@ -120,7 +120,7 @@ checkoutButton.onclick = ()=>{
 orderClose.onclick = ()=> orderModal.style.display="none";
 orderModal.onclick = e => { if(e.target === orderModal) orderModal.style.display="none"; };
 
-// ================== ОФОРМЛЕНИЕ ЗАКАЗА (с Mini App fix) ==================
+// ================== ОФОРМЛЕНИЕ ЗАКАЗА (Mini App friendly) ==================
 orderForm.onsubmit = async e => {
   e.preventDefault();
   if(isSubmitting) return;
@@ -152,7 +152,6 @@ orderForm.onsubmit = async e => {
   try{
       sendTelegramOrder(data);
 
-      // ===== Mini App fix: return_url жёстко привязан к домену =====
       const res = await fetch("/api/create-payment", {
           method: "POST",
           headers: {"Content-Type":"application/json"},
@@ -165,28 +164,40 @@ orderForm.onsubmit = async e => {
       const json = await res.json();
       console.log("create-payment response:", json);
 
-      if(json.payment_url){
-          cart=[];
-          renderProducts(products);
-          updateCartUI();
-          orderModal.style.display="none";
-
-          if(window.Telegram?.WebApp && typeof Telegram.WebApp.openLink === "function"){
-              Telegram.WebApp.openLink(json.payment_url, { try_instant_view:false });
-          } else {
-              window.open(json.payment_url, "_blank", "noopener,noreferrer");
-          }
-      } else {
+      if(!json.payment_url){
           alert("Ошибка создания оплаты");
+          return;
+      }
+
+      // Очистка корзины и UI
+      cart=[];
+      renderProducts(products);
+      updateCartUI();
+      orderModal.style.display="none";
+
+      // =================== Mini App openLink ===================
+      if(window.Telegram?.WebApp && typeof Telegram.WebApp.openLink === "function"){
+          Telegram.WebApp.openLink(json.payment_url, { try_instant_view:false });
+      } else {
+          window.open(json.payment_url, "_blank", "noopener,noreferrer");
       }
 
   } catch(err){
       console.error("Ошибка оплаты:", err);
       alert("Ошибка оплаты");
-  } finally {
+  } finally{
       isSubmitting = false;
   }
 };
+
+// =================== Обработка возврата после оплаты ===================
+window.addEventListener('load', () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  if(urlParams.get('success') === 'true') {
+      // Показываем модальное окно успешной оплаты
+      alert("Оплата прошла успешно! ✅");
+  }
+});
 
 // ================== РЕНДЕР ==================
 function renderProducts(list){
@@ -215,6 +226,7 @@ function renderProducts(list){
   updateCartUI();
 }
 
+// ================== ФУНКЦИИ КОРЗИНЫ ==================
 function addToCart(p){ const i = cart.find(x=>x.product.id===p.id); i ? i.count++ : cart.push({product:p,count:1}); renderProducts(getCurrentList()); }
 function removeFromCart(p){ const i = cart.find(x=>x.product.id===p.id); if(!i) return; i.count--; if(i.count===0) cart = cart.filter(x=>x!==i); renderProducts(getCurrentList()); }
 function getCurrentList(){ if(inCartScreen) return cart.map(i=>i.product); if(currentCategory==="Главная") return products; return products.filter(p=>p.category===currentCategory); }
@@ -236,7 +248,7 @@ function updateCartUI(){
   const c = cart.reduce((s,i)=>s+i.count,0);
   const t = cart.reduce((s,i)=>s+i.count*i.product.price,0);
   cartCount.textContent = c;
-  cartTotal.textContent = t?"Итого: "+t+" ₽":"";
+  cartTotal.textContent = t?"Итого: "+t+" ₽":""; 
   cartTotal.style.display = inCartScreen?"block":"none";
   checkoutButton.style.display = c && inCartScreen?"block":"none";
   footerButtons.style.display = inCartScreen?"none":"flex";

@@ -2,7 +2,6 @@
 let cart = [];
 let inCartScreen = false;
 let currentCategory = "Главная";
-let isSubmitting = false;
 
 const productsEl = document.getElementById("products");
 const searchInput = document.getElementById("searchInput");
@@ -10,9 +9,7 @@ const cartButton = document.getElementById("cartButton");
 const cartCount = document.getElementById("cartCount");
 const cartTotal = document.getElementById("cartTotal");
 const checkoutButton = document.getElementById("checkoutButton");
-const categories = document.getElementById("categories");
 const mainTitle = document.getElementById("mainTitle");
-const menuIcon = document.getElementById("menuIcon");
 const footerButtons = document.getElementById("footerButtons");
 
 const modal = document.getElementById("modal");
@@ -121,18 +118,16 @@ checkoutButton.onclick = ()=>{
 orderClose.onclick=()=>orderModal.style.display="none";
 orderModal.onclick=e=>{if(e.target===orderModal)orderModal.style.display="none";};
 
-// ================== ОФОРМЛЕНИЕ ЗАКАЗА (с Mini App fix) ==================
-orderForm.onsubmit = async e=>{
+// ================== ОФОРМЛЕНИЕ ЗАКАЗА ==================
+orderForm.onsubmit = e=>{
   e.preventDefault();
-  if(isSubmitting) return;
   if(!cart.length) return alert("Корзина пуста!");
-  isSubmitting=true;
 
   const fd = new FormData(orderForm);
-  const productsList = cart.map(i=>`• ${i.product.name} x${i.count}`).join("\n");
+  const productsList = cart.map(i => `• ${i.product.name} x${i.count}`).join("\n");
 
   let deliveryCost = 0;
-  switch(fd.get("delivery")){
+  switch(fd.get("delivery")) {
     case "СДЭК": deliveryCost=450; break;
     case "Почта России": deliveryCost=550; break;
     case "Яндекс.Доставка": deliveryCost=400; break;
@@ -150,39 +145,16 @@ orderForm.onsubmit = async e=>{
     total
   };
 
-  try{
-    sendTelegramOrder(data);
+  // Сохраняем данные для checkout.html
+  localStorage.setItem("cart", JSON.stringify(cart));
+  localStorage.setItem("orderData", JSON.stringify(data));
 
-    const res = await fetch("/api/create-payment",{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({
-        amount: total,
-        order_id: Date.now(),
-        return_url: window.location.origin + "/success.html"
-      })
-    });
-    const json = await res.json();
-    console.log("create-payment response:", json);
+  // Очищаем корзину и закрываем модалку
+  cart=[]; renderProducts(products); updateCartUI();
+  orderModal.style.display="none";
 
-    if(json.payment_url){
-      cart=[]; renderProducts(products); updateCartUI();
-      orderModal.style.display="none";
-
-      // ===== Mini App fix =====
-      if(window.Telegram?.WebApp && typeof Telegram.WebApp.openLink === "function"){
-        Telegram.WebApp.openLink(json.payment_url);
-      } else {
-        window.location.href = json.payment_url;
-      }
-
-    } else alert("Ошибка создания оплаты");
-  } catch(err){
-    console.error("Ошибка оплаты:", err);
-    alert("Ошибка оплаты");
-  } finally{
-    isSubmitting=false;
-  }
+  // Переход на checkout.html для оплаты
+  window.location.href = "/checkout.html";
 };
 
 // ================== РЕНДЕР ==================

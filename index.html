@@ -9,6 +9,12 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/suggestions-jquery/dist/css/suggestions.min.css">
 <script src="https://cdn.jsdelivr.net/npm/suggestions-jquery/dist/js/jquery.suggestions.min.js"></script>
+
+<!-- EmailJS SDK -->
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+<script>
+  emailjs.init("0K_N35aYR37FA5PAl"); // Public Key
+</script>
 </head>
 <body>
 
@@ -58,7 +64,26 @@
     <span class="order-modal-close" id="orderClose">&times;</span>
     <h2>Оформление заказа</h2>
     <form id="orderForm">
-      <!-- Поля будут добавлены через main.js -->
+      <label>ФИО</label>
+      <input type="text" name="fullname" placeholder="Введите ваше ФИО" required>
+
+      <label>Адрес</label>
+      <input type="text" id="addressInput" name="address" placeholder="Город, улица, дом, квартира, индекс" required>
+
+      <label>Доставка</label>
+      <select name="delivery" required>
+        <option value="" disabled selected>Выберите способ доставки</option>
+        <option value="СДЭК">СДЭК</option>
+        <option value="Почта России">Почта России</option>
+        <option value="Boxberry">Boxberry</option>
+        <option value="Самовывоз">Самовывоз</option>
+        <option value="Яндекс.Доставка">Яндекс.Доставка</option>
+      </select>
+
+      <label>Телефон или ник в Telegram</label>
+      <input type="text" name="phone" placeholder="Введите телефон или ник" required>
+
+      <button type="submit">Оформить заказ</button>
     </form>
   </div>
 </div>

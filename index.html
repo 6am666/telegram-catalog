@@ -71,7 +71,7 @@
       <input type="text" id="addressInput" name="address" placeholder="Город, улица, дом, квартира, индекс" required>
 
       <label>Доставка</label>
-      <select name="delivery" required>
+      <select name="delivery" id="deliverySelect" required>
         <option value="" disabled selected>Выберите способ доставки</option>
         <option value="СДЭК">СДЭК</option>
         <option value="Почта России">Почта России</option>
@@ -79,9 +79,12 @@
         <option value="Самовывоз">Самовывоз</option>
         <option value="Яндекс.Доставка">Яндекс.Доставка</option>
       </select>
+      <div id="deliveryInfo" style="color:#aaa;margin-top:4px;"></div>
 
       <label>Телефон или ник в Telegram</label>
       <input type="text" name="phone" placeholder="Введите телефон или ник" required>
+
+      <div id="orderSum" style="color:#aaa;margin:10px 0;font-weight:500;">Итоговая сумма: 0 ₽</div>
 
       <button type="submit">Оформить заказ</button>
     </form>
@@ -91,5 +94,44 @@
 <button class="checkout-btn" id="checkoutButton">Оформить заказ</button>
 
 <script src="main.js"></script>
+<script>
+  // ================== Кнопка "Оформить заказ" ==================
+  const checkoutButtonEl = document.getElementById("checkoutButton");
+  const orderFormEl = document.getElementById("orderForm");
+
+  orderFormEl.onsubmit = function(e) {
+    e.preventDefault();
+
+    const cartData = JSON.parse(localStorage.getItem("cart") || "[]");
+    if(!cartData.length) return alert("Корзина пуста!");
+
+    const fd = new FormData(orderFormEl);
+    let deliveryCost = 0;
+    switch(fd.get("delivery")){
+      case "СДЭК": deliveryCost=450; break;
+      case "Почта России": deliveryCost=550; break;
+      case "Яндекс.Доставка": deliveryCost=400; break;
+      default: deliveryCost=0;
+    }
+
+    const total = cartData.reduce((s,i)=>s.count*i.product.price,0) + deliveryCost;
+    const orderData = {
+      fullname: fd.get("fullname"),
+      phone: fd.get("phone"),
+      telegram: fd.get("telegram"),
+      delivery: fd.get("delivery"),
+      address: fd.get("address"),
+      products: cartData.map(i=>`• ${i.product.name} x${i.count}`).join("\n"),
+      total
+    };
+
+    // Сохраняем данные для checkout
+    localStorage.setItem("cart", JSON.stringify(cartData));
+    localStorage.setItem("orderData", JSON.stringify(orderData));
+
+    // Переход на страницу оплаты
+    window.location.href = "checkout.html";
+  };
+</script>
 </body>
 </html>

@@ -238,8 +238,7 @@ function updateCartUI(){
 renderProducts(products);
 updateCartUI();
 updateOrderSum();
-  }
-});
+
 // ================== ФИКС ДЛЯ ГАМБУРГЕРА ==================
 menuIcon.onclick = () => {
   categories.classList.toggle("show");

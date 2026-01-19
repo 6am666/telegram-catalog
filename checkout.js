@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  try{
+  try {
     const res = await fetch("/api/create-payment", {
       method: "POST",
       headers: {"Content-Type":"application/json"},
@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const json = await res.json();
 
     if(json.payment_url){
-      window.location.href = json.payment_url; // редирект на YooKassa
+      window.location.href = json.payment_url;
     } else {
       document.body.innerHTML = "<h2>Ошибка создания оплаты</h2>";
       console.error(json);

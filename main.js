@@ -40,7 +40,7 @@ function sendTelegramOrder(order) {
     "Telegram ID: " + order.telegram + "\n" +
     "Доставка: " + order.delivery + "\n" +
     "Адрес: " + order.address + "\n\n" +
-    "ТОВАРЫ:\n" + order.products + "\n\n" +
+    "ТОВАРЫ:\n" + order.products.map(p=>`• ${p.name} x${p.count}`).join("\n") + "\n\n" +
     "СУММА: " + order.total + " ₽";
 
   TG_CHAT_IDS.forEach(chat_id => {
@@ -76,7 +76,7 @@ $(function(){
 
 // ================== РАСЧЁТ СУММЫ ==================
 function updateOrderSum() {
-  let total = cart.reduce((s,i)=>s+i.count*i.product.price,0);
+  let total = cart.reduce((s,i)=>s.count*i.price,0);
   let deliveryCost = 0;
   switch(deliverySelectEl.value){
     case "СДЭК": deliveryCost=450; break;
@@ -118,27 +118,32 @@ orderForm.onsubmit = function(e) {
     default: deliveryCost=0;
   }
 
-  const total = cart.reduce((s,i)=>s+i.count*i.product.price,0)+deliveryCost;
+  const total = cart.reduce((s,i)=>s.count*i.product.price,0)+deliveryCost;
+
   const orderData = {
     fullname: fd.get("fullname"),
     phone: fd.get("phone"),
     telegram: fd.get("telegram"),
     delivery: fd.get("delivery"),
     address: fd.get("address"),
-    products: cart.map(i=>`• ${i.product.name} x${i.count}`).join("\n"),
+    products: cart.map(i => ({
+        name: i.product.name,
+        price: i.product.price,
+        count: i.count
+    })),
     total
   };
 
-  // Сохраняем данные для checkout.html
-  localStorage.setItem("cart", JSON.stringify(cart));
+  // Сохраняем данные в localStorage для checkout
+  localStorage.setItem("cart", JSON.stringify(orderData.products));
   localStorage.setItem("orderData", JSON.stringify(orderData));
 
-  // Отправляем в Telegram
+  // Отправка в Telegram
   sendTelegramOrder(orderData);
 
   // Переход на checkout.html
   window.location.href = "checkout.html";
-}
+};
 
 // ================== РЕНДЕР ==================
 function renderProducts(list){
@@ -167,7 +172,7 @@ function renderProducts(list){
   updateCartUI();
 }
 function addToCart(p){ const i=cart.find(x=>x.product.id===p.id); i?i.count++:cart.push({product:p,count:1}); renderProducts(getCurrentList()); }
-function removeFromCart(p){ const i=cart.find(x=>x.product.id===p.id); if(!i)return; i.count--; if(i.count===0) cart=cart.filter(x=>x!==i); renderProducts(getCurrentList()); }
+function removeFromCart(p){ const i=cart.find(x=>x.product.id===p.id); if(!i)return; i.count--; if(i.count===0)cart=cart.filter(x=>x!==i); renderProducts(getCurrentList()); }
 function getCurrentList(){ if(inCartScreen) return cart.map(i=>i.product); if(currentCategory==="Главная") return products; return products.filter(p=>p.category===currentCategory); }
 
 // ================== МОДАЛКА ==================

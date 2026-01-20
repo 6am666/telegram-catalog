@@ -66,8 +66,7 @@ const products = [
 orderForm.innerHTML = `
 <label>ФИО</label><input type="text" name="fullname" placeholder="Введите ФИО" required>
 <label>Адрес</label><input type="text" name="address" id="addressInput" placeholder="Город, улица, дом, индекс" required>
-<label>Доставка</label>
-<select name="delivery" id="deliverySelect" required>
+<label>Доставка</label><select name="delivery" id="deliverySelect" required>
 <option value="" disabled selected>Выберите способ доставки</option>
 <option value="СДЭК">СДЭК — 450₽</option>
 <option value="Почта России">Почта России — 550₽</option>
@@ -90,114 +89,34 @@ $(function(){
   });
 });
 
-// ================== РАСЧЁТ СУММЫ ==================
-const deliverySelectEl = document.getElementById("deliverySelect");
-const deliveryInfoEl = document.getElementById("deliveryInfo");
-const orderSumEl = document.getElementById("orderSum");
-function updateOrderSum() {
-  let total = cart.reduce((s,i)=>s+i.count*i.product.price,0);
-  let deliveryCost = 0;
-  switch(deliverySelectEl.value){
-    case "СДЭК": deliveryCost=450; break;
-    case "Почта России": deliveryCost=550; break;
-    case "Яндекс.Доставка": deliveryCost=400; break;
-    default: deliveryCost=0;
-  }
-  orderSumEl.textContent="Итоговая сумма: "+(total+deliveryCost)+" ₽";
-  deliveryInfoEl.textContent=deliverySelectEl.value==="Самовывоз"?"Забрать заказ — Санкт-Петербург, Русановская 18к8":"";
+// ================== РЕНДЕР С ПЛАВНОЙ АНИМАЦИЕЙ ==================
+function smoothRender(list){
+  productsEl.classList.add("hide");
+  setTimeout(()=>{
+    renderProducts(list);
+    productsEl.classList.remove("hide");
+  }, 80);
 }
-deliverySelectEl.addEventListener("change", updateOrderSum);
 
-// ================== КНОПКА ОФОРМИТЬ ЗАКАЗ ==================
-checkoutButton.onclick = ()=>{
-  if(!cart.length) return alert("Корзина пуста!");
-  orderModal.style.display="flex";
-  orderModal.style.pointerEvents="auto";
-  updateOrderSum();
-  document.activeElement.blur();
-};
-
-// ================== ЗАКРЫТИЕ МОДАЛКИ ==================
-orderClose.onclick=()=>orderModal.style.display="none";
-orderModal.onclick=e=>{if(e.target===orderModal)orderModal.style.display="none";};
-
-// ================== ОФОРМЛЕНИЕ ЗАКАЗА (с Mini App fix) ==================
-orderForm.onsubmit=async e=>{
-  e.preventDefault();
-  if(isSubmitting) return;
-  if(!cart.length) return alert("Корзина пуста!");
-  isSubmitting=true;
-
-  const fd = new FormData(orderForm);
-  const productsList=cart.map(i=>`• ${i.product.name} x${i.count}`).join("\n");
-
-  let deliveryCost=0;
-  switch(fd.get("delivery")){
-    case "СДЭК": deliveryCost=450; break;
-    case "Почта России": deliveryCost=550; break;
-    case "Яндекс.Доставка": deliveryCost=400; break;
-    default: deliveryCost=0;
-  }
-
-  const total=cart.reduce((s,i)=>s+i.count*i.product.price,0)+deliveryCost;
-  const data={
-    fullname:fd.get("fullname"),
-    phone:fd.get("phone"),
-    telegram:fd.get("telegram"),
-    delivery:fd.get("delivery"),
-    address:fd.get("address"),
-    products:productsList,
-    total
-  };
-
-  try{
-    sendTelegramOrder(data);
-
-    const res = await fetch("/api/create-payment",{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({amount:total, order_id:Date.now(), return_url:window.location.href+"?success=true"})
-    });
-    const json=await res.json();
-    console.log("create-payment response:",json);
-
-    if(json.payment_url){
-      cart=[]; renderProducts(products); updateCartUI();
-      orderModal.style.display="none";
-
-      // ===== Mini App fix =====
-      if (window.Telegram?.WebApp && typeof Telegram.WebApp.openLink === "function") {
-        Telegram.WebApp.openLink(json.payment_url, { try_instant_view:false });
-      } else {
-        window.open(json.payment_url, "_blank", "noopener,noreferrer");
-      }
-
-    } else alert("Ошибка создания оплаты");
-  }catch(err){
-    console.error("Ошибка оплаты:",err);
-    alert("Ошибка оплаты");
-  }finally{isSubmitting=false;}
-};
-
-// ================== РЕНДЕР ==================
+// ================== renderProducts ==================
 function renderProducts(list){
   productsEl.innerHTML="";
-  list.forEach(p=>{
-    const card=document.createElement("div"); card.className="product";
-    const img=document.createElement("img"); img.src=p.image; img.onclick=()=>openModal(p);
-    const title=document.createElement("h3"); title.textContent=p.name;
-    const price=document.createElement("p"); price.textContent=p.price+" ₽";
+  list.forEach((p,i)=>{
+    const card = document.createElement("div"); card.className="product";
+    card.style.animationDelay = (i*0.03)+"s";
+    const img = document.createElement("img"); img.src=p.image; img.onclick=()=>openModal(p);
+    const title = document.createElement("h3"); title.textContent=p.name;
+    const price = document.createElement("p"); price.textContent=p.price+" ₽";
 
-    const controls=document.createElement("div"); controls.className="count-block";
-    const item=cart.find(i=>i.product.id===p.id);
-
+    const controls = document.createElement("div"); controls.className="count-block";
+    const item = cart.find(i=>i.product.id===p.id);
     if(item){
-      const minus=document.createElement("button"); minus.textContent="–"; minus.onclick=e=>{e.stopPropagation();removeFromCart(p)};
-      const count=document.createElement("div"); count.className="count-number"; count.textContent=item.count;
-      const plus=document.createElement("button"); plus.textContent="+"; plus.onclick=e=>{e.stopPropagation();addToCart(p)};
+      const minus = document.createElement("button"); minus.textContent="–"; minus.onclick=e=>{e.stopPropagation();removeFromCart(p)};
+      const count = document.createElement("div"); count.className="count-number"; count.textContent=item.count;
+      const plus = document.createElement("button"); plus.textContent="+"; plus.onclick=e=>{e.stopPropagation();addToCart(p)};
       controls.append(minus,count,plus);
-    }else{
-      const btn=document.createElement("button"); btn.textContent="В корзину"; btn.onclick=e=>{e.stopPropagation();addToCart(p)};
+    } else {
+      const btn = document.createElement("button"); btn.textContent="В корзину"; btn.onclick=e=>{e.stopPropagation();addToCart(p)};
       controls.appendChild(btn);
     }
     card.append(img,title,price,controls);
@@ -205,97 +124,24 @@ function renderProducts(list){
   });
   updateCartUI();
 }
-function addToCart(p){ const i=cart.find(x=>x.product.id===p.id); i?i.count++:cart.push({product:p,count:1}); renderProducts(getCurrentList()); }
-function removeFromCart(p){ const i=cart.find(x=>x.product.id===p.id); if(!i)return; i.count--; if(i.count===0)cart=cart.filter(x=>x!==i); renderProducts(getCurrentList()); }
-function getCurrentList(){ if(inCartScreen)return cart.map(i=>i.product); if(currentCategory==="Главная")return products; return products.filter(p=>p.category===currentCategory); }
-
-// ================== МОДАЛКА ==================
-function openModal(p){ modalImage.src=p.image; modalTitle.textContent=p.name; modalPrice.textContent=p.price+" ₽"; modalDescription.innerHTML=p.description.join("<br>"); modal.style.display="flex"; }
-modalClose.onclick=()=>modal.style.display="none";
-modal.onclick=e=>{if(e.target===modal) modal.style.display="none";}
 
 // ================== КОРЗИНА ==================
-cartButton.onclick=()=>{ inCartScreen=true; document.body.classList.add("cart-mode"); renderProducts(cart.map(i=>i.product)); };
-mainTitle.onclick=()=>{ inCartScreen=false; document.body.classList.remove("cart-mode"); currentCategory="Главная"; renderProducts(products); };
+function addToCart(p){ const i = cart.find(x=>x.product.id===p.id); i? i.count++ : cart.push({product:p,count:1}); smoothRender(getCurrentList()); }
+function removeFromCart(p){ const i = cart.find(x=>x.product.id===p.id); if(!i) return; i.count--; if(i.count===0) cart = cart.filter(x=>x!==i); smoothRender(getCurrentList()); }
+function getCurrentList(){ if(inCartScreen) return cart.map(i=>i.product); if(currentCategory==="Главная") return products; return products.filter(p=>p.category===currentCategory); }
 
-// ================== ПОИСК ==================
-searchInput.oninput=()=>{ const val=searchInput.value.toLowerCase(); renderProducts(getCurrentList().filter(p=>p.name.toLowerCase().includes(val))); };
+cartButton.onclick=()=>{ inCartScreen=true; smoothRender(cart.map(i=>i.product)); };
+mainTitle.onclick=()=>{ inCartScreen=false; currentCategory="Главная"; smoothRender(products); };
 
-// ================== ОБНОВЛЕНИЕ КОРЗИНЫ ==================
-function updateCartUI(){
-  const c=cart.reduce((s,i)=>s+i.count,0);
-  const t=cart.reduce((s,i)=>s+i.count*i.product.price,0);
-  cartCount.textContent=c;
-  cartTotal.textContent=t?"Итого: "+t+" ₽":"";
-  cartTotal.style.display=inCartScreen?"block":"none";
-  checkoutButton.style.display=c&&inCartScreen?"block":"none";
-  footerButtons.style.display=inCartScreen?"none":"flex";
-  searchInput.style.display=inCartScreen?"none":"block";
-  updateOrderSum();
-}
+searchInput.oninput=()=>{ const val = searchInput.value.toLowerCase(); smoothRender(getCurrentList().filter(p=>p.name.toLowerCase().includes(val))); };
 
-// ================== SOFT TRANSITION ==================
-const container = document.querySelector(".container");
-
-function softSwitch(callback){
-  container.classList.add("page-hide");
-
-  setTimeout(() => {
-    callback();
-    container.classList.remove("page-hide");
-    container.classList.add("page-show");
-
-    setTimeout(() => {
-      container.classList.remove("page-show");
-    }, 180);
-  }, 160);
-}
-
-// ===== В КОРЗИНУ =====
-cartButton.onclick = () => {
-  if(inCartScreen) return;
-  softSwitch(() => {
-    inCartScreen = true;
-    document.body.classList.add("cart-mode");
-    renderProducts(cart.map(i => i.product));
-  });
-};
-
-// ===== НА ГЛАВНУЮ =====
-mainTitle.onclick = () => {
-  if(!inCartScreen) return;
-  softSwitch(() => {
-    inCartScreen = false;
-    document.body.classList.remove("cart-mode");
-    currentCategory = "Главная";
-    renderProducts(products);
-  });
-};
-
-// ===== ГАМБУРГЕР =====
-menuIcon.onclick = () => {
-  categories.classList.toggle("show");
-};
-
-// ===== КАТЕГОРИИ =====
-categories.querySelectorAll("div").forEach(cat => {
-  cat.onclick = () => {
-    const catName = cat.dataset.category;
+// ================== ГАМБУРГЕР ==================
+menuIcon.onclick=()=>{ categories.classList.toggle("show"); };
+categories.querySelectorAll("div").forEach(cat=>{
+  cat.onclick=()=>{
+    currentCategory = cat.dataset.category;
+    inCartScreen=false;
     categories.classList.remove("show");
-
-    softSwitch(() => {
-      inCartScreen = false;
-      document.body.classList.remove("cart-mode");
-      currentCategory = catName;
-      renderProducts(getCurrentList());
-    });
-  };
+    smoothRender(getCurrentList());
+  }
 });
-
-
-// ================== СТАРТ ==================
-renderProducts(products);
-updateCartUI();
-updateOrderSum();
-
-

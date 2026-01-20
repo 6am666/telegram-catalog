@@ -318,3 +318,32 @@ body{
   transform: translateX(0);
   opacity: 1;
 }
+
+/* ================== SMOOTH PAGE TRANSITION ================== */
+.container{
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  will-change: opacity, transform;
+}
+
+.page-hide{
+  opacity: 0;
+  transform: scale(0.985);
+}
+
+.page-show{
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ===== ФОН ВСЕГДА СТАБИЛЬНЫЙ ===== */
+body{
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+/* Убираем любые трансформации body */
+body.cart-mode{
+  background-attachment: fixed;
+}
+

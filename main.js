@@ -234,7 +234,77 @@ function updateCartUI(){
   updateOrderSum();
 }
 
+// ================== ADD ANIMATIONS (SAFE PATCH) ==================
+const container = document.querySelector(".container");
+let isAnimating = false;
+
+function animatePageSwitch(direction, callback){
+  if(isAnimating) return;
+  isAnimating = true;
+
+  const outClass = direction === "left" ? "slide-out-left" : "slide-out-right";
+  const inClass  = direction === "left" ? "slide-in-right" : "slide-in-left";
+
+  container.classList.add(outClass);
+
+  setTimeout(()=>{
+    callback(); // renderProducts вызывается тут
+    container.classList.remove(outClass);
+    container.classList.add(inClass);
+
+    setTimeout(()=>{
+      container.classList.remove(inClass);
+      isAnimating = false;
+    }, 220);
+  }, 200);
+}
+
+// ===== ПЕРЕХОД В КОРЗИНУ =====
+cartButton.onclick = () => {
+  if(inCartScreen) return;
+  animatePageSwitch("left", () => {
+    inCartScreen = true;
+    document.body.classList.add("cart-mode");
+    renderProducts(cart.map(i => i.product));
+  });
+};
+
+// ===== ВОЗВРАТ НА ГЛАВНУЮ =====
+mainTitle.onclick = () => {
+  if(!inCartScreen) return;
+  animatePageSwitch("right", () => {
+    inCartScreen = false;
+    document.body.classList.remove("cart-mode");
+    currentCategory = "Главная";
+    renderProducts(products);
+  });
+};
+
+// ===== ГАМБУРГЕР =====
+menuIcon.onclick = () => {
+  categories.classList.toggle("show");
+};
+
+// ===== КАТЕГОРИИ С АНИМАЦИЕЙ =====
+categories.querySelectorAll("div").forEach(cat => {
+  cat.onclick = () => {
+    const catName = cat.dataset.category;
+    categories.classList.remove("show");
+
+    if(catName === currentCategory && !inCartScreen) return;
+
+    animatePageSwitch("left", () => {
+      inCartScreen = false;
+      document.body.classList.remove("cart-mode");
+      currentCategory = catName;
+      renderProducts(getCurrentList());
+    });
+  };
+});
+
 // ================== СТАРТ ==================
 renderProducts(products);
 updateCartUI();
 updateOrderSum();
+
+

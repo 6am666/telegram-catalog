@@ -1,11 +1,14 @@
 *{margin:0; padding:0; box-sizing:border-box;}
 body{
   font-family: Arial,sans-serif;
-  background-color:#1e1e1e;
   background-image:url("https://i.pinimg.com/originals/6d/7c/65/6d7c65bbef77082a19ff4a2a2327d50d.jpg");
-  background-size:cover;
-  background-position:center;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+
   overflow-x:hidden;
+
 }
 
 /* 🔴 НОВЫЙ КЛАСС для фикс фона при открытой корзине */

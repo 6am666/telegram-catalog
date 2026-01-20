@@ -8,7 +8,7 @@ body{
   overflow-x:hidden;
 }
 
-/* 🔴 НОВЫЙ КЛАСС для фикс фона при открытой корзине */
+/* 🔴 Фикс фона при открытой корзине */
 body.cart-mode {
   background-attachment: fixed;
 }
@@ -19,7 +19,7 @@ body.cart-mode {
   display:flex; align-items:center; justify-content:center;
   padding:16px;
   background: rgba(30,30,30,0.95);
-  z-index:11;
+  z-index:1000;
 }
 .header h1{
   color:#fff;
@@ -29,11 +29,12 @@ body.cart-mode {
   cursor:pointer;
 }
 .header .menu-icon{
-  position:absolute; left:16px;
+  position:absolute; left:16px; top:50%; transform:translateY(-50%);
   display:flex; flex-direction:column;
   justify-content:space-between;
   width:36px; height:26px;
   cursor:pointer;
+  z-index:1001;
 }
 .header .menu-icon div{
   width:36px; height:4px; background:white; border-radius:2px;
@@ -60,7 +61,7 @@ body.cart-mode {
 .categories{
   position:fixed; top:0; left:-220px; width:220px; height:100%;
   background:rgba(30,30,30,0.95); color:white; padding:60px 20px;
-  display:flex; flex-direction:column; gap:20px; transition:left 0.3s; z-index:10;
+  display:flex; flex-direction:column; gap:20px; transition:left 0.3s; z-index:1000;
 }
 .categories.show{left:0;}
 .categories div{cursor:pointer;font-size:18px;}
@@ -217,10 +218,10 @@ body.cart-mode {
   height:36px;
   width:100%;
   box-sizing:border-box;
-  caret-color: black; /* черный курсор только в форме */
+  caret-color: black;
 }
 
-/* Итоговая сумма под формой слева */
+/* Итоговая сумма под формой */
 #orderSum {
   color:#aaa;
   font-weight:500;
@@ -239,7 +240,6 @@ body.cart-mode {
   cursor:pointer;
   transition: background 0.2s;
 }
-
 .order-modal button:hover {
   background:#555;
 }

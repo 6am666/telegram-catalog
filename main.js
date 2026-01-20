@@ -50,143 +50,128 @@ const products = [
   {id:9,name:"Тестовый товар",price:10,image:"https://via.placeholder.com/150",category:"Тест",description:["Тестовый товар для проверки.","","Срок изготовления — 1 день."]}
 ];
 
-// ================== РЕНДЕР ==================
-function renderProducts(list){
-  productsEl.innerHTML="";
-  list.forEach(p=>{
-    const card=document.createElement("div");
-    card.className="product fade-slide";
+// ================== ФОРМА ==================
+orderForm.innerHTML = `
+<label>ФИО</label><input type="text" name="fullname" placeholder="Введите ФИО" required>
+<label>Адрес</label><input type="text" name="address" id="addressInput" placeholder="Город, улица, дом, индекс" required>
+<label>Доставка</label><select name="delivery" id="deliverySelect" required>
+<option value="" disabled selected>Выберите способ доставки</option>
+<option value="СДЭК">СДЭК — 450₽</option>
+<option value="Почта России">Почта России — 550₽</option>
+<option value="Яндекс.Доставка">Яндекс.Доставка — 400₽</option>
+<option value="Самовывоз">Самовывоз</option>
+</select>
+<div id="deliveryInfo" style="color:#aaa;margin-top:4px;"></div>
+<label>Номер телефона</label><input type="text" name="phone" placeholder="Введите номер" required>
+<label>Telegram ID</label><input type="text" name="telegram" placeholder="@id" required>
+<div id="orderSum" style="color:#aaa;margin:10px 0;font-weight:500;">Итоговая сумма: 0 ₽</div>
+<button type="submit">Оплатить</button>
+`;
 
-    const img=document.createElement("img");
-    img.src=p.image;
-    img.onclick=()=>openModal(p);
-
-    const title=document.createElement("h3");
-    title.textContent=p.name;
-
-    const price=document.createElement("p");
-    price.textContent=p.price+" ₽";
-
-    const controls=document.createElement("div");
-    controls.className="count-block";
-
-    const item = cart.find(i=>i.product.id===p.id);
-    if(item){
-      controls.innerHTML = `
-        <button>–</button>
-        <div class="count-number">${item.count}</div>
-        <button>+</button>
-      `;
-      const [minus,,plus] = controls.children;
-      minus.onclick = e=>{e.stopPropagation(); removeFromCart(p)};
-      plus.onclick  = e=>{e.stopPropagation(); addToCart(p)};
-    } else {
-      const btn=document.createElement("button");
-      btn.textContent="В корзину";
-      btn.classList.add("micro-btn");
-      btn.onclick=e=>{e.stopPropagation(); addToCart(p)};
-      controls.appendChild(btn);
-    }
-
-    card.append(img,title,price,controls);
-    productsEl.appendChild(card);
-
-    requestAnimationFrame(()=>{
-      card.style.opacity="1";
-      card.style.transform="translateY(0)";
-    });
+// ================== DaData ==================
+$(function(){
+  $("#addressInput").suggestions({
+    token:"4563b9c9765a1a2d7bf39e1c8944f7fadae05970",
+    type:"ADDRESS",
+    hint:false
   });
-  updateCartUI();
+});
+
+// ================== РАСЧЁТ СУММЫ ==================
+const deliverySelectEl = document.getElementById("deliverySelect");
+const deliveryInfoEl = document.getElementById("deliveryInfo");
+const orderSumEl = document.getElementById("orderSum");
+function updateOrderSum() {
+  let total = cart.reduce((s,i)=>s+i.count*i.product.price,0);
+  let deliveryCost = 0;
+  switch(deliverySelectEl.value){
+    case "СДЭК": deliveryCost = 450; break;
+    case "Почта России": deliveryCost = 550; break;
+    case "Яндекс.Доставка": deliveryCost = 400; break;
+    default: deliveryCost = 0;
+  }
+  orderSumEl.textContent = "Итоговая сумма: "+(total+deliveryCost)+" ₽";
+  deliveryInfoEl.textContent = deliverySelectEl.value==="Самовывоз"?"Забрать заказ — Санкт-Петербург, Русановская 18к8":"";
+}
+deliverySelectEl.addEventListener("change", updateOrderSum);
+
+// ================== ПОДСВЕТКА КОРЗИНЫ ==================
+function animateAddToCart(){
+  cartButton.classList.remove("cart-pulse");
+  void cartButton.offsetWidth;
+  cartButton.classList.add("cart-pulse");
 }
 
 // ================== КОРЗИНА ==================
-
-// 🔧 FIX: УБРАН renderProducts + animateAddToCart
 function addToCart(p){
   let item = cart.find(x => x.product.id === p.id);
-  if(item){
-    item.count++;
-  } else {
+  const isNew = !item;
+
+  if(item) item.count++;
+  else {
     item = { product:p, count:1 };
     cart.push(item);
   }
 
   updateCartUI();
 
-  const card = [...productsEl.children]
-    .find(c => c.querySelector("h3")?.textContent === p.name);
+  const card = [...productsEl.children].find(c=>c.querySelector("h3")?.textContent===p.name);
   if(!card) return;
-
   const controls = card.querySelector(".count-block");
-  controls.innerHTML = `
-    <button>–</button>
-    <div class="count-number">${item.count}</div>
-    <button>+</button>
-  `;
-  const [minus,,plus] = controls.children;
-  minus.onclick = e=>{e.stopPropagation(); removeFromCart(p)};
-  plus.onclick  = e=>{e.stopPropagation(); addToCart(p)};
-}
 
-// 🔧 FIX: симметрично без перерендера
-function removeFromCart(p){
-  const item = cart.find(x => x.product.id === p.id);
-  if(!item) return;
-
-  item.count--;
-  if(item.count===0){
-    cart = cart.filter(x=>x!==item);
+  if(isNew){
+    controls.innerHTML="";
+    const minus=document.createElement("button"); minus.textContent="–"; minus.onclick=e=>{e.stopPropagation();removeFromCart(p)};
+    const count=document.createElement("div"); count.className="count-number"; count.textContent="1";
+    const plus=document.createElement("button"); plus.textContent="+"; plus.onclick=e=>{e.stopPropagation();addToCart(p)};
+    controls.append(minus,count,plus);
+  } else {
+    controls.querySelector(".count-number").textContent=item.count;
   }
 
+  animateAddToCart();
+}
+
+function removeFromCart(p){
+  const item = cart.find(x=>x.product.id===p.id);
+  if(!item) return;
+  item.count--;
+  if(item.count===0) cart=cart.filter(x=>x!==item);
   updateCartUI();
 
-  const card = [...productsEl.children]
-    .find(c => c.querySelector("h3")?.textContent === p.name);
+  const card=[...productsEl.children].find(c=>c.querySelector("h3")?.textContent===p.name);
   if(!card) return;
-
-  const controls = card.querySelector(".count-block");
-  controls.innerHTML="";
+  const controls=card.querySelector(".count-block");
 
   if(item.count>0){
-    controls.innerHTML = `
-      <button>–</button>
-      <div class="count-number">${item.count}</div>
-      <button>+</button>
-    `;
-    const [minus,,plus] = controls.children;
-    minus.onclick = e=>{e.stopPropagation(); removeFromCart(p)};
-    plus.onclick  = e=>{e.stopPropagation(); addToCart(p)};
+    controls.querySelector(".count-number").textContent=item.count;
   } else {
+    controls.innerHTML="";
     const btn=document.createElement("button");
     btn.textContent="В корзину";
     btn.classList.add("micro-btn");
-    btn.onclick=e=>{e.stopPropagation(); addToCart(p)};
+    btn.onclick=e=>{e.stopPropagation();addToCart(p)};
     controls.appendChild(btn);
   }
 }
 
-// ================== ОСТАЛЬНОЕ (БЕЗ ИЗМЕНЕНИЙ) ==================
-// модалки, поиск, категории, заказ, updateCartUI, старт
-// ⬇️ НИЖЕ КОД У ТЕБЯ ОСТАЁТСЯ БЕЗ ИЗМЕНЕНИЙ ⬇️
-
-function getCurrentList(){
-  if(inCartScreen) return cart.map(i=>i.product);
-  if(currentCategory==="Главная") return products;
-  return products.filter(p=>p.category===currentCategory);
-}
-
-function openModal(p){
-  modalImage.src=p.image;
-  modalTitle.textContent=p.name;
-  modalPrice.textContent=p.price+" ₽";
-  modalDescription.innerHTML=p.description.join("<br>");
-  modal.style.display="flex";
-}
-modalClose.onclick = ()=>modal.style.display="none";
-modal.onclick = e=>{if(e.target===modal) modal.style.display="none";}
-
-// ... (дальше ВЕСЬ твой код без изменений)
-
+// ================== ОСТАЛЬНОЕ БЕЗ ИЗМЕНЕНИЙ ==================
+// ... тут оставляем весь твой renderProducts, модалки, гамбургер, поиск, checkout, updateCartUI ...
+// ================== СТАРТ ==================
 renderProducts(products);
 updateCartUI();
 updateOrderSum();
+
+// ================== CSS ПОДСВЕТКИ ==================
+const style=document.createElement("style");
+style.innerHTML=`
+.cart-pulse {
+  animation: cartPulse 0.35s ease;
+}
+@keyframes cartPulse {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+`;
+document.head.appendChild(style);

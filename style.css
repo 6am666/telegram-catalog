@@ -267,3 +267,17 @@ body.cart-mode {
   background-color: #555 !important; 
   color: #fff !important;
 }
+/* ===== Плавное перелистывание страниц ===== */
+.page-wrapper {
+  transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  will-change: transform;
+}
+
+body.cart-mode .page-wrapper {
+  transform: translateX(-100vw); /* сдвигаем корзину вправо */
+}
+
+/* Опционально: лёгкая тень при перелисте */
+body.cart-mode .page-wrapper {
+  box-shadow: -10px 0 30px rgba(0,0,0,0.1);
+}

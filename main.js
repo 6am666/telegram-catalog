@@ -202,27 +202,24 @@ function renderProducts(list){
 // ================== КОРЗИНА ==================
 function addToCart(p){ 
   const item = cart.find(x => x.product.id === p.id);
+  const isNewItem = !item;
   if(item) item.count++;
   else cart.push({product: p, count: 1});
 
   updateCartUI();
 
-  const productCard = [...productsEl.children].find(c => c.querySelector("h3").textContent === p.name);
-  if(productCard){
-    const countDiv = productCard.querySelector(".count-number");
-    if(countDiv){
-      countDiv.textContent = item.count;
-    } else {
-      const controls = productCard.querySelector(".count-block");
-      controls.innerHTML = "";
-      const minus = document.createElement("button"); minus.textContent="–"; minus.onclick=e=>{e.stopPropagation(); removeFromCart(p)};
-      const count = document.createElement("div"); count.className="count-number"; count.textContent=item.count;
-      const plus = document.createElement("button"); plus.textContent="+"; plus.onclick=e=>{e.stopPropagation(); addToCart(p)};
-      controls.append(minus,count,plus);
+  if(isNewItem){
+    // Перерендерим весь список, чтобы кнопки +/-
+    renderProducts(getCurrentList());
+  } else {
+    // Обновляем только текущую карточку
+    const productCard = [...productsEl.children].find(c => c.querySelector("h3").textContent === p.name);
+    if(productCard){
+      const countDiv = productCard.querySelector(".count-number");
+      if(countDiv) countDiv.textContent = item.count;
+      productCard.classList.add("added");
+      setTimeout(()=>productCard.classList.remove("added"), 300);
     }
-
-    productCard.classList.add("added");
-    setTimeout(()=>productCard.classList.remove("added"), 300);
   }
 }
 
@@ -237,12 +234,14 @@ function removeFromCart(p){
   const productCard = [...productsEl.children].find(c => c.querySelector("h3").textContent === p.name);
   if(productCard){
     const countDiv = productCard.querySelector(".count-number");
-    if(item.count > 0){
+    if(item && item.count > 0){
       countDiv.textContent = item.count;
     } else {
       const controls = productCard.querySelector(".count-block");
       controls.innerHTML = "";
-      const btn = document.createElement("button"); btn.textContent = "В корзину"; btn.classList.add("micro-btn");
+      const btn = document.createElement("button");
+      btn.textContent = "В корзину";
+      btn.classList.add("micro-btn");
       btn.onclick = e=>{e.stopPropagation(); addToCart(p)};
       controls.appendChild(btn);
     }

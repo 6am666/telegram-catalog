@@ -199,6 +199,36 @@ function renderProducts(list){
   updateCartUI();
 }
 
+// ================== АНІМАЦИЯ ПОЛЁТА В КОРЗИНУ ==================
+function animateAddToCart(p){
+  const productCard = [...productsEl.children].find(c => c.querySelector("h3").textContent === p.name);
+  if(!productCard) return;
+
+  const img = productCard.querySelector("img");
+  const imgClone = img.cloneNode(true);
+  const rect = img.getBoundingClientRect();
+  imgClone.style.position = "fixed";
+  imgClone.style.left = rect.left + "px";
+  imgClone.style.top = rect.top + "px";
+  imgClone.style.width = rect.width + "px";
+  imgClone.style.height = rect.height + "px";
+  imgClone.style.transition = "all 0.6s ease-in-out";
+  imgClone.style.zIndex = 9999;
+  imgClone.style.pointerEvents = "none";
+  document.body.appendChild(imgClone);
+
+  const cartRect = cartButton.getBoundingClientRect();
+  requestAnimationFrame(() => {
+    imgClone.style.left = (cartRect.left + cartRect.width/2 - rect.width/2) + "px";
+    imgClone.style.top = (cartRect.top + cartRect.height/2 - rect.height/2) + "px";
+    imgClone.style.width = "20px";
+    imgClone.style.height = "20px";
+    imgClone.style.opacity = "0.5";
+  });
+
+  setTimeout(() => imgClone.remove(), 600);
+}
+
 // ================== КОРЗИНА ==================
 function addToCart(p){ 
   const item = cart.find(x => x.product.id === p.id);
@@ -209,18 +239,16 @@ function addToCart(p){
   updateCartUI();
 
   if(isNewItem){
-    // Перерендерим весь список, чтобы кнопки +/-
     renderProducts(getCurrentList());
   } else {
-    // Обновляем только текущую карточку
     const productCard = [...productsEl.children].find(c => c.querySelector("h3").textContent === p.name);
     if(productCard){
       const countDiv = productCard.querySelector(".count-number");
       if(countDiv) countDiv.textContent = item.count;
-      productCard.classList.add("added");
-      setTimeout(()=>productCard.classList.remove("added"), 300);
     }
   }
+
+  animateAddToCart(p);
 }
 
 function removeFromCart(p){

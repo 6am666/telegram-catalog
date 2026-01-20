@@ -288,3 +288,54 @@ body.cart-mode .products {
 body:not(.cart-mode) .products {
   transform: translateX(0);
 }
+
+/* ================== ГАМБУРГЕР ================== */
+.categories {
+  position: fixed;
+  top: 0;
+  left: -260px; /* скрыто за экраном */
+  width: 260px;
+  height: 100vh;
+  background: rgba(30,30,30,0.95);
+  padding: 80px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  transition: left 0.25s ease-out;
+  z-index: 20;
+  background-attachment: fixed; /* фиксируем фон */
+}
+.categories.show { left: 0; }
+
+/* ================== ПЛАВНЫЙ ПЕРЕХОД СТРАНИЦ ================== */
+.page-wrapper {
+  transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  will-change: transform;
+}
+
+/* Переход в корзину */
+body.cart-mode .page-wrapper {
+  transform: translateX(-100vw);
+  box-shadow: -10px 0 30px rgba(0,0,0,0.12);
+}
+
+/* Переход в категорию */
+body.category-mode .page-wrapper {
+  transform: translateX(-100vw);
+}
+
+/* Лёгкий параллакс карточек товаров */
+body.cart-mode .products,
+body.category-mode .products {
+  transition: transform 0.5s ease;
+  transform: translateX(20px);
+}
+
+body:not(.cart-mode):not(.category-mode) .products {
+  transform: translateX(0);
+}
+
+/* Фон фиксированный для всего body */
+body {
+  background-attachment: fixed;
+}

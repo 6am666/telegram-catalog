@@ -273,36 +273,6 @@ body.cart-mode {
   will-change: transform, opacity;
 }
 
-.slide-out-left{
-  animation: slideOutLeft 0.2s forwards;
-}
-.slide-out-right{
-  animation: slideOutRight 0.2s forwards;
-}
-.slide-in-left{
-  animation: slideInLeft 0.22s forwards;
-}
-.slide-in-right{
-  animation: slideInRight 0.22s forwards;
-}
-
-@keyframes slideOutLeft{
-  from{ transform:translateX(0); opacity:1; }
-  to{ transform:translateX(-60px); opacity:0; }
-}
-@keyframes slideOutRight{
-  from{ transform:translateX(0); opacity:1; }
-  to{ transform:translateX(60px); opacity:0; }
-}
-@keyframes slideInLeft{
-  from{ transform:translateX(-60px); opacity:0; }
-  to{ transform:translateX(0); opacity:1; }
-}
-@keyframes slideInRight{
-  from{ transform:translateX(60px); opacity:0; }
-  to{ transform:translateX(0); opacity:1; }
-}
-
 /* ================== FIXED BACKGROUND ================== */
 body{
   background-attachment: fixed;

@@ -18,23 +18,30 @@
 </head>
 <body>
 
+<!-- Фон с blur -->
+<div class="bg-fixed"></div>
+
 <div class="header">
   <div class="menu-icon" id="menuIcon"><div></div><div></div><div></div></div>
   <h1 id="mainTitle">Chronicle Chains</h1>
   <button class="cart-btn" id="cartButton">🛒<span id="cartCount" class="cart-count">0</span></button>
 </div>
 
-<div class="container">
-  <div class="categories" id="categories">
-    <div data-category="Главная">Главная</div>
-    <div data-category="Браслеты">Браслеты</div>
-    <div data-category="Колье">Колье</div>
-    <div data-category="Кулоны">Кулоны</div>
-    <div data-category="Серьги">Серьги</div>
-    <div data-category="Обвесы">Обвесы</div>
-    <div data-category="Аксессуары для волос">Аксессуары для волос</div>
-  </div>
+<!-- Overlay для гамбургера -->
+<div class="overlay" id="overlay"></div>
 
+<!-- Гамбургер -->
+<div class="categories" id="categories">
+  <div data-category="Главная">Главная</div>
+  <div data-category="Браслеты">Браслеты</div>
+  <div data-category="Колье">Колье</div>
+  <div data-category="Кулоны">Кулоны</div>
+  <div data-category="Серьги">Серьги</div>
+  <div data-category="Обвесы">Обвесы</div>
+  <div data-category="Аксессуары для волос">Аксессуары для волос</div>
+</div>
+
+<div class="container">
   <input type="text" class="search" placeholder="Мне нужно..." id="searchInput">
   <div class="products" id="products"></div>
   <div class="cart-total" id="cartTotal"></div>
@@ -70,5 +77,23 @@
 <button class="checkout-btn" id="checkoutButton">Оформить заказ</button>
 
 <script src="main.js"></script>
+
+<script>
+  // Overlay для гамбургера
+  const overlay = document.getElementById("overlay");
+  const categoriesEl = document.getElementById("categories");
+  const menuIcon = document.getElementById("menuIcon");
+
+  menuIcon.onclick = () => {
+    categoriesEl.classList.toggle("show");
+    overlay.classList.toggle("show");
+  };
+
+  overlay.onclick = () => {
+    categoriesEl.classList.remove("show");
+    overlay.classList.remove("show");
+  };
+</script>
+
 </body>
 </html>

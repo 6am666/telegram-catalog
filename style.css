@@ -60,7 +60,7 @@ body.cart-mode, body.tab-mode {
   top: 16px;
   width: 36px;
   height: 36px;
-  background: url('/mnt/data/9402fea5-6ed6-4523-87d4-16da71607394.png') no-repeat center center;
+  background: url('/mnt/data/ea340395-40d0-4f91-8990-771279f4a390.png') no-repeat center center;
   background-size: contain;
   border: none;
   cursor: pointer;
@@ -85,6 +85,17 @@ body.cart-mode, body.tab-mode {
   font-size: 12px;
   font-weight: bold;
 }
+
+/* ================== ПОДСВЕТКА КОРЗИНЫ ================== */
+.cart-pulse {
+  animation: cartPulse 0.5s ease;
+}
+@keyframes cartPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+
 
 /* ================== КОНТЕЙНЕР ================== */
 .container{

@@ -234,45 +234,37 @@ function updateCartUI(){
   updateOrderSum();
 }
 
-// ================== ADD ANIMATIONS (SAFE PATCH) ==================
+// ================== SOFT TRANSITION ==================
 const container = document.querySelector(".container");
-let isAnimating = false;
 
-function animatePageSwitch(direction, callback){
-  if(isAnimating) return;
-  isAnimating = true;
+function softSwitch(callback){
+  container.classList.add("page-hide");
 
-  const outClass = direction === "left" ? "slide-out-left" : "slide-out-right";
-  const inClass  = direction === "left" ? "slide-in-right" : "slide-in-left";
+  setTimeout(() => {
+    callback();
+    container.classList.remove("page-hide");
+    container.classList.add("page-show");
 
-  container.classList.add(outClass);
-
-  setTimeout(()=>{
-    callback(); // renderProducts вызывается тут
-    container.classList.remove(outClass);
-    container.classList.add(inClass);
-
-    setTimeout(()=>{
-      container.classList.remove(inClass);
-      isAnimating = false;
-    }, 220);
-  }, 200);
+    setTimeout(() => {
+      container.classList.remove("page-show");
+    }, 180);
+  }, 160);
 }
 
-// ===== ПЕРЕХОД В КОРЗИНУ =====
+// ===== В КОРЗИНУ =====
 cartButton.onclick = () => {
   if(inCartScreen) return;
-  animatePageSwitch("left", () => {
+  softSwitch(() => {
     inCartScreen = true;
     document.body.classList.add("cart-mode");
     renderProducts(cart.map(i => i.product));
   });
 };
 
-// ===== ВОЗВРАТ НА ГЛАВНУЮ =====
+// ===== НА ГЛАВНУЮ =====
 mainTitle.onclick = () => {
   if(!inCartScreen) return;
-  animatePageSwitch("right", () => {
+  softSwitch(() => {
     inCartScreen = false;
     document.body.classList.remove("cart-mode");
     currentCategory = "Главная";
@@ -285,15 +277,13 @@ menuIcon.onclick = () => {
   categories.classList.toggle("show");
 };
 
-// ===== КАТЕГОРИИ С АНИМАЦИЕЙ =====
+// ===== КАТЕГОРИИ =====
 categories.querySelectorAll("div").forEach(cat => {
   cat.onclick = () => {
     const catName = cat.dataset.category;
     categories.classList.remove("show");
 
-    if(catName === currentCategory && !inCartScreen) return;
-
-    animatePageSwitch("left", () => {
+    softSwitch(() => {
       inCartScreen = false;
       document.body.classList.remove("cart-mode");
       currentCategory = catName;
@@ -301,6 +291,7 @@ categories.querySelectorAll("div").forEach(cat => {
     });
   };
 });
+
 
 // ================== СТАРТ ==================
 renderProducts(products);

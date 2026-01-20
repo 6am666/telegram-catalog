@@ -14,7 +14,6 @@ const categories = document.getElementById("categories");
 const mainTitle = document.getElementById("mainTitle");
 const menuIcon = document.getElementById("menuIcon");
 const footerButtons = document.getElementById("footerButtons");
-const pageWrapper = document.getElementById("pageWrapper");
 
 const modal = document.getElementById("modal");
 const modalImage = document.getElementById("modalImage");
@@ -26,6 +25,8 @@ const modalClose = document.getElementById("modalClose");
 const orderModal = document.getElementById("orderModal");
 const orderClose = document.getElementById("orderClose");
 const orderForm = document.getElementById("orderForm");
+
+const pageWrapper = document.getElementById("pageWrapper"); // Для плавного сдвига
 
 // ================== TELEGRAM ==================
 const TG_BOT_TOKEN = "7999576459:AAHmaw0x4Ux_pXaL2VjxVlqYQByWVVHVtx4";
@@ -164,11 +165,7 @@ orderForm.onsubmit = async e => {
           })
       });
       const json = await res.json();
-
-      if(!json.payment_url){
-          alert("Ошибка создания оплаты");
-          return;
-      }
+      if(!json.payment_url) return alert("Ошибка создания оплаты");
 
       cart = [];
       renderProducts(products);
@@ -199,17 +196,19 @@ function renderProducts(list){
     const price = document.createElement("p"); price.textContent=p.price+" ₽";
 
     const controls = document.createElement("div"); controls.className="count-block";
-    const item = cart.find(i=>i.product.id===p.id);
+    const item = cart.find(x=>x.product.id===p.id);
+    const countVal = p.count || (item ? item.count : 0);
 
-    if(item){
-      const minus = document.createElement("button"); minus.textContent="–"; minus.onclick=e=>{e.stopPropagation();removeFromCart(p)};
-      const count = document.createElement("div"); count.className="count-number"; count.textContent=item.count;
-      const plus = document.createElement("button"); plus.textContent="+"; plus.onclick=e=>{e.stopPropagation();addToCart(p)};
+    if(countVal){
+      const minus = document.createElement("button"); minus.textContent="–"; minus.onclick=e=>{e.stopPropagation(); removeFromCart(p)};
+      const count = document.createElement("div"); count.className="count-number"; count.textContent=countVal;
+      const plus = document.createElement("button"); plus.textContent="+"; plus.onclick=e=>{e.stopPropagation(); addToCart(p)};
       controls.append(minus,count,plus);
-    }else{
-      const btn = document.createElement("button"); btn.textContent="В корзину"; btn.onclick=e=>{e.stopPropagation();addToCart(p)};
+    } else {
+      const btn = document.createElement("button"); btn.textContent="В корзину"; btn.onclick=e=>{e.stopPropagation(); addToCart(p)};
       controls.appendChild(btn);
     }
+
     card.append(img,title,price,controls);
     productsEl.appendChild(card);
   });
@@ -217,48 +216,73 @@ function renderProducts(list){
 }
 
 // ================== ФУНКЦИИ КОРЗИНЫ ==================
-function addToCart(p){ const i = cart.find(x=>x.product.id===p.id); i ? i.count++ : cart.push({product:p,count:1}); renderProducts(getCurrentList()); }
-function removeFromCart(p){ const i = cart.find(x=>x.product.id===p.id); if(!i) return; i.count--; if(i.count===0) cart = cart.filter(x=>x!==i); renderProducts(getCurrentList()); }
-function getCurrentList(){ if(inCartScreen) return cart.map(i=>i.product); if(currentCategory==="Главная") return products; return products.filter(p=>p.category===currentCategory); }
+function addToCart(p){ 
+  const i = cart.find(x=>x.product.id===p.id); 
+  i ? i.count++ : cart.push({product:p,count:1}); 
+  renderProducts(getCurrentList()); 
+}
+function removeFromCart(p){ 
+  const i = cart.find(x=>x.product.id===p.id); 
+  if(!i) return; 
+  i.count--; 
+  if(i.count===0) cart = cart.filter(x=>x!==i); 
+  renderProducts(getCurrentList()); 
+}
+function getCurrentList(){ 
+  if(inCartScreen) return cart.map(i=>({...i.product, count:i.count})); 
+  if(currentCategory==="Главная") return products; 
+  return products.filter(p=>p.category===currentCategory); 
+}
 
 // ================== МОДАЛКА ==================
-function openModal(p){ modalImage.src=p.image; modalTitle.textContent=p.name; modalPrice.textContent=p.price+" ₽"; modalDescription.innerHTML=p.description.join("<br>"); modal.style.display="flex"; }
+function openModal(p){ 
+  modalImage.src=p.image; 
+  modalTitle.textContent=p.name; 
+  modalPrice.textContent=p.price+" ₽"; 
+  modalDescription.innerHTML=p.description.join("<br>"); 
+  modal.style.display="flex"; 
+}
 modalClose.onclick=()=>modal.style.display="none";
 modal.onclick=e=>{if(e.target===modal) modal.style.display="none";}
 
-// ================== ГАМБУРГЕР ==================
-menuIcon.onclick = ()=>{ categories.classList.toggle("show"); };
-
-// ================== КОРЗИНА С ПЛАВНЫМ ПЕРЕЛИСТЫВАНИЕМ ==================
-cartButton.onclick = ()=>{
-  inCartScreen = true;
-  document.body.classList.add("cart-mode");
+// ================== КОРЗИНА ==================
+cartButton.onclick=()=>{
+  inCartScreen=true; 
+  document.body.classList.add("cart-mode"); 
   pageWrapper.style.transform = "translateX(-100vw)";
-  renderProducts(cart.map(i=>i.product));
+  renderProducts(cart.map(i=>({...i.product, count:i.count}))); 
 };
 
-mainTitle.onclick = ()=>{
-  inCartScreen = false;
-  document.body.classList.remove("cart-mode");
+mainTitle.onclick=()=>{
+  inCartScreen=false; 
+  document.body.classList.remove("cart-mode"); 
+  currentCategory="Главная"; 
   pageWrapper.style.transform = "translateX(0)";
-  currentCategory="Главная";
-  renderProducts(products);
+  renderProducts(products); 
 };
 
 // ================== ПОИСК ==================
-searchInput.oninput = ()=>{ const val = searchInput.value.toLowerCase(); renderProducts(getCurrentList().filter(p=>p.name.toLowerCase().includes(val))); };
+searchInput.oninput=()=>{
+  const val = searchInput.value.toLowerCase(); 
+  renderProducts(getCurrentList().filter(p=>p.name.toLowerCase().includes(val))); 
+};
 
 // ================== ОБНОВЛЕНИЕ КОРЗИНЫ ==================
 function updateCartUI(){
   const c = cart.reduce((s,i)=>s+i.count,0);
   const t = cart.reduce((s,i)=>s+i.count*i.product.price,0);
   cartCount.textContent = c;
-  cartTotal.textContent = t?"Итого: "+t+" ₽":""; 
+  cartTotal.textContent = t?"Итого: "+t+" ₽":"";
   cartTotal.style.display = inCartScreen?"block":"none";
   checkoutButton.style.display = c && inCartScreen?"block":"none";
   footerButtons.style.display = inCartScreen?"none":"flex";
   searchInput.style.display = inCartScreen?"none":"block";
   updateOrderSum();
+}
+
+// ================== ГАМБУРГЕР ==================
+menuIcon.onclick=()=>{
+  categories.classList.toggle("show");
 }
 
 // ================== СТАРТ ==================

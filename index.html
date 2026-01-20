@@ -5,71 +5,69 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Магазин</title>
 <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <!-- Шапка -->
-  <div class="header">
-    <div class="menu-icon" id="menuIcon">
-      <div></div>
-      <div></div>
-      <div></div>
-    </div>
-    <h1 id="mainTitle">Chronicle Chains</h1>
-    <button class="cart-btn" id="cartButton">
-      🛒 <span class="cart-count" id="cartCount">0</span>
-    </button>
-  </div>
-
-  <!-- Гамбургер -->
-  <div class="categories" id="categories">
-    <div>Браслеты</div>
-    <div>Колье</div>
-    <div>Кулоны</div>
-    <div>Обвесы</div>
-    <div>Серьги</div>
-    <div>Тест</div>
-  </div>
-
-  <!-- Контейнер с товарами -->
-  <div class="page-wrapper">
-    <div class="container">
-      <input type="text" class="search" id="searchInput" placeholder="Поиск...">
-      <div class="products" id="products"></div>
-      <div class="cart-total" id="cartTotal"></div>
-      <button class="checkout-btn" id="checkoutButton">Оформить заказ</button>
-    </div>
-  </div>
-
-  <!-- Модалка товара -->
-  <div class="modal" id="modal">
-    <div class="modal-content">
-      <span class="modal-close" id="modalClose">&times;</span>
-      <div class="modal-img-wrapper"><img id="modalImage" src=""></div>
-      <div class="modal-title-price">
-        <h3 id="modalTitle"></h3>
-        <p id="modalPrice"></p>
-      </div>
-      <div class="modal-desc" id="modalDescription"></div>
-    </div>
-  </div>
-
-  <!-- Модалка оформления заказа -->
-  <div class="order-modal" id="orderModal">
-    <div class="order-modal-content">
-      <span class="order-modal-close" id="orderClose">&times;</span>
-      <h2>Оформить заказ</h2>
-      <form id="orderForm"></form>
-    </div>
-  </div>
-
-  <!-- Футер -->
-  <div class="footer-buttons" id="footerButtons">
-    <a class="footer-btn" href="#">Главная</a>
-    <a class="footer-btn" href="#">Контакты</a>
-  </div>
-
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/suggestions-jquery/dist/js/jquery.suggestions.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/suggestions-jquery/dist/css/suggestions.min.css">
+</head>
+<body>
+
+<!-- Шапка -->
+<div class="header">
+  <div id="menuIcon" class="menu-icon">
+    <div></div><div></div><div></div>
+  </div>
+  <h1 id="mainTitle">Главная</h1>
+  <button id="cartButton" class="cart-btn">
+    🛒 <span id="cartCount" class="cart-count">0</span>
+  </button>
+</div>
+
+<!-- Меню категорий (гамбургер) -->
+<div id="categories" class="categories">
+  <div>Главная</div>
+  <div>Браслеты</div>
+  <div>Колье</div>
+  <div>Кулоны</div>
+  <div>Обвесы</div>
+  <div>Серьги</div>
+</div>
+
+<!-- Контент -->
+<div class="container page-wrapper">
+  <input id="searchInput" class="search" placeholder="Поиск по товарам">
+  <div id="products" class="products"></div>
+  <div id="cartTotal" class="cart-total"></div>
+  <button id="checkoutButton" class="checkout-btn">Оформить заказ</button>
+  <div id="footerButtons" class="footer-buttons">
+    <a href="#" class="footer-btn">Главная</a>
+    <a href="#" class="footer-btn">Контакты</a>
+  </div>
+</div>
+
+<!-- Модалка товара -->
+<div id="modal" class="modal">
+  <div class="modal-content">
+    <span id="modalClose" class="modal-close">&times;</span>
+    <div class="modal-img-wrapper">
+      <img id="modalImage" src="">
+    </div>
+    <div class="modal-title-price">
+      <h3 id="modalTitle"></h3>
+      <p id="modalPrice"></p>
+    </div>
+    <div id="modalDescription" class="modal-desc"></div>
+  </div>
+</div>
+
+<!-- Модалка оформления заказа -->
+<div id="orderModal" class="order-modal">
+  <div class="order-modal-content">
+    <span id="orderClose" class="order-modal-close">&times;</span>
+    <h2>Оформление заказа</h2>
+    <form id="orderForm"></form>
+  </div>
+</div>
+
 <script src="main.js"></script>
 </body>
 </html>

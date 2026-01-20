@@ -299,6 +299,51 @@ function addKuromi(){
   letterC.style.position="relative";
   letterC.appendChild(kuromiImg);
 }
+
+addKuromi();
+// ================== ПЛАВНЫЙ ГАМБУРГЕР ==================
+menuIcon.style.transition = "transform 0.3s ease, background 0.3s ease";
+categoriesEl.style.transition = "left 0.4s cubic-bezier(0.4, 0, 0.2, 1)";
+
+// ================== МИКРО-АНИМАЦИИ КНОПОК ==================
+document.addEventListener("click", e => {
+  if(e.target.classList.contains("micro-btn") || e.target.closest(".count-block button")) {
+    e.target.style.transform = "scale(0.95)";
+    setTimeout(() => { e.target.style.transform = "scale(1)"; }, 100);
+  }
+});
+
+// ================== КУРОМИ НА БУКВЕ "C" ==================
+function addKuromi() {
+  const title = mainTitle;
+  if(title.querySelector(".kuromi")) return;
+  title.innerHTML = title.textContent.replace("C","<span class='letter-c'>C</span>");
+  const letterC = title.querySelector(".letter-c");
+  letterC.style.position = "relative";
+
+  const kuromiImg = document.createElement("img");
+  kuromiImg.src = "https://i.pinimg.com/originals/5e/fb/32/5efb327b6e50362c36d4ff3571f36c84.gif";
+  kuromiImg.className = "kuromi";
+  kuromiImg.style.width = "24px";
+  kuromiImg.style.height = "24px";
+  kuromiImg.style.position = "absolute";
+  kuromiImg.style.bottom = "-6px";
+  kuromiImg.style.left = "50%";
+  kuromiImg.style.transform = "translateX(-50%)";
+  kuromiImg.style.animation = "kuromiLeg 0.6s infinite ease-in-out";
+
+  letterC.appendChild(kuromiImg);
+}
+
+// keyframes через JS
+const styleSheet = document.createElement("style");
+styleSheet.innerHTML = `
+@keyframes kuromiLeg {
+  0%, 100% { transform: translateX(-50%) rotate(0deg); }
+  50% { transform: translateX(-50%) rotate(15deg); }
+}`;
+document.head.appendChild(styleSheet);
+
 addKuromi();
 
 // ================== СТАРТ ==================

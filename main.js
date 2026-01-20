@@ -194,10 +194,6 @@ function renderProducts(list){
     requestAnimationFrame(()=>{
       card.style.opacity="1";
       card.style.transform="translateY(0)";
-      if(cart.find(x=>x.product.id===p.id)){
-        card.classList.add("added");
-        setTimeout(()=>card.classList.remove("added"),300);
-      }
     });
   });
   updateCartUI();
@@ -205,18 +201,52 @@ function renderProducts(list){
 
 // ================== КОРЗИНА ==================
 function addToCart(p){ 
-  const i = cart.find(x => x.product.id === p.id);
-  if(i) i.count++;
+  const item = cart.find(x => x.product.id === p.id);
+  if(item) item.count++;
   else cart.push({product: p, count: 1});
-  renderProducts(getCurrentList());
+
+  updateCartUI();
+
+  const productCard = [...productsEl.children].find(c => c.querySelector("h3").textContent === p.name);
+  if(productCard){
+    const countDiv = productCard.querySelector(".count-number");
+    if(countDiv){
+      countDiv.textContent = item.count;
+    } else {
+      const controls = productCard.querySelector(".count-block");
+      controls.innerHTML = "";
+      const minus = document.createElement("button"); minus.textContent="–"; minus.onclick=e=>{e.stopPropagation(); removeFromCart(p)};
+      const count = document.createElement("div"); count.className="count-number"; count.textContent=item.count;
+      const plus = document.createElement("button"); plus.textContent="+"; plus.onclick=e=>{e.stopPropagation(); addToCart(p)};
+      controls.append(minus,count,plus);
+    }
+
+    productCard.classList.add("added");
+    setTimeout(()=>productCard.classList.remove("added"), 300);
+  }
 }
 
 function removeFromCart(p){
-  const i = cart.find(x => x.product.id === p.id);
-  if(!i) return;
-  i.count--;
-  if(i.count === 0) cart = cart.filter(x => x !== i);
-  renderProducts(getCurrentList());
+  const item = cart.find(x => x.product.id === p.id);
+  if(!item) return;
+  item.count--;
+  if(item.count === 0) cart = cart.filter(x => x !== item);
+
+  updateCartUI();
+
+  const productCard = [...productsEl.children].find(c => c.querySelector("h3").textContent === p.name);
+  if(productCard){
+    const countDiv = productCard.querySelector(".count-number");
+    if(item.count > 0){
+      countDiv.textContent = item.count;
+    } else {
+      const controls = productCard.querySelector(".count-block");
+      controls.innerHTML = "";
+      const btn = document.createElement("button"); btn.textContent = "В корзину"; btn.classList.add("micro-btn");
+      btn.onclick = e=>{e.stopPropagation(); addToCart(p)};
+      controls.appendChild(btn);
+    }
+  }
 }
 
 function getCurrentList(){

@@ -19,7 +19,7 @@ body.cart-mode {
   display:flex; align-items:center; justify-content:center;
   padding:16px;
   background: rgba(30,30,30,0.95);
-  z-index:1000;
+  z-index:11;
 }
 .header h1{
   color:#fff;
@@ -29,12 +29,12 @@ body.cart-mode {
   cursor:pointer;
 }
 .header .menu-icon{
-  position:absolute; left:16px; top:50%; transform:translateY(-50%);
+  position:absolute; left:16px;
   display:flex; flex-direction:column;
   justify-content:space-between;
   width:36px; height:26px;
   cursor:pointer;
-  z-index:1001;
+  transition: transform 0.3s;
 }
 .header .menu-icon div{
   width:36px; height:4px; background:white; border-radius:2px;
@@ -57,16 +57,17 @@ body.cart-mode {
 /* Контейнер */
 .container{max-width:460px; margin:80px auto 40px; padding:16px; position:relative;}
 
-/* Меню категорий */
+/* Меню категорий (гамбургер) */
 .categories{
-  position:fixed; top:0; left:-220px; width:220px; height:100%;
+  position:fixed; top:0; left:-240px; width:240px; height:100%;
   background:rgba(30,30,30,0.95); color:white; padding:60px 20px;
-  display:flex; flex-direction:column; gap:20px; transition:left 0.3s; z-index:1000;
+  display:flex; flex-direction:column; gap:20px; transition:left 0.2s;
+  z-index:12;
 }
 .categories.show{left:0;}
 .categories div{cursor:pointer;font-size:18px;}
 
-/* 🔴 Поиск */
+/* Поиск */
 .search{
   width:100%; padding:12px; border-radius:12px; border:none;
   margin-bottom:20px; font-size:16px; display:block; background:#333; color:white;
@@ -74,7 +75,7 @@ body.cart-mode {
 .search::placeholder{color:#ccc;}
 
 /* Сетка товаров */
-.products{display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:14px; justify-items:center;}
+.products{display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:14px; justify-items:center; transition: transform 0.3s ease;}
 
 /* Карточки товаров */
 .product{
@@ -94,7 +95,7 @@ body.cart-mode {
 
 /* Кнопки + / - и добавить в корзину */
 .count-block{display:flex; align-items:center; justify-content:center; gap:8px; margin-top:6px;}
-.count-block button, .product .add-btn{
+.count-block button{
   padding:8px 12px; border-radius:10px; border:none; background:#333; color:white; font-size:14px; cursor:pointer;
   width:100%;
 }
@@ -130,212 +131,27 @@ body.cart-mode {
   object-fit:cover;
   margin-bottom:12px;
 }
-.modal-title-price{
-  text-align:center; margin-bottom:12px;
-}
 .modal-title-price h3{color:white; font-size:20px; margin:0;}
 .modal-title-price p{color:#ccc; font-size:16px; margin:4px 0 0 0;}
-.modal-desc{
-  text-align:left; 
-  color:white; 
-  font-size:14px; 
-  line-height:1.5; 
-  background: rgba(30,30,30,0.5); 
-  padding:12px; 
-  border-radius:10px;
-}
-.modal-desc p{margin:0;}
-.modal-desc p span:last-child{display:block; margin-top:8px; font-weight:500;}
+.modal-desc{color:white; font-size:14px; line-height:1.5; background: rgba(30,30,30,0.5); padding:12px; border-radius:10px; text-align:left;}
 
-/* ================== ФОРМА ОФОРМЛЕНИЯ ЗАКАЗА ================== */
-.order-modal{
-  display:none;
-  position:fixed;
-  z-index:200;
-  left:0; top:0;
-  width:100%; height:100%;
-  background-color:rgba(0,0,0,0.8);
-  justify-content:center;
-  align-items:center;
-}
-.order-modal-content{
-  background:#1e1e1e;
-  padding:20px;
-  border-radius:12px;
-  width:90%;
-  max-width:400px;
-  color:white;
-  display:flex;
-  flex-direction:column;
-  position:relative;
-}
+/* Форма оформления заказа */
+.order-modal{display:none;position:fixed; z-index:200; left:0; top:0; width:100%; height:100%; background-color:rgba(0,0,0,0.8); justify-content:center; align-items:center;}
+.order-modal-content{background:#1e1e1e; padding:20px; border-radius:12px; width:90%; max-width:400px; color:white; display:flex; flex-direction:column; position:relative;}
+.order-modal-close{position:absolute; top:10px; right:12px; font-size:28px; color:red; font-weight:bold; cursor:pointer;}
+.order-modal form{display:flex; flex-direction:column; gap:4px;}
+.order-modal input, .order-modal select{padding:10px; border-radius:6px; border:none; font-size:14px; outline:none; height:36px; width:100%; box-sizing:border-box;}
+#orderSum{color:#aaa; font-weight:500; text-align:left; margin:6px 0 8px 0;}
+.order-modal button{padding:12px 0; border-radius:10px; border:none; background:#333; color:white; font-size:16px; cursor:pointer; transition: background 0.2s;}
+.order-modal button:hover{background:#555;}
 
-/* Заголовок формы */
-.order-modal h2{
-  text-align:center;
-  font-size:20px;
-  font-weight:bold;
-  text-transform:uppercase;
-  margin-top:0;
-  margin-bottom:12px;
-}
-
-/* Крестик закрытия */
-.order-modal-close{
-  position:absolute;
-  top:10px;
-  right:12px;
-  font-size:28px;
-  color:red;
-  font-weight:bold;
-  cursor:pointer;
-  transition: color 0.2s;
-}
-.order-modal-close:hover{
-  color:#ff5555;
-}
-
-/* Форма внутри модалки */
-.order-modal form {
-  display:flex;
-  flex-direction:column;
-  gap:4px;
-}
-
-.order-modal label {
-  font-size:14px;
-  color:#fff;
-  margin-bottom:2px;
-  display:block;
-}
-
-.order-modal input, .order-modal select {
-  padding:10px;
-  border-radius:6px;
-  border:none;
-  font-size:14px;
-  outline:none;
-  height:36px;
-  width:100%;
-  box-sizing:border-box;
-  caret-color: black;
-}
-
-/* Итоговая сумма под формой */
-#orderSum {
-  color:#aaa;
-  font-weight:500;
-  text-align:left;
-  margin:6px 0 8px 0;
-}
-
-/* Кнопка оплаты */
-.order-modal button {
-  padding:12px 0;
-  border-radius:10px;
-  border:none;
-  background:#333;
-  color:white;
-  font-size:16px;
-  cursor:pointer;
-  transition: background 0.2s;
-}
-.order-modal button:hover {
-  background:#555;
-}
-
-/* Футер */
+/* Кнопка оформления заказа */
+.checkout-btn{position:relative; margin:20px auto; display:none; padding:14px 20px; border-radius:20px; border:none; background:#333; color:white; font-size:16px; cursor:pointer; text-align:center;}
 .footer-buttons{position:relative; display:flex; gap:12px; justify-content:center; margin:12px 0;}
 .footer-btn{padding:12px 18px; border-radius:20px; background:#333; color:white; font-size:16px; text-decoration:none; text-align:center;}
 .footer-btn:hover{background:#555;}
 
-/* Кнопка оформления заказа */
-.checkout-btn{position:relative; margin:20px auto; display:none; padding:14px 20px; border-radius:20px; border:none; background:#333; color:white; font-size:16px; cursor:pointer; text-align:center;}
-
 /* DaData подсказки */
-.suggestions-suggestions {
-  background-color: #333 !important;
-  color: #fff !important;
-  z-index: 999999 !important;
-}
-.suggestions-item {
-  background-color: #333 !important; 
-  color: #fff !important;
-  cursor: pointer;
-}
-.suggestions-item:hover {
-  background-color: #555 !important; 
-  color: #fff !important;
-}
-
-/* ================== ПЛАВНОЕ ПЕРЕЛИСТЫВАНИЕ КОРЗИНЫ ================== */
-.page-wrapper {
-  transition: transform 0.55s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  will-change: transform;
-}
-
-body.cart-mode .page-wrapper {
-  transform: translateX(-100vw);
-  box-shadow: -10px 0 30px rgba(0,0,0,0.12);
-}
-
-/* Лёгкий параллакс карточек товаров */
-body.cart-mode .products {
-  transition: transform 0.55s ease;
-  transform: translateX(20px);
-}
-
-body:not(.cart-mode) .products {
-  transform: translateX(0);
-}
-
-/* ================== ГАМБУРГЕР ================== */
-.categories {
-  position: fixed;
-  top: 0;
-  left: -260px; /* скрыто за экраном */
-  width: 260px;
-  height: 100vh;
-  background: rgba(30,30,30,0.95);
-  padding: 80px 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  transition: left 0.25s ease-out;
-  z-index: 20;
-  background-attachment: fixed; /* фиксируем фон */
-}
-.categories.show { left: 0; }
-
-/* ================== ПЛАВНЫЙ ПЕРЕХОД СТРАНИЦ ================== */
-.page-wrapper {
-  transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  will-change: transform;
-}
-
-/* Переход в корзину */
-body.cart-mode .page-wrapper {
-  transform: translateX(-100vw);
-  box-shadow: -10px 0 30px rgba(0,0,0,0.12);
-}
-
-/* Переход в категорию */
-body.category-mode .page-wrapper {
-  transform: translateX(-100vw);
-}
-
-/* Лёгкий параллакс карточек товаров */
-body.cart-mode .products,
-body.category-mode .products {
-  transition: transform 0.5s ease;
-  transform: translateX(20px);
-}
-
-body:not(.cart-mode):not(.category-mode) .products {
-  transform: translateX(0);
-}
-
-/* Фон фиксированный для всего body */
-body {
-  background-attachment: fixed;
-}
+.suggestions-suggestions {background-color: #333 !important; color: #fff !important; z-index: 999999 !important;}
+.suggestions-item {background-color: #333 !important; color: #fff !important; cursor: pointer;}
+.suggestions-item:hover {background-color: #555 !important; color: #fff !important;}

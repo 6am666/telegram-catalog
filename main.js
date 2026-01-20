@@ -178,12 +178,12 @@ function renderProducts(list){
     const item = cart.find(i=>i.product.id===p.id);
 
     if(item){
-      const minus = document.createElement("button"); minus.textContent="–"; minus.onclick=e=>{e.stopPropagation();removeFromCart(p)};
+      const minus = document.createElement("button"); minus.textContent="–"; minus.onclick=e=>{e.stopPropagation(); removeFromCart(p)};
       const count = document.createElement("div"); count.className="count-number"; count.textContent=item.count;
-      const plus = document.createElement("button"); plus.textContent="+"; plus.onclick=e=>{e.stopPropagation();addToCart(p)};
+      const plus = document.createElement("button"); plus.textContent="+"; plus.onclick=e=>{e.stopPropagation(); addToCart(p)};
       controls.append(minus,count,plus);
     }else{
-      const btn = document.createElement("button"); btn.textContent="В корзину"; btn.onclick=e=>{e.stopPropagation();addToCart(p)};
+      const btn = document.createElement("button"); btn.textContent="В корзину"; btn.onclick=e=>{e.stopPropagation(); addToCart(p)};
       btn.classList.add("micro-btn");
       controls.appendChild(btn);
     }
@@ -191,8 +191,14 @@ function renderProducts(list){
     card.append(img,title,price,controls);
     productsEl.appendChild(card);
 
-    // Анимация появления
-    requestAnimationFrame(()=>{card.style.opacity="1"; card.style.transform="translateY(0)";});
+    requestAnimationFrame(()=>{
+      card.style.opacity="1";
+      card.style.transform="translateY(0)";
+      if(cart.find(x=>x.product.id===p.id)){
+        card.classList.add("added");
+        setTimeout(()=>card.classList.remove("added"),300);
+      }
+    });
   });
   updateCartUI();
 }
@@ -202,16 +208,7 @@ function addToCart(p){
   const i = cart.find(x => x.product.id === p.id);
   if(i) i.count++;
   else cart.push({product: p, count: 1});
-  updateCartUI();
-
-  // Только анимация добавления
-  const productCard = [...productsEl.children].find(c => 
-    c.querySelector("h3").textContent === p.name
-  );
-  if(productCard){
-    productCard.classList.add("added");
-    setTimeout(()=>productCard.classList.remove("added"), 300);
-  }
+  renderProducts(getCurrentList());
 }
 
 function removeFromCart(p){
@@ -219,7 +216,7 @@ function removeFromCart(p){
   if(!i) return;
   i.count--;
   if(i.count === 0) cart = cart.filter(x => x !== i);
-  updateCartUI();
+  renderProducts(getCurrentList());
 }
 
 function getCurrentList(){

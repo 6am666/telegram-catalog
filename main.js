@@ -108,62 +108,12 @@ checkoutButton.onclick = () => {
 orderClose.onclick = ()=>orderModal.style.display="none";
 orderModal.onclick = e=>{if(e.target===orderModal) orderModal.style.display="none";};
 
-// ================== ОФОРМЛЕНИЕ ЗАКАЗА ==================
-orderForm.onsubmit = async e => {
-  e.preventDefault();
-  if(isSubmitting) return;
-  if(!cart.length) return alert("Корзина пуста!");
-  isSubmitting=true;
-
-  const fd = new FormData(orderForm);
-  const productsList = cart.map(i => `• ${i.product.name} x${i.count}`).join("\n");
-
-  let deliveryCost=0;
-  switch(fd.get("delivery")){
-    case "СДЭК": deliveryCost=450; break;
-    case "Почта России": deliveryCost=550; break;
-    case "Яндекс.Доставка": deliveryCost=400; break;
-    default: deliveryCost=0;
-  }
-
-  const total = cart.reduce((s,i)=>s+i.count*i.product.price,0)+deliveryCost;
-  const data = {
-    fullname: fd.get("fullname"),
-    phone: fd.get("phone"),
-    telegram: fd.get("telegram"),
-    delivery: fd.get("delivery"),
-    address: fd.get("address"),
-    products: productsList,
-    total
-  };
-
-  try {
-    sendTelegramOrder(data);
-
-    const res = await fetch("/api/create-payment",{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({amount:total, order_id:Date.now(), return_url:window.location.href+"?success=true"})
-    });
-    const json = await res.json();
-
-    if(json.payment_url){
-      cart = [];
-      updateCartUI();
-      renderProducts(products);
-      orderModal.style.display="none";
-    } else alert("Ошибка создания оплаты");
-  } catch(err){
-    console.error("Ошибка оплаты:",err);
-    alert("Ошибка оплаты");
-  } finally {isSubmitting=false;}
-};
-
 // ================== ПОДСВЕТКА КОРЗИНЫ ==================
 function animateAddToCart() {
-  cartButton.classList.remove("cart-pulse");
-  void cartButton.offsetWidth; // сброс для повторной анимации
-  cartButton.classList.add("cart-pulse");
+  const img = cartButton.querySelector("img");
+  img.classList.remove("cart-pulse");
+  void img.offsetWidth;
+  img.classList.add("cart-pulse");
 }
 
 // ================== РЕНДЕР ==================
@@ -192,10 +142,7 @@ function renderProducts(list){
     card.append(img,title,price,controls);
     productsEl.appendChild(card);
 
-    requestAnimationFrame(()=>{
-      card.style.opacity="1";
-      card.style.transform="translateY(0)";
-    });
+    requestAnimationFrame(()=>{ card.style.opacity="1"; card.style.transform="translateY(0)"; });
   });
   updateCartUI();
 }
@@ -212,8 +159,6 @@ function addToCart(p){
   }
 
   updateCartUI();
-
-  if(inCartScreen) renderProducts(cart.map(i=>i.product));
 
   const card = [...productsEl.children].find(c=>c.querySelector("h3")?.textContent===p.name);
   if(!card) return;
@@ -256,13 +201,6 @@ function removeFromCart(p){
   }
 }
 
-// ================== GET LIST ==================
-function getCurrentList(){
-  if(inCartScreen) return cart.map(i=>i.product);
-  if(currentCategory==="Главная") return products;
-  return products.filter(p=>p.category===currentCategory);
-}
-
 // ================== МОДАЛКА ==================
 function openModal(p){
   modalImage.src=p.image;
@@ -293,7 +231,7 @@ function updateCartUI(){
   const c = cart.reduce((s,i)=>s+i.count,0);
   const t = cart.reduce((s,i)=>s+i.count*i.product.price,0);
   cartCount.textContent = c;
-  cartTotal.textContent = t?"Итого: "+t+" ₽":""; 
+  cartTotal.textContent = t?"Итого: "+t+" ₽":"";
   cartTotal.style.display = inCartScreen?"block":"none";
   checkoutButton.style.display = c && inCartScreen?"block":"none";
   footerButtons.style.display = inCartScreen?"none":"flex";
@@ -325,6 +263,13 @@ searchInput.oninput = ()=>{
   const val = searchInput.value.toLowerCase();
   renderProducts(getCurrentList().filter(p=>p.name.toLowerCase().includes(val)));
 };
+
+// ================== GET LIST ==================
+function getCurrentList(){
+  if(inCartScreen) return cart.map(i=>i.product);
+  if(currentCategory==="Главная") return products;
+  return products.filter(p=>p.category===currentCategory);
+}
 
 // ================== СТАРТ ==================
 renderProducts(products);

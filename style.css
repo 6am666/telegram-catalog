@@ -281,3 +281,24 @@ body.cart-mode .page-wrapper {
 body.cart-mode .page-wrapper {
   box-shadow: -10px 0 30px rgba(0,0,0,0.1);
 }
+/* ===== Плавное перелистывание корзины ===== */
+.page-wrapper {
+  transition: transform 0.55s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  will-change: transform;
+}
+
+body.cart-mode .page-wrapper {
+  transform: translateX(-100vw);
+  box-shadow: -10px 0 30px rgba(0,0,0,0.12);
+}
+
+/* Дополнительно: лёгкий параллакс при перелисте */
+body.cart-mode .products {
+  transition: transform 0.55s ease;
+  transform: translateX(20px);
+}
+
+body:not(.cart-mode) .products {
+  transform: translateX(0);
+}
+

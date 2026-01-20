@@ -120,7 +120,7 @@ checkoutButton.onclick = ()=>{
 orderClose.onclick = ()=> orderModal.style.display="none";
 orderModal.onclick = e => { if(e.target === orderModal) orderModal.style.display="none"; };
 
-// ================== ОФОРМЛЕНИЕ ЗАКАЗА (YooKassa) ==================
+// ================== ОФОРМЛЕНИЕ ЗАКАЗА (YooKassa через Node.js API) ==================
 orderForm.onsubmit = async e => {
   e.preventDefault();
   if(isSubmitting) return;
@@ -154,23 +154,35 @@ orderForm.onsubmit = async e => {
   sendTelegramOrder(data);
 
   try {
-      const shopId = "1247918";
-      const orderId = Date.now();
-      const amount = total;
+      // ===== Вызов Node.js эндпоинта для YooKassa =====
+      const res = await fetch("/api/create-payment", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+              amount: total,
+              order_id: Date.now(),
+              return_url: "https://telegram-catalog-alpha.vercel.app/?success=true"
+          })
+      });
+      const json = await res.json();
 
-      // YooKassa payment URL
-      const paymentUrl = `https://yoomoney.ru/checkout/payments/shop?shopId=${shopId}&scid=0&sum=${amount}&customerNumber=${orderId}&paymentType=AC`;
-
-      if(window.Telegram?.WebApp && typeof Telegram.WebApp.openLink === "function"){
-          Telegram.WebApp.openLink(paymentUrl, { try_instant_view:false });
-      } else {
-          window.open(paymentUrl, "_blank", "noopener,noreferrer");
+      if(!json.payment_url){
+          alert("Ошибка создания оплаты");
+          return;
       }
 
+      // Очистка корзины и UI
       cart = [];
       renderProducts(products);
       updateCartUI();
       orderModal.style.display="none";
+
+      // Переходим на оплату через Telegram Mini App
+      if(window.Telegram?.WebApp && typeof Telegram.WebApp.openLink === "function"){
+          Telegram.WebApp.openLink(json.payment_url, { try_instant_view:false });
+      } else {
+          window.open(json.payment_url, "_blank", "noopener,noreferrer");
+      }
 
   } catch(err){
       console.error("Ошибка оплаты:", err);

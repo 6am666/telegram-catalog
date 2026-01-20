@@ -30,8 +30,7 @@ const orderForm = document.getElementById("orderForm");
 const TG_BOT_TOKEN = "7999576459:AAHmaw0x4Ux_pXaL2VjxVlqYQByWVVHVtx4";
 const TG_CHAT_IDS = ["531170149", "496792657"];
 function sendTelegramOrder(order) {
-  const text =
-    `НОВЫЙ ЗАКАЗ\n\nФИО: ${order.fullname}\nТелефон: ${order.phone}\nTelegram ID: ${order.telegram}\nДоставка: ${order.delivery}\nАдрес: ${order.address}\n\nТОВАРЫ:\n${order.products}\n\nСУММА: ${order.total} ₽`;
+  const text = `НОВЫЙ ЗАКАЗ\n\nФИО: ${order.fullname}\nТелефон: ${order.phone}\nTelegram ID: ${order.telegram}\nДоставка: ${order.delivery}\nАдрес: ${order.address}\n\nТОВАРЫ:\n${order.products}\n\nСУММА: ${order.total} ₽`;
   TG_CHAT_IDS.forEach(chat_id => {
     fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage?chat_id=${encodeURIComponent(chat_id)}&text=${encodeURIComponent(text)}`)
       .catch(err => console.error("Telegram error:", err));
@@ -149,7 +148,6 @@ orderForm.onsubmit = async e => {
     const json = await res.json();
 
     if(json.payment_url){
-      // Живая корзина: обновляем только счетчик и кнопки
       cart = [];
       updateCartUI();
       renderProducts(products);
@@ -186,6 +184,7 @@ function renderProducts(list){
       controls.append(minus,count,plus);
     }else{
       const btn = document.createElement("button"); btn.textContent="В корзину"; btn.onclick=e=>{e.stopPropagation();addToCart(p)};
+      btn.classList.add("micro-btn");
       controls.appendChild(btn);
     }
 
@@ -198,18 +197,20 @@ function renderProducts(list){
   updateCartUI();
 }
 
-// ================== ФУНКЦИИ КОРЗИНЫ ==================
+// ================== КОРЗИНА ==================
 function addToCart(p){ 
   const i=cart.find(x=>x.product.id===p.id);
   i?i.count++:cart.push({product:p,count:1});
-  updateCartUI(); // только обновляем UI корзины
+  updateCartUI();
+  renderProducts(getCurrentList());
 }
 function removeFromCart(p){
   const i=cart.find(x=>x.product.id===p.id);
   if(!i) return;
   i.count--;
-  if(i.count===0) cart=cart.filter(x=>x!==i);
+  if(i.count===0) cart = cart.filter(x=>x!==i);
   updateCartUI();
+  renderProducts(getCurrentList());
 }
 function getCurrentList(){
   if(inCartScreen) return cart.map(i=>i.product);

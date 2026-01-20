@@ -110,11 +110,11 @@ orderModal.onclick = e=>{if(e.target===orderModal) orderModal.style.display="non
 
 // ================== ПОДСВЕТКА КОРЗИНЫ ==================
 function animateAddToCart() {
-  const img = cartButton.querySelector("img");
-  img.classList.remove("cart-pulse");
-  void img.offsetWidth;
-  img.classList.add("cart-pulse");
+  cartButton.classList.remove("cart-pulse");
+  void cartButton.offsetWidth; // перезапуск анимации
+  cartButton.classList.add("cart-pulse");
 }
+
 
 // ================== РЕНДЕР ==================
 function renderProducts(list){

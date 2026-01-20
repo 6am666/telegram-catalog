@@ -199,19 +199,29 @@ function renderProducts(list){
 
 // ================== КОРЗИНА ==================
 function addToCart(p){ 
-  const i=cart.find(x=>x.product.id===p.id);
-  i?i.count++:cart.push({product:p,count:1});
+  const i = cart.find(x => x.product.id === p.id);
+  if(i) i.count++;
+  else cart.push({product: p, count: 1});
   updateCartUI();
-  renderProducts(getCurrentList());
+
+  // Только анимация добавления
+  const productCard = [...productsEl.children].find(c => 
+    c.querySelector("h3").textContent === p.name
+  );
+  if(productCard){
+    productCard.classList.add("added");
+    setTimeout(()=>productCard.classList.remove("added"), 300);
+  }
 }
+
 function removeFromCart(p){
-  const i=cart.find(x=>x.product.id===p.id);
+  const i = cart.find(x => x.product.id === p.id);
   if(!i) return;
   i.count--;
-  if(i.count===0) cart = cart.filter(x=>x!==i);
+  if(i.count === 0) cart = cart.filter(x => x !== i);
   updateCartUI();
-  renderProducts(getCurrentList());
 }
+
 function getCurrentList(){
   if(inCartScreen) return cart.map(i=>i.product);
   if(currentCategory==="Главная") return products;
@@ -229,7 +239,7 @@ function openModal(p){
 modalClose.onclick = ()=>modal.style.display="none";
 modal.onclick = e=>{if(e.target===modal) modal.style.display="none";}
 
-// ================== КОРЗИНА ==================
+// ================== КОРЗИНА НА ГЛАВНОЙ ==================
 cartButton.onclick = ()=>{
   inCartScreen = true;
   document.body.classList.add("cart-mode");
@@ -240,12 +250,6 @@ mainTitle.onclick = ()=>{
   document.body.classList.remove("cart-mode");
   currentCategory="Главная";
   renderProducts(products);
-};
-
-// ================== ПОИСК ==================
-searchInput.oninput = ()=>{
-  const val = searchInput.value.toLowerCase();
-  renderProducts(getCurrentList().filter(p=>p.name.toLowerCase().includes(val)));
 };
 
 // ================== ОБНОВЛЕНИЕ КОРЗИНЫ ==================
@@ -261,10 +265,8 @@ function updateCartUI(){
   updateOrderSum();
 }
 
-// ================== КАТЕГОРИИ / ГАМБУРГЕР ==================
-menuIcon.onclick = ()=>{
-  categoriesEl.classList.toggle("show");
-};
+// ================== ГАМБУРГЕР ==================
+menuIcon.onclick = ()=> categoriesEl.classList.toggle("show");
 categoriesEl.querySelectorAll("div").forEach(cat=>{
   cat.onclick = ()=>{
     currentCategory = cat.dataset.category;
@@ -273,6 +275,20 @@ categoriesEl.querySelectorAll("div").forEach(cat=>{
     renderProducts(getCurrentList());
   }
 });
+
+// ================== КЛИК ПО ПУСТОМУ МЕСТУ ==================
+document.addEventListener("click", (e) => {
+  if(!categoriesEl.contains(e.target) && !menuIcon.contains(e.target) && e.target !== searchInput){
+    categoriesEl.classList.remove("show");
+    searchInput.blur();
+  }
+});
+
+// ================== ПОИСК ==================
+searchInput.oninput = ()=>{
+  const val = searchInput.value.toLowerCase();
+  renderProducts(getCurrentList().filter(p=>p.name.toLowerCase().includes(val)));
+};
 
 // ================== СТАРТ ==================
 renderProducts(products);

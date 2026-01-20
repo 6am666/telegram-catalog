@@ -26,6 +26,8 @@ const orderModal = document.getElementById("orderModal");
 const orderClose = document.getElementById("orderClose");
 const orderForm = document.getElementById("orderForm");
 
+const pageWrapper = document.getElementById("pageWrapper"); // Обертка для анимации
+
 // ================== TELEGRAM ==================
 const TG_BOT_TOKEN = "7999576459:AAHmaw0x4Ux_pXaL2VjxVlqYQByWVVHVtx4";
 const TG_CHAT_IDS = ["531170149", "496792657"];
@@ -120,7 +122,7 @@ checkoutButton.onclick = ()=>{
 orderClose.onclick = ()=> orderModal.style.display="none";
 orderModal.onclick = e => { if(e.target === orderModal) orderModal.style.display="none"; };
 
-// ================== ОФОРМЛЕНИЕ ЗАКАЗА (YooKassa через Node.js API) ==================
+// ================== ОФОРМЛЕНИЕ ЗАКАЗА ==================
 orderForm.onsubmit = async e => {
   e.preventDefault();
   if(isSubmitting) return;
@@ -150,11 +152,9 @@ orderForm.onsubmit = async e => {
       total
   };
 
-  // Отправляем заказ админу
   sendTelegramOrder(data);
 
   try {
-      // ===== Вызов Node.js эндпоинта для YooKassa =====
       const res = await fetch("/api/create-payment", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -171,13 +171,11 @@ orderForm.onsubmit = async e => {
           return;
       }
 
-      // Очистка корзины и UI
       cart = [];
       renderProducts(products);
       updateCartUI();
       orderModal.style.display="none";
 
-      // Переходим на оплату через Telegram Mini App
       if(window.Telegram?.WebApp && typeof Telegram.WebApp.openLink === "function"){
           Telegram.WebApp.openLink(json.payment_url, { try_instant_view:false });
       } else {
@@ -187,7 +185,7 @@ orderForm.onsubmit = async e => {
   } catch(err){
       console.error("Ошибка оплаты:", err);
       alert("Ошибка оплаты");
-  } finally {
+  } finally{
       isSubmitting = false;
   }
 };
@@ -229,9 +227,19 @@ function openModal(p){ modalImage.src=p.image; modalTitle.textContent=p.name; mo
 modalClose.onclick=()=>modal.style.display="none";
 modal.onclick=e=>{if(e.target===modal) modal.style.display="none";}
 
-// ================== КОРЗИНА ==================
-cartButton.onclick=()=>{ inCartScreen=true; document.body.classList.add("cart-mode"); renderProducts(cart.map(i=>i.product)); };
-mainTitle.onclick=()=>{ inCartScreen=false; document.body.classList.remove("cart-mode"); currentCategory="Главная"; renderProducts(products); };
+// ================== КОРЗИНА С ПЛАВНОЙ АНИМАЦИЕЙ ==================
+cartButton.onclick = () => {
+  inCartScreen = true;
+  document.body.classList.add("cart-mode");
+  renderProducts(cart.map(i => i.product));
+};
+
+mainTitle.onclick = () => {
+  inCartScreen = false;
+  document.body.classList.remove("cart-mode");
+  currentCategory = "Главная";
+  renderProducts(products);
+};
 
 // ================== ПОИСК ==================
 searchInput.oninput=()=>{ const val = searchInput.value.toLowerCase(); renderProducts(getCurrentList().filter(p=>p.name.toLowerCase().includes(val))); };

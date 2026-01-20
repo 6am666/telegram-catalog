@@ -11,11 +11,6 @@ body{
 
 }
 
-/* 🔴 НОВЫЙ КЛАСС для фикс фона при открытой корзине */
-body.cart-mode {
-  background-attachment: fixed;
-}
-
 /* Шапка */
 .header{
   position:fixed; top:0; left:0; right:0;

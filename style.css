@@ -284,3 +284,68 @@ body.cart-mode, body.tab-mode {
   transform: translateY(10px);
   transition: all 0.3s ease;
 }
+
+/* =========================================================
+   FIX 4 — новая иконка корзины (PNG без фона)
+   ========================================================= */
+.cart-btn {
+  width: 34px;
+  height: 34px;
+  background-image: url("https://i.pinimg.com/736x/5d/4b/ba/5d4bba78c595dc7904c5cdf206f77d52.jpg");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  border: none;
+  background-color: transparent;
+  position: relative;
+  cursor: pointer;
+}
+
+/* счётчик на корзине */
+.cart-count {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #000;
+  color: #fff;
+  font-size: 11px;
+  padding: 2px 5px;
+  border-radius: 50%;
+  min-width: 18px;
+  text-align: center;
+}
+
+/* =========================================================
+   FIX 5 — убираем белые полосы у изображений товаров
+   ========================================================= */
+.product img {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: #000;
+  object-fit: cover;
+}
+
+/* если используется border-radius */
+.product {
+  overflow: hidden;
+}
+
+/* =========================================================
+   FIX 2 — сообщение "переносим на оплату"
+   ========================================================= */
+#paymentNotice {
+  animation: fadeIn 0.25s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+

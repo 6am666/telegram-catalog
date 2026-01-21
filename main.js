@@ -47,7 +47,7 @@ const products = [
   {id:6,name:"Обвес Lighter",price:3600,image:"https://i.pinimg.com/736x/e8/cb/c2/e8cbc2287025b23930c20e030755a0b5.jpg",category:"Обвесы",description:["Материал изделия:","Фурнитура из нержавеющей стали;","Хирургическая и нержавеющая сталь.","","Срок изготовления — до 5 рабочих дней."]},
   {id:7,name:"Обвес Star",price:2000,image:"https://i.pinimg.com/736x/16/36/75/163675cf410dfc51ef97238bbbab1056.jpg",category:"Обвесы",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
   {id:8,name:"Серьги Moonlight",price:2000,image:"https://i.pinimg.com/736x/93/e4/e5/93e4e5ee7594f6ef436f8b994ef04016.jpg",category:"Серьги",description:["Материал изделия:","Лунные бусины;","Хирургическая сталь;","Фурнитура из нержавеющей и хирургической стали.","","Срок изготовления — до 5 рабочих дней."]},
-  {id:9,name:"Тестовый товар",price:10,image:"https://via.placeholder.com/150",category:"Тест",description:["Тестовый товар для проверки.","","Срок изготовления — 1 день."]},
+  {id:9,name:"Тестовый товар",price:1,image:"https://via.placeholder.com/150",category:"Тест",description:["Тестовый товар для проверки.","","Срок изготовления — 1 день."]},
   {id:10,name:"Кольчужный топ",price:18000,image:"https://i.pinimg.com/736x/a9/95/24/a995240ff0d58266a65e1edc78c366ed.jpg",category:"Топы",description:["Материал изделия: Полностью хирургическая сталь.","Срок изготовления — до 14 рабочих дней."]}
 ];
 
@@ -112,7 +112,7 @@ orderModal.onclick = e=>{if(e.target===orderModal) orderModal.style.display="non
 // ================== ПОДСВЕТКА КОРЗИНЫ ==================
 function animateAddToCart() {
   cartButton.classList.remove("cart-pulse");
-  void cartButton.offsetWidth; // перезапуск анимации
+  void cartButton.offsetWidth; 
   cartButton.classList.add("cart-pulse");
 }
 
@@ -152,8 +152,24 @@ function addToCart(p){
   let item = cart.find(x=>x.product.id===p.id);
   if(item) item.count++;
   else { item = {product:p,count:1}; cart.push(item); }
+
   updateCartUI();
-  renderProducts(getCurrentList()); // 🔹 обновляем карточки и счетчики
+  
+  // 🔹 обновляем только счетчик для конкретной карточки
+  const card = [...productsEl.children].find(c=>c.querySelector("h3")?.textContent===p.name);
+  if(!card) return;
+  const countDiv = card.querySelector(".count-number");
+  if(countDiv) countDiv.textContent = item.count;
+  else {
+    const controls = card.querySelector(".count-block");
+    controls.innerHTML="";
+    const minus = document.createElement("button"); minus.textContent="–"; minus.onclick=e=>{e.stopPropagation(); removeFromCart(p)};
+    const count = document.createElement("div"); count.className="count-number"; count.textContent=item.count;
+    const plus = document.createElement("button"); plus.textContent="+"; plus.onclick=e=>{e.stopPropagation(); addToCart(p)};
+    controls.append(minus,count,plus);
+  }
+
+  animateAddToCart();
 }
 
 function removeFromCart(p){
@@ -162,7 +178,21 @@ function removeFromCart(p){
   item.count--;
   if(item.count <= 0) cart = cart.filter(x=>x!==item);
   updateCartUI();
-  renderProducts(getCurrentList()); // 🔹 обновляем карточки и счетчики
+
+  const card = [...productsEl.children].find(c=>c.querySelector("h3")?.textContent===p.name);
+  if(!card) return;
+  const controls = card.querySelector(".count-block");
+
+  if(item && item.count>0){
+    const countDiv = controls.querySelector(".count-number");
+    if(countDiv) countDiv.textContent = item.count;
+  } else {
+    controls.innerHTML="";
+    const btn = document.createElement("button"); btn.textContent="В корзину";
+    btn.classList.add("micro-btn");
+    btn.onclick=e=>{e.stopPropagation(); addToCart(p)};
+    controls.appendChild(btn);
+  }
 }
 
 // ================== МОДАЛКА ==================
@@ -208,14 +238,14 @@ searchInput.oninput = ()=>{ const val = searchInput.value.toLowerCase(); renderP
 // ================== GET LIST ==================
 function getCurrentList(){ if(inCartScreen) return cart.map(i=>i.product); if(currentCategory==="Главная") return products; return products.filter(p=>p.category===currentCategory); }
 
-// ================== ОПЛАТА (YooKassa + Telegram Mini App) ==================
+// ================== ОПЛАТА ==================
 orderForm.onsubmit = async (e) => {
   e.preventDefault();
   if (isSubmitting) return;
   if (!cart.length) { alert("Корзина пуста"); return; }
   isSubmitting = true;
 
-  alert("Переносим вас на оплату! буквально пару секунд..."); // 🔹 новое сообщение
+  alert("Переносим вас на оплату! буквально пару секунд...");
 
   try {
     if (window.Telegram?.WebApp) Telegram.WebApp.ready();
@@ -244,7 +274,7 @@ orderForm.onsubmit = async (e) => {
     const res = await fetch("https://telegram-catalog-alpha.vercel.app/api/create-payment", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ amount: total, order_id: orderId, return_url: "https://t.me/ChronicleChainsZAKAZI_Bot" })
+      body: JSON.stringify({ amount: total, order_id: orderId, return_url: "https://t.me/ChronicleChainsMiniApp?start=paid" })
     });
 
     const data = await res.json();
@@ -253,10 +283,6 @@ orderForm.onsubmit = async (e) => {
     if (window.Telegram?.WebApp?.openLink) Telegram.WebApp.openLink(data.payment_url, { try_instant_view: false });
     else window.location.href = data.payment_url;
 
-    // 🔹 После оплаты (будет редирект) можно добавить сообщение
-    // Telegram Mini App получит уведомление и покажет:
-    // "Спасибо за то что выбираете Chronicle Chains! Ваш заказ успешно оплачен. Мы уже его получили и начинаем собирать..."
-    
   } catch (err) {
     console.error("Ошибка оплаты:", err);
     alert("Ошибка при оплате");
@@ -267,3 +293,11 @@ orderForm.onsubmit = async (e) => {
 renderProducts(products);
 updateCartUI();
 updateOrderSum();
+
+// ================== ЗАМЕНА КОРЗИНЫ ==================
+cartButton.querySelector("img")?.remove();
+const cartImg = document.createElement("img");
+cartImg.src="https://img.icons8.com/?size=100&id=2616&format=png&color=FFFFFF";
+cartImg.style.width="32px";
+cartImg.style.height="32px";
+cartButton.appendChild(cartImg);

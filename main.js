@@ -174,23 +174,32 @@ function addToCart(p){
   animateAddToCart();
 }
 
-function removeFromCart(p){
-  const item = cart.find(x=>x.product.id===p.id);
-  if(!item) return;
+function removeFromCart(p) {
+  const item = cart.find(x => x.product.id === p.id);
+  if (!item) return;
 
   item.count--;
-  if(item.count <= 0){
-    cart = cart.filter(x=>x!==item);
-    if(inCartScreen) renderProducts(cart.map(i=>i.product));
-  } else {
-    const card = [...productsEl.children].find(c=>c.querySelector("h3")?.textContent===p.name);
-    if(card){
-      const countDiv = card.querySelector(".count-number");
-      if(countDiv) countDiv.textContent = item.count;
-    }
-  }
+  if (item.count <= 0) cart = cart.filter(x => x.product.id !== p.id);
 
   updateCartUI();
+
+  const card = [...productsEl.children].find(c => c.querySelector("h3")?.textContent === p.name);
+  if (!card) return;
+  const controls = card.querySelector(".count-block");
+
+  if (item && item.count > 0) {
+    const countDiv = controls.querySelector(".count-number");
+    if (countDiv) countDiv.textContent = item.count;
+  } else {
+    controls.innerHTML = "";
+    const btn = document.createElement("button");
+    btn.textContent = "В корзину";
+    btn.classList.add("micro-btn");
+    btn.onclick = e => { e.stopPropagation(); addToCart(p); };
+    controls.appendChild(btn);
+  }
+
+  if (inCartScreen) renderProducts(cart.map(i=>i.product));
 }
 
 // ================== МОДАЛКА ==================
@@ -244,24 +253,26 @@ orderForm.onsubmit = async (e) => {
   isSubmitting = true;
 
   try {
-    // модалка ожидания
+    if (window.Telegram?.WebApp) Telegram.WebApp.ready();
+
+    // Модалка оплаты
     const waitModal = document.createElement("div");
     waitModal.style.position = "fixed";
     waitModal.style.top = 0;
     waitModal.style.left = 0;
     waitModal.style.width = "100%";
     waitModal.style.height = "100%";
-    waitModal.style.backgroundColor = "#333";
+    waitModal.style.backgroundColor = "#2c2c2c";
     waitModal.style.color = "#fff";
     waitModal.style.display = "flex";
     waitModal.style.alignItems = "center";
     waitModal.style.justifyContent = "center";
-    waitModal.style.fontSize = "18px";
+    waitModal.style.fontSize = "16px";
     waitModal.style.zIndex = 9999;
-    waitModal.textContent = "Переносим вас на оплату! буквально пару секунд...";
+    waitModal.style.flexDirection = "column";
+    waitModal.style.textAlign = "center";
+    waitModal.innerHTML = `<div style="margin-bottom:5px;">Переносим вас на оплату!</div><div>Пожалуйста, подождите пару секунд...</div>`;
     document.body.appendChild(waitModal);
-
-    if (window.Telegram?.WebApp) Telegram.WebApp.ready();
 
     const fd = new FormData(orderForm);
     let deliveryCost = 0;
@@ -297,9 +308,7 @@ orderForm.onsubmit = async (e) => {
   } catch(err) {
     console.error(err);
     alert("Ошибка при оплате");
-  } finally {
-    isSubmitting = false;
-  }
+  } finally { isSubmitting = false; }
 };
 
 // ================== СТАРТ ==================

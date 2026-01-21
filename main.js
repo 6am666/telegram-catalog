@@ -70,11 +70,7 @@ orderForm.innerHTML = `
 
 // ================== DaData ==================
 $(function(){
-  $("#addressInput").suggestions({
-    token:"4563b9c9765a1a2d7bf39e1c8944f7fadae05970",
-    type:"ADDRESS",
-    hint:false
-  });
+  $("#addressInput").suggestions({ token:"4563b9c9765a1a2d7bf39e1c8944f7fadae05970", type:"ADDRESS", hint:false });
 });
 
 // ================== РАСЧЁТ СУММЫ ==================
@@ -98,8 +94,7 @@ deliverySelectEl.addEventListener("change", updateOrderSum);
 // ================== КОРЗИНА ==================
 function addToCart(p){
   let item = cart.find(x=>x.product.id===p.id);
-  if(item) item.count++;
-  else cart.push({product:p,count:1});
+  if(item) item.count++; else cart.push({product:p,count:1});
   animateAddToCart();
   updateCartUI();
 }
@@ -108,7 +103,14 @@ function removeFromCart(p){
   let item = cart.find(x=>x.product.id===p.id);
   if(!item) return;
   item.count--;
-  if(item.count<=0) cart = cart.filter(x=>x.product.id!==p.id);
+  if(item.count<=0) {
+    cart = cart.filter(x=>x.product.id!==p.id);
+    // Полностью удаляем карточку из DOM, если в корзине
+    if(inCartScreen){
+      const card = [...productsEl.children].find(c=>c.querySelector("h3")?.textContent===p.name);
+      if(card) card.remove();
+    }
+  }
   updateCartUI();
 }
 
@@ -147,7 +149,7 @@ function updateCartUI(){
       plus.textContent="+";
       plus.onclick=e=>{e.stopPropagation(); addToCart(item.product)};
       controls.append(minus,count,plus);
-    } else if(!inCartScreen) { // кнопка "в корзину" только вне корзины
+    } else if(!inCartScreen){ 
       const pObj = products.find(x=>x.name===pName);
       if(!pObj) return;
       const btn = document.createElement("button");
@@ -177,10 +179,10 @@ function renderProducts(list){
       const count = document.createElement("div"); count.className="count-number"; count.textContent=item.count;
       const plus = document.createElement("button"); plus.textContent="+"; plus.onclick=e=>{e.stopPropagation(); addToCart(p)};
       controls.append(minus,count,plus);
-    } else {
+    } else if(!inCartScreen) {
       const btn = document.createElement("button"); btn.textContent="В корзину"; btn.onclick=e=>{e.stopPropagation(); addToCart(p)};
       btn.classList.add("micro-btn");
-      if(!inCartScreen) controls.appendChild(btn);
+      controls.appendChild(btn);
     }
 
     card.append(img,title,price,controls);
@@ -270,14 +272,14 @@ orderForm.onsubmit = async e=>{
       total
     });
 
-    // ================== ОТПРАВКА НА СЕРВЕР ==================
     const res = await fetch("https://telegram-catalog-alpha.vercel.app/api/create-payment", {
       method:"POST",
-      body: JSON.stringify({ orderId, total }),
-      headers: {"Content-Type":"application/json"}
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({ orderId, total })
     });
     const data = await res.json();
     if(data.url) window.location.href = data.url;
+    else throw new Error("Нет ссылки на оплату");
 
   } catch(err){
     console.error(err); 

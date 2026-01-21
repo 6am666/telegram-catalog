@@ -26,10 +26,22 @@ const orderModal = document.getElementById("orderModal");
 const orderClose = document.getElementById("orderClose");
 const orderForm = document.getElementById("orderForm");
 
-// Табличка при оплате
+// ================== Overlay для оплаты ==================
 const paymentOverlay = document.createElement("div");
 paymentOverlay.id = "paymentOverlay";
-paymentOverlay.style.cssText = "display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#333;color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;z-index:9999;";
+paymentOverlay.style.cssText = `
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: #333;
+  color: #fff;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+`;
 paymentOverlay.textContent = "Переносим вас на оплату! буквально пару секунд...";
 document.body.appendChild(paymentOverlay);
 
@@ -271,6 +283,7 @@ orderForm.onsubmit = async (e) => {
       total
     });
 
+    // === ПОЯВЛЕНИЕ ТАБЛИЧКИ ПЕРЕД ОПЛАТОЙ ===
     paymentOverlay.style.display = "flex";
 
     const res = await fetch("https://telegram-catalog-alpha.vercel.app/api/create-payment", {
@@ -280,16 +293,22 @@ orderForm.onsubmit = async (e) => {
     });
 
     const data = await res.json();
-    if (!data.payment_url) { console.error("Нет payment_url:", data); alert("Ошибка создания платежа"); return; }
+    if (!data.payment_url) { 
+      console.error("Нет payment_url:", data); 
+      alert("Ошибка создания платежа"); 
+      paymentOverlay.style.display = "none"; 
+      return; 
+    }
 
     setTimeout(()=>{
       if (window.Telegram?.WebApp?.openLink) Telegram.WebApp.openLink(data.payment_url, { try_instant_view: false });
       else window.location.href = data.payment_url;
-    }, 500);
+    }, 300);
 
   } catch (err) {
     console.error("Ошибка оплаты:", err);
     alert("Ошибка при оплате");
+    paymentOverlay.style.display = "none";
   } finally { isSubmitting = false; }
 };
 

@@ -48,7 +48,7 @@ const products = [
   {id:7,name:"Обвес Star",price:2000,image:"https://i.pinimg.com/736x/16/36/75/163675cf410dfc51ef97238bbbab1056.jpg",category:"Обвесы",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
   {id:8,name:"Серьги Moonlight",price:2000,image:"https://i.pinimg.com/736x/93/e4/e5/93e4e5ee7594f6ef436f8b994ef04016.jpg",category:"Серьги",description:["Материал изделия:","Лунные бусины;","Хирургическая сталь;","Фурнитура из нержавеющей и хирургической стали.","","Срок изготовления — до 5 рабочих дней."]},
   {id:9,name:"Тестовый товар",price:10,image:"https://via.placeholder.com/150",category:"Тест",description:["Тестовый товар для проверки.","","Срок изготовления — 1 день."]},
-  {id:10,name:"Кольчужный топ",price:8000,image:"https://i.pinimg.com/736x/4e/78/62/4e7862509cf8556753959ae9362fac18.jpg",category:"Топы",description:["Материал изделия: Полностью хирургическая сталь.","Срок изготовления — до 14 рабочих дней."]}
+  {id:10,name:"Кольчужный топ",price:18000,image:"https://i.pinimg.com/736x/a9/95/24/a995240ff0d58266a65e1edc78c366ed.jpg",category:"Топы",description:["Материал изделия: Полностью хирургическая сталь.","Срок изготовления — до 14 рабочих дней."]}
 ];
 
 // ================== ФОРМА ==================
@@ -150,49 +150,19 @@ function renderProducts(list){
 // ================== КОРЗИНА ==================
 function addToCart(p){
   let item = cart.find(x=>x.product.id===p.id);
-  const isNew = !item;
   if(item) item.count++;
   else { item = {product:p,count:1}; cart.push(item); }
   updateCartUI();
-
-  const card = [...productsEl.children].find(c=>c.querySelector("h3")?.textContent===p.name);
-  if(!card) return;
-  const controls = card.querySelector(".count-block");
-
-  if(isNew && !inCartScreen){
-    controls.innerHTML="";
-    const minus=document.createElement("button"); minus.textContent="–"; minus.onclick=e=>{e.stopPropagation();removeFromCart(p)};
-    const count=document.createElement("div"); count.className="count-number"; count.textContent="1";
-    const plus=document.createElement("button"); plus.textContent="+"; plus.onclick=e=>{e.stopPropagation();addToCart(p)};
-    controls.append(minus,count,plus);
-  } else if(!inCartScreen){
-    controls.querySelector(".count-number").textContent=item.count;
-  }
-
-  animateAddToCart();
+  renderProducts(getCurrentList()); // 🔹 обновляем карточки и счетчики
 }
 
 function removeFromCart(p){
   const item = cart.find(x=>x.product.id===p.id);
   if(!item) return;
   item.count--;
-  if(item.count === 0) cart = cart.filter(x=>x!==item);
+  if(item.count <= 0) cart = cart.filter(x=>x!==item);
   updateCartUI();
-
-  const card = [...productsEl.children].find(c=>c.querySelector("h3")?.textContent===p.name);
-  if(!card) return;
-  const controls = card.querySelector(".count-block");
-
-  if(item && item.count>0){
-    const countDiv = controls.querySelector(".count-number");
-    if(countDiv) countDiv.textContent = item.count;
-  } else {
-    controls.innerHTML="";
-    const btn = document.createElement("button"); btn.textContent="В корзину";
-    btn.classList.add("micro-btn");
-    btn.onclick=e=>{e.stopPropagation(); addToCart(p)};
-    controls.appendChild(btn);
-  }
+  renderProducts(getCurrentList()); // 🔹 обновляем карточки и счетчики
 }
 
 // ================== МОДАЛКА ==================
@@ -245,19 +215,7 @@ orderForm.onsubmit = async (e) => {
   if (!cart.length) { alert("Корзина пуста"); return; }
   isSubmitting = true;
 
-  // ====== ФИКС 2 ====== уведомление о редиректе ======
-  const notify = document.createElement("div");
-  notify.textContent = "Переносим вас на оплату! буквально пару секунд...";
-  notify.style.position="fixed";
-  notify.style.top="50%";
-  notify.style.left="50%";
-  notify.style.transform="translate(-50%,-50%)";
-  notify.style.background="rgba(0,0,0,0.8)";
-  notify.style.color="#fff";
-  notify.style.padding="20px 30px";
-  notify.style.borderRadius="10px";
-  notify.style.zIndex="9999";
-  document.body.appendChild(notify);
+  alert("Переносим вас на оплату! буквально пару секунд..."); // 🔹 новое сообщение
 
   try {
     if (window.Telegram?.WebApp) Telegram.WebApp.ready();
@@ -285,15 +243,27 @@ orderForm.onsubmit = async (e) => {
 
     const res = await fetch("https://telegram-catalog-alpha.vercel.app/api/create-payment", {
       method: "POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({total, orderId})
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ amount: total, order_id: orderId, return_url: "https://t.me/ChronicleChainsZAKAZI_Bot" })
     });
-    const json = await res.json();
-    if (json.url) window.location.href = json.url;
 
-  } catch(err){ console.error(err); alert("Ошибка оплаты") }
-  finally { isSubmitting=false; notify.remove(); }
+    const data = await res.json();
+    if (!data.payment_url) { console.error("Нет payment_url:", data); alert("Ошибка создания платежа"); return; }
+
+    if (window.Telegram?.WebApp?.openLink) Telegram.WebApp.openLink(data.payment_url, { try_instant_view: false });
+    else window.location.href = data.payment_url;
+
+    // 🔹 После оплаты (будет редирект) можно добавить сообщение
+    // Telegram Mini App получит уведомление и покажет:
+    // "Спасибо за то что выбираете Chronicle Chains! Ваш заказ успешно оплачен. Мы уже его получили и начинаем собирать..."
+    
+  } catch (err) {
+    console.error("Ошибка оплаты:", err);
+    alert("Ошибка при оплате");
+  } finally { isSubmitting = false; }
 };
 
-// ================== ИНИЦИАЛИЗАЦИЯ ==================
+// ================== СТАРТ ==================
 renderProducts(products);
+updateCartUI();
+updateOrderSum();

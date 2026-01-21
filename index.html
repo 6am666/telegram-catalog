@@ -22,14 +22,10 @@
 <div class="bg-fixed"></div>
 
 <div class="header">
-  <div class="menu-icon" id="menuIcon">
-    <div></div><div></div><div></div>
-  </div>
-
+  <div class="menu-icon" id="menuIcon"><div></div><div></div><div></div></div>
   <h1 id="mainTitle">Chronicle Chains</h1>
-
-  <!-- FIX 4 — новая иконка корзины -->
   <button class="cart-btn" id="cartButton">
+    <img src="https://img.icons8.com/?size=100&id=2616&format=png&color=FFFFFF" alt="Корзина" style="width:36px; height:36px;">
     <span id="cartCount" class="cart-count">0</span>
   </button>
 </div>
@@ -63,19 +59,12 @@
 <div class="modal" id="modal">
   <div class="modal-content">
     <span class="modal-close" id="modalClose">&times;</span>
-
-    <div class="modal-img-wrapper">
-      <img id="modalImage" src="" alt="">
-    </div>
-
+    <div class="modal-img-wrapper"><img id="modalImage" src="" alt=""></div>
     <div class="modal-title-price">
       <h3 id="modalTitle"></h3>
       <p id="modalPrice"></p>
     </div>
-
-    <div class="modal-desc">
-      <p id="modalDescription"></p>
-    </div>
+    <div class="modal-desc"><p id="modalDescription"></p></div>
   </div>
 </div>
 
@@ -84,24 +73,11 @@
   <div class="order-modal-content">
     <span class="order-modal-close" id="orderClose">&times;</span>
     <h2>Оформление заказа</h2>
-
-    <!-- FIX 2 — сообщение при создании платежа -->
-    <div
-      id="paymentNotice"
-      style="
-        display:none;
-        color:#aaa;
-        margin-bottom:10px;
-        text-align:center;
-        font-size:14px;
-      "
-    >
-      Переносим вас на оплату! буквально пару секунд...
-    </div>
-
     <form id="orderForm"></form>
   </div>
 </div>
+
+<div id="paymentMessage" style="display:none; position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#333;color:white;padding:20px;border-radius:12px;z-index:999;">Переносим вас на оплату! буквально пару секунд...</div>
 
 <button class="checkout-btn" id="checkoutButton">Оформить заказ</button>
 

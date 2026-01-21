@@ -47,7 +47,8 @@ const products = [
   {id:6,name:"Обвес Lighter",price:3600,image:"https://i.pinimg.com/736x/e8/cb/c2/e8cbc2287025b23930c20e030755a0b5.jpg",category:"Обвесы",description:["Материал изделия:","Фурнитура из нержавеющей стали;","Хирургическая и нержавеющая сталь.","","Срок изготовления — до 5 рабочих дней."]},
   {id:7,name:"Обвес Star",price:2000,image:"https://i.pinimg.com/736x/16/36/75/163675cf410dfc51ef97238bbbab1056.jpg",category:"Обвесы",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
   {id:8,name:"Серьги Moonlight",price:2000,image:"https://i.pinimg.com/736x/93/e4/e5/93e4e5ee7594f6ef436f8b994ef04016.jpg",category:"Серьги",description:["Материал изделия:","Лунные бусины;","Хирургическая сталь;","Фурнитура из нержавеющей и хирургической стали.","","Срок изготовления — до 5 рабочих дней."]},
-  {id:9,name:"Кольчужный топ",price:18000,image:"https://i.pinimg.com/736x/a9/95/24/a995240ff0d58266a65e1edc78c366ed.jpg",category:"Тест",description:["Материал изделия: Полностью хирургическая сталь.","","Срок изготовления — до 14 рабочих дней."]}
+  {id:9,name:"Кольчужный топ",price:18000,image:"https://i.pinimg.com/736x/a9/95/24/a995240ff0d58266a65e1edc78c366ed.jpg",category:"Тест",description:["Материал изделия: Полностью хирургическая сталь.","","Срок изготовления — до 14 рабочих дней."]},
+  {id:10,name:"Тестовый товар",price:1,image:"https://i.pinimg.com/236x/47/12/8f/47128f92e4f8d4a8d0f5bb2c0fbc7a25.jpg",category:"Главная",description:["Это тестовый товар за 1₽"]}
 ];
 
 // ================== ФОРМА ==================
@@ -111,7 +112,7 @@ orderModal.onclick = e=>{if(e.target===orderModal) orderModal.style.display="non
 // ================== ПОДСВЕТКА КОРЗИНЫ ==================
 function animateAddToCart() {
   cartButton.classList.remove("cart-pulse");
-  void cartButton.offsetWidth; // перезапуск анимации
+  void cartButton.offsetWidth;
   cartButton.classList.add("cart-pulse");
 }
 
@@ -154,10 +155,10 @@ function addToCart(p){
 }
 
 function removeFromCart(p){
-  const item = cart.find(x=>x.product.id===p.id);
-  if(!item) return;
-  item.count--;
-  if(item.count<=0) cart = cart.filter(x=>x.product.id!==p.id);
+  const itemIndex = cart.findIndex(x=>x.product.id===p.id);
+  if(itemIndex===-1) return;
+  cart[itemIndex].count--;
+  if(cart[itemIndex].count<=0) cart.splice(itemIndex,1);
   updateCartUI();
 }
 
@@ -187,7 +188,6 @@ function updateCartUI(){
   footerButtons.style.display = inCartScreen?"none":"flex";
   searchInput.style.display = inCartScreen?"none":"block";
 
-  // обновляем счетчики на карточках
   [...productsEl.children].forEach(card=>{
     const pName = card.querySelector("h3")?.textContent;
     const item = cart.find(x=>x.product.name===pName);
@@ -195,12 +195,13 @@ function updateCartUI(){
     if(!controls) return;
     controls.innerHTML = "";
     if(item){
-      const minus = document.createElement("button"); minus.textContent="–"; minus.onclick=e=>{e.stopPropagation(); removeFromCart(cart.find(x=>x.product.name===pName).product)};
+      const minus = document.createElement("button"); minus.textContent="–"; minus.onclick=e=>{e.stopPropagation(); removeFromCart(item.product)};
       const count = document.createElement("div"); count.className="count-number"; count.textContent=item.count;
-      const plus = document.createElement("button"); plus.textContent="+"; plus.onclick=e=>{e.stopPropagation(); addToCart(cart.find(x=>x.product.name===pName).product)};
+      const plus = document.createElement("button"); plus.textContent="+"; plus.onclick=e=>{e.stopPropagation(); addToCart(item.product)};
       controls.append(minus,count,plus);
     }else{
-      const btn = document.createElement("button"); btn.textContent="В корзину"; btn.onclick=e=>{e.stopPropagation(); addToCart(products.find(x=>x.name===pName))};
+      const pId = products.find(p=>p.name===pName)?.id;
+      const btn = document.createElement("button"); btn.textContent="В корзину"; btn.onclick=e=>{e.stopPropagation(); addToCart(products.find(x=>x.id===pId))};
       btn.classList.add("micro-btn");
       controls.appendChild(btn);
     }
@@ -230,7 +231,6 @@ orderForm.onsubmit = async (e) => {
   if (!cart.length) { alert("Корзина пуста"); return; }
   isSubmitting = true;
 
-  // показываем сообщение с рамкой
   const msgOverlay = document.createElement("div");
   msgOverlay.style.position = "fixed";
   msgOverlay.style.top="0";
@@ -279,12 +279,13 @@ orderForm.onsubmit = async (e) => {
 
     const res = await fetch("https://spbbank.ru/pay", {
       method: "POST",
-      body: JSON.stringify({ orderId, total })
+      body: JSON.stringify({orderId, total})
     });
     const data = await res.json();
-    window.location.href = data.pay_url; // переход на оплату
-  } catch (err) {
-    alert("Ошибка при оплате: "+err.message);
-  }
+    if(data.url) window.location.href=data.url;
+  } catch(err){ console.error(err); alert("Ошибка оплаты"); }
+  finally { isSubmitting=false; document.body.removeChild(msgOverlay); }
 };
+
+// ================== СТАРТОВЫЙ РЕНДЕР ==================
 renderProducts(products);

@@ -48,7 +48,7 @@ const products = [
   {id:7,name:"Обвес Star",price:2000,image:"https://i.pinimg.com/736x/16/36/75/163675cf410dfc51ef97238bbbab1056.jpg",category:"Обвесы",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
   {id:8,name:"Серьги Moonlight",price:2000,image:"https://i.pinimg.com/736x/93/e4/e5/93e4e5ee7594f6ef436f8b994ef04016.jpg",category:"Серьги",description:["Материал изделия:","Лунные бусины;","Хирургическая сталь;","Фурнитура из нержавеющей и хирургической стали.","","Срок изготовления — до 5 рабочих дней."]},
   {id:9,name:"Тестовый товар",price:1,image:"https://via.placeholder.com/150",category:"Тест",description:["Тестовый товар для проверки.","","Срок изготовления — 1 день."]},
-  {id:10,name:"Кольчужный топ",price:18000,image:"https://i.pinimg.com/736x/a9/95/24/a995240ff0d58266a65e1edc78c366ed.jpg",category:"Колье",description:["Материал изделия: Полностью хирургическая сталь.","","Срок изготовления — до 14 рабочих дней."]}
+  {id:10,name:"Кольчужный топ",price:18000,image:"https://i.pinimg.com/736x/a9/95/24/a995240ff0d58266a65e1edc78c366ed.jpg",category:"Топ",description:["Материал изделия: Полностью хирургическая сталь.","Срок изготовления — до 14 рабочих дней."]}
 ];
 
 // ================== ФОРМА ==================
@@ -89,7 +89,6 @@ function updateOrderSum() {
     case "СДЭК": deliveryCost = 450; break;
     case "Почта России": deliveryCost = 550; break;
     case "Яндекс.Доставка": deliveryCost = 400; break;
-    default: deliveryCost = 0;
   }
   orderSumEl.textContent = "Итоговая сумма: "+(total+deliveryCost)+" ₽";
   deliveryInfoEl.textContent = deliverySelectEl.value==="Самовывоз"?"Забрать заказ — Санкт-Петербург, Русановская 18к8":"";
@@ -149,49 +148,19 @@ function renderProducts(list){
 // ================== КОРЗИНА ==================
 function addToCart(p){
   let item = cart.find(x=>x.product.id===p.id);
-  const isNew = !item;
-
   if(item) item.count++;
-  else { item = {product:p,count:1}; cart.push(item); }
-
+  else cart.push({product:p,count:1});
   updateCartUI();
-
-  const card = [...productsEl.children].find(c=>c.querySelector("h3")?.textContent===p.name);
-  if(!card) return;
-  const controls = card.querySelector(".count-block");
-
-  controls.innerHTML="";
-  const minus=document.createElement("button"); minus.textContent="–"; minus.onclick=e=>{e.stopPropagation(); removeFromCart(p)};
-  const count=document.createElement("div"); count.className="count-number"; count.textContent=item.count;
-  const plus=document.createElement("button"); plus.textContent="+"; plus.onclick=e=>{e.stopPropagation(); addToCart(p)};
-  controls.append(minus,count,plus);
-
-  animateAddToCart();
+  renderProducts(getCurrentList());
 }
 
 function removeFromCart(p){
-  const item = cart.find(x=>x.product.id===p.id);
-  if(!item) return;
-  item.count--;
-  if(item.count===0) cart = cart.filter(x=>x!==item);
-
+  const itemIndex = cart.findIndex(x=>x.product.id===p.id);
+  if(itemIndex===-1) return;
+  cart[itemIndex].count--;
+  if(cart[itemIndex].count<=0) cart.splice(itemIndex,1);
   updateCartUI();
-
-  const card = [...productsEl.children].find(c=>c.querySelector("h3")?.textContent===p.name);
-  if(!card) return;
-  const controls = card.querySelector(".count-block");
-
-  const itemNow = cart.find(x=>x.product.id===p.id);
-  controls.innerHTML="";
-  if(itemNow){
-    const minus=document.createElement("button"); minus.textContent="–"; minus.onclick=e=>{e.stopPropagation(); removeFromCart(p)};
-    const count=document.createElement("div"); count.className="count-number"; count.textContent=itemNow.count;
-    const plus=document.createElement("button"); plus.textContent="+"; plus.onclick=e=>{e.stopPropagation(); addToCart(p)};
-    controls.append(minus,count,plus);
-  } else {
-    const btn=document.createElement("button"); btn.textContent="В корзину"; btn.classList.add("micro-btn"); btn.onclick=e=>{e.stopPropagation(); addToCart(p)};
-    controls.appendChild(btn);
-  }
+  renderProducts(getCurrentList());
 }
 
 // ================== МОДАЛКА ==================
@@ -199,7 +168,7 @@ function openModal(p){
   modalImage.src=p.image;
   modalTitle.textContent=p.name;
   modalPrice.textContent=p.price+" ₽";
-  modalDescription.innerHTML=p.description.map(line => line ? line+"<br>" : "<br>").join("") + (p.name==="Кольчужный топ" ? "<br>" : "");
+  modalDescription.innerHTML=p.description.join("<br>");
   modal.style.display="flex";
 }
 modalClose.onclick = ()=>modal.style.display="none";
@@ -215,7 +184,6 @@ function updateCartUI(){
   const t = cart.reduce((s,i)=>s+i.count*i.product.price,0);
   cartCount.textContent = c;
   cartTotal.textContent = t?"Итого: "+t+" ₽":"";
-  cartTotal.style.display = inCartScreen?"block":"none";
   checkoutButton.style.display = c && inCartScreen?"block":"none";
   footerButtons.style.display = inCartScreen?"none":"flex";
   searchInput.style.display = inCartScreen?"none":"block";
@@ -237,63 +205,86 @@ searchInput.oninput = ()=>{ const val = searchInput.value.toLowerCase(); renderP
 // ================== GET LIST ==================
 function getCurrentList(){ if(inCartScreen) return cart.map(i=>i.product); if(currentCategory==="Главная") return products; return products.filter(p=>p.category===currentCategory); }
 
-// ================== ОПЛАТА (YooKassa + Telegram Mini App) ==================
+// ================== ОПЛАТА С БЛАГОДАРНОСТЬЮ ==================
 orderForm.onsubmit = async (e) => {
   e.preventDefault();
-  if (isSubmitting) return;
-  if (!cart.length) { alert("Корзина пуста"); return; }
+  if(isSubmitting) return;
+  if(!cart.length){ alert("Корзина пуста"); return; }
   isSubmitting = true;
 
   try {
-    if (window.Telegram?.WebApp) Telegram.WebApp.ready();
-
-    alert("Переносим вас на оплату! буквально пару секунд...");
-
     const fd = new FormData(orderForm);
     let deliveryCost = 0;
-    switch (fd.get("delivery")) {
+    switch(fd.get("delivery")){
       case "СДЭК": deliveryCost = 450; break;
       case "Почта России": deliveryCost = 550; break;
       case "Яндекс.Доставка": deliveryCost = 400; break;
-      default: deliveryCost = 0;
     }
-    const total = cart.reduce((s, i) => s + i.count * i.product.price, 0) + deliveryCost;
+    const total = cart.reduce((s,i)=>s+i.count*i.product.price,0)+deliveryCost;
     const orderId = Date.now();
 
+    // Отправляем в Telegram
     sendTelegramOrder({
       fullname: fd.get("fullname"),
       phone: fd.get("phone"),
       telegram: fd.get("telegram"),
       delivery: fd.get("delivery"),
       address: fd.get("address"),
-      products: cart.map(i => `• ${i.product.name} x${i.count}`).join("\n"),
+      products: cart.map(i=>`• ${i.product.name} x${i.count}`).join("\n"),
       total
     });
 
+    // Сообщение overlay
+    const overlay = document.createElement("div");
+    overlay.style.position="fixed";
+    overlay.style.top="0";
+    overlay.style.left="0";
+    overlay.style.width="100%";
+    overlay.style.height="100%";
+    overlay.style.background="rgba(0,0,0,0.6)";
+    overlay.style.color="#fff";
+    overlay.style.display="flex";
+    overlay.style.alignItems="center";
+    overlay.style.justifyContent="center";
+    overlay.style.zIndex="9999";
+    overlay.style.fontSize="18px";
+    overlay.innerText="Переносим вас на оплату! буквально пару секунд...";
+    document.body.appendChild(overlay);
+
+    // Получаем ссылку на оплату
     const res = await fetch("https://telegram-catalog-alpha.vercel.app/api/create-payment", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ amount: total, order_id: orderId, return_url: "https://t.me/ChronicleChainsZAKAZI_Bot" })
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({amount: total, order_id: orderId, return_url:"https://t.me/ChronicleChainsZAKAZI_Bot"})
+    });
+    const data = await res.json();
+    if(!data.payment_url){ alert("Ошибка создания платежа"); return; }
+
+    // Переход на оплату
+    if(window.Telegram?.WebApp?.openLink) Telegram.WebApp.openLink(data.payment_url, {try_instant_view:false});
+    else window.open(data.payment_url,"_blank");
+
+    // После успешной оплаты (возврат в миниапп)
+    window.addEventListener("message", (ev)=>{
+      if(ev.data==="payment_success"){
+        alert("Спасибо за то что выбираете Chronicle Chains! Ваш заказ успешно оплачен. Мы уже его получили и начинаем собирать...");
+      }
     });
 
-    const data = await res.json();
-    if (!data.payment_url) { console.error("Нет payment_url:", data); alert("Ошибка создания платежа"); return; }
-
-    if (window.Telegram?.WebApp?.openLink) Telegram.WebApp.openLink(data.payment_url, { try_instant_view: false });
-    else window.open(data.payment_url, "_blank");
-
-    // Сброс корзины после оплаты
     cart = [];
     updateCartUI();
+    renderProducts(getCurrentList());
 
-  } catch (err) {
+  } catch(err){
     console.error(err);
     alert("Ошибка оплаты, попробуйте позже.");
   } finally {
-    isSubmitting = false;
+    isSubmitting=false;
+    setTimeout(()=>{const o=document.querySelector("div[style*='z-index: 9999']"); if(o) document.body.removeChild(o)},5000);
   }
 };
 
 // ================== СТАРТ ==================
 renderProducts(products);
-
+updateCartUI();
+updateOrderSum();

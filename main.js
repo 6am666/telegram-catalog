@@ -47,7 +47,8 @@ const products = [
   {id:6,name:"Обвес Lighter",price:3600,image:"https://i.pinimg.com/736x/e8/cb/c2/e8cbc2287025b23930c20e030755a0b5.jpg",category:"Обвесы",description:["Материал изделия:","Фурнитура из нержавеющей стали;","Хирургическая и нержавеющая сталь.","","Срок изготовления — до 5 рабочих дней."]},
   {id:7,name:"Обвес Star",price:2000,image:"https://i.pinimg.com/736x/16/36/75/163675cf410dfc51ef97238bbbab1056.jpg",category:"Обвесы",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
   {id:8,name:"Серьги Moonlight",price:2000,image:"https://i.pinimg.com/736x/93/e4/e5/93e4e5ee7594f6ef436f8b994ef04016.jpg",category:"Серьги",description:["Материал изделия:","Лунные бусины;","Хирургическая сталь;","Фурнитура из нержавеющей и хирургической стали.","","Срок изготовления — до 5 рабочих дней."]},
-  {id:9,name:"Тестовый товар",price:10,image:"https://via.placeholder.com/150",category:"Тест",description:["Тестовый товар для проверки.","","Срок изготовления — 1 день."]}
+  {id:9,name:"Тестовый товар",price:1,image:"https://via.placeholder.com/150",category:"Тест",description:["Тестовый товар для проверки.","","Срок изготовления — 1 день."]},
+  {id:10,name:"Кольчужный топ",price:18000,image:"https://i.pinimg.com/736x/a9/95/24/a995240ff0d58266a65e1edc78c366ed.jpg",category:"Топы",description:["Материал изделия: Полностью хирургическая сталь","","Срок изготовления — до 14 рабочих дней."]}
 ];
 
 // ================== ФОРМА ==================
@@ -111,7 +112,7 @@ orderModal.onclick = e=>{if(e.target===orderModal) orderModal.style.display="non
 // ================== ПОДСВЕТКА КОРЗИНЫ ==================
 function animateAddToCart() {
   cartButton.classList.remove("cart-pulse");
-  void cartButton.offsetWidth; // перезапуск анимации
+  void cartButton.offsetWidth;
   cartButton.classList.add("cart-pulse");
 }
 
@@ -152,10 +153,7 @@ function addToCart(p){
   const isNew = !item;
 
   if(item) item.count++;
-  else {
-    item = {product:p,count:1};
-    cart.push(item);
-  }
+  else { item = {product:p,count:1}; cart.push(item); }
 
   updateCartUI();
 
@@ -179,25 +177,20 @@ function addToCart(p){
 function removeFromCart(p){
   const item = cart.find(x=>x.product.id===p.id);
   if(!item) return;
+
   item.count--;
-  if(item.count === 0) cart = cart.filter(x=>x!==item);
+  if(item.count <= 0){
+    cart = cart.filter(x=>x!==item);
+    if(inCartScreen) renderProducts(cart.map(i=>i.product));
+  } else {
+    const card = [...productsEl.children].find(c=>c.querySelector("h3")?.textContent===p.name);
+    if(card){
+      const countDiv = card.querySelector(".count-number");
+      if(countDiv) countDiv.textContent = item.count;
+    }
+  }
 
   updateCartUI();
-
-  const card = [...productsEl.children].find(c=>c.querySelector("h3")?.textContent===p.name);
-  if(!card) return;
-  const controls = card.querySelector(".count-block");
-
-  if(item && item.count>0){
-    const countDiv = controls.querySelector(".count-number");
-    if(countDiv) countDiv.textContent = item.count;
-  } else {
-    controls.innerHTML="";
-    const btn = document.createElement("button"); btn.textContent="В корзину";
-    btn.classList.add("micro-btn");
-    btn.onclick=e=>{e.stopPropagation(); addToCart(p)};
-    controls.appendChild(btn);
-  }
 }
 
 // ================== МОДАЛКА ==================
@@ -243,7 +236,7 @@ searchInput.oninput = ()=>{ const val = searchInput.value.toLowerCase(); renderP
 // ================== GET LIST ==================
 function getCurrentList(){ if(inCartScreen) return cart.map(i=>i.product); if(currentCategory==="Главная") return products; return products.filter(p=>p.category===currentCategory); }
 
-// ================== ОПЛАТА (YooKassa + Telegram Mini App) ==================
+// ================== ОПЛАТА ==================
 orderForm.onsubmit = async (e) => {
   e.preventDefault();
   if (isSubmitting) return;
@@ -251,6 +244,23 @@ orderForm.onsubmit = async (e) => {
   isSubmitting = true;
 
   try {
+    // модалка ожидания
+    const waitModal = document.createElement("div");
+    waitModal.style.position = "fixed";
+    waitModal.style.top = 0;
+    waitModal.style.left = 0;
+    waitModal.style.width = "100%";
+    waitModal.style.height = "100%";
+    waitModal.style.backgroundColor = "#333";
+    waitModal.style.color = "#fff";
+    waitModal.style.display = "flex";
+    waitModal.style.alignItems = "center";
+    waitModal.style.justifyContent = "center";
+    waitModal.style.fontSize = "18px";
+    waitModal.style.zIndex = 9999;
+    waitModal.textContent = "Переносим вас на оплату! буквально пару секунд...";
+    document.body.appendChild(waitModal);
+
     if (window.Telegram?.WebApp) Telegram.WebApp.ready();
 
     const fd = new FormData(orderForm);
@@ -259,7 +269,6 @@ orderForm.onsubmit = async (e) => {
       case "СДЭК": deliveryCost = 450; break;
       case "Почта России": deliveryCost = 550; break;
       case "Яндекс.Доставка": deliveryCost = 400; break;
-      default: deliveryCost = 0;
     }
     const total = cart.reduce((s, i) => s + i.count * i.product.price, 0) + deliveryCost;
     const orderId = Date.now();
@@ -279,17 +288,18 @@ orderForm.onsubmit = async (e) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ amount: total, order_id: orderId, return_url: "https://t.me/ChronicleChainsZAKAZI_Bot" })
     });
-
     const data = await res.json();
-    if (!data.payment_url) { console.error("Нет payment_url:", data); alert("Ошибка создания платежа"); return; }
+    if (!data.payment_url) { alert("Ошибка создания платежа"); return; }
 
     if (window.Telegram?.WebApp?.openLink) Telegram.WebApp.openLink(data.payment_url, { try_instant_view: false });
     else window.location.href = data.payment_url;
 
-  } catch (err) {
-    console.error("Ошибка оплаты:", err);
+  } catch(err) {
+    console.error(err);
     alert("Ошибка при оплате");
-  } finally { isSubmitting = false; }
+  } finally {
+    isSubmitting = false;
+  }
 };
 
 // ================== СТАРТ ==================

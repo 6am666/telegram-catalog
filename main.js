@@ -48,7 +48,7 @@ const products = [
   {id:7,name:"Обвес Star",price:2000,image:"https://i.pinimg.com/736x/16/36/75/163675cf410dfc51ef97238bbbab1056.jpg",category:"Обвесы",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
   {id:8,name:"Серьги Moonlight",price:2000,image:"https://i.pinimg.com/736x/93/e4/e5/93e4e5ee7594f6ef436f8b994ef04016.jpg",category:"Серьги",description:["Материал изделия:","Лунные бусины;","Хирургическая сталь;","Фурнитура из нержавеющей и хирургической стали.","","Срок изготовления — до 5 рабочих дней."]},
   {id:9,name:"Тестовый товар",price:1,image:"https://via.placeholder.com/150",category:"Тест",description:["Тестовый товар для проверки.","","Срок изготовления — 1 день."]},
-  {id:10,name:"Кольчужный топ",price:18000,image:"https://i.pinimg.com/736x/a9/95/24/a995240ff0d58266a65e1edc78c366ed.jpg",category:"Топ",description:["Материал изделия: Полностью хирургическая сталь. Срок изготовления — до 14 рабочих дней."]}
+  {id:10,name:"Кольчужный топ",price:18000,image:"https://i.pinimg.com/736x/a9/95/24/a995240ff0d58266a65e1edc78c366ed.jpg",category:"Колье",description:["Материал изделия: Полностью хирургическая сталь.","","Срок изготовления — до 14 рабочих дней."]}
 ];
 
 // ================== ФОРМА ==================
@@ -141,7 +141,6 @@ function renderProducts(list){
 
     card.append(img,title,price,controls);
     productsEl.appendChild(card);
-
     requestAnimationFrame(()=>{ card.style.opacity="1"; card.style.transform="translateY(0)"; });
   });
   updateCartUI();
@@ -153,46 +152,46 @@ function addToCart(p){
   const isNew = !item;
 
   if(item) item.count++;
-  else {
-    item = {product:p,count:1};
-    cart.push(item);
-  }
-
-  // Обновление конкретного контролла
-  const card = [...productsEl.children].find(c=>c.querySelector("h3")?.textContent===p.name);
-  if(card){
-    const controls = card.querySelector(".count-block");
-    controls.innerHTML="";
-    const minus=document.createElement("button"); minus.textContent="–"; minus.onclick=e=>{e.stopPropagation(); removeFromCart(p)};
-    const count=document.createElement("div"); count.className="count-number"; count.textContent=item.count;
-    const plus=document.createElement("button"); plus.textContent="+"; plus.onclick=e=>{e.stopPropagation(); addToCart(p)};
-    controls.append(minus,count,plus);
-  }
+  else { item = {product:p,count:1}; cart.push(item); }
 
   updateCartUI();
+
+  const card = [...productsEl.children].find(c=>c.querySelector("h3")?.textContent===p.name);
+  if(!card) return;
+  const controls = card.querySelector(".count-block");
+
+  controls.innerHTML="";
+  const minus=document.createElement("button"); minus.textContent="–"; minus.onclick=e=>{e.stopPropagation(); removeFromCart(p)};
+  const count=document.createElement("div"); count.className="count-number"; count.textContent=item.count;
+  const plus=document.createElement("button"); plus.textContent="+"; plus.onclick=e=>{e.stopPropagation(); addToCart(p)};
+  controls.append(minus,count,plus);
+
   animateAddToCart();
 }
 
 function removeFromCart(p){
   const item = cart.find(x=>x.product.id===p.id);
   if(!item) return;
-
   item.count--;
-  if(item.count <= 0) cart = cart.filter(x=>x.product.id!==p.id);
-
-  const card = [...productsEl.children].find(c=>c.querySelector("h3")?.textContent===p.name);
-  if(card){
-    const controls = card.querySelector(".count-block");
-    const itemUpdated = cart.find(x=>x.product.id===p.id);
-    if(itemUpdated){
-      controls.querySelector(".count-number").textContent = itemUpdated.count;
-    } else {
-      controls.innerHTML = `<button class="micro-btn">В корзину</button>`;
-      controls.querySelector("button").onclick = e => { e.stopPropagation(); addToCart(p) };
-    }
-  }
+  if(item.count===0) cart = cart.filter(x=>x!==item);
 
   updateCartUI();
+
+  const card = [...productsEl.children].find(c=>c.querySelector("h3")?.textContent===p.name);
+  if(!card) return;
+  const controls = card.querySelector(".count-block");
+
+  const itemNow = cart.find(x=>x.product.id===p.id);
+  controls.innerHTML="";
+  if(itemNow){
+    const minus=document.createElement("button"); minus.textContent="–"; minus.onclick=e=>{e.stopPropagation(); removeFromCart(p)};
+    const count=document.createElement("div"); count.className="count-number"; count.textContent=itemNow.count;
+    const plus=document.createElement("button"); plus.textContent="+"; plus.onclick=e=>{e.stopPropagation(); addToCart(p)};
+    controls.append(minus,count,plus);
+  } else {
+    const btn=document.createElement("button"); btn.textContent="В корзину"; btn.classList.add("micro-btn"); btn.onclick=e=>{e.stopPropagation(); addToCart(p)};
+    controls.appendChild(btn);
+  }
 }
 
 // ================== МОДАЛКА ==================
@@ -200,25 +199,15 @@ function openModal(p){
   modalImage.src=p.image;
   modalTitle.textContent=p.name;
   modalPrice.textContent=p.price+" ₽";
-  modalDescription.innerHTML=p.description.join("<br>");
+  modalDescription.innerHTML=p.description.map(line => line ? line+"<br>" : "<br>").join("") + (p.name==="Кольчужный топ" ? "<br>" : "");
   modal.style.display="flex";
 }
 modalClose.onclick = ()=>modal.style.display="none";
 modal.onclick = e=>{if(e.target===modal) modal.style.display="none";}
 
 // ================== КОРЗИНА НА ГЛАВНОЙ ==================
-cartButton.onclick = ()=>{ 
-  if(!cart.length) return alert("Корзина пуста!"); 
-  inCartScreen = true; 
-  document.body.classList.add("cart-mode"); 
-  renderProducts(cart.map(i=>i.product)); 
-};
-mainTitle.onclick = ()=>{ 
-  inCartScreen = false; 
-  document.body.classList.remove("cart-mode"); 
-  currentCategory="Главная"; 
-  renderProducts(products); 
-};
+cartButton.onclick = ()=>{ if(!cart.length) return alert("Корзина пуста!"); inCartScreen = true; document.body.classList.add("cart-mode"); renderProducts(cart.map(i=>i.product)); };
+mainTitle.onclick = ()=>{ inCartScreen = false; document.body.classList.remove("cart-mode"); currentCategory="Главная"; renderProducts(products); };
 
 // ================== ОБНОВЛЕНИЕ КОРЗИНЫ ==================
 function updateCartUI(){
@@ -248,34 +237,27 @@ searchInput.oninput = ()=>{ const val = searchInput.value.toLowerCase(); renderP
 // ================== GET LIST ==================
 function getCurrentList(){ if(inCartScreen) return cart.map(i=>i.product); if(currentCategory==="Главная") return products; return products.filter(p=>p.category===currentCategory); }
 
-// ================== ОПЛАТА ==================
+// ================== ОПЛАТА (YooKassa + Telegram Mini App) ==================
 orderForm.onsubmit = async (e) => {
   e.preventDefault();
-  if(isSubmitting) return;
-  if(!cart.length){ alert("Корзина пуста"); return; }
+  if (isSubmitting) return;
+  if (!cart.length) { alert("Корзина пуста"); return; }
   isSubmitting = true;
 
-  const modalMsg = document.createElement("div");
-  modalMsg.id = "paymentMsg";
-  modalMsg.style.position="fixed";
-  modalMsg.style.top="0"; modalMsg.style.left="0";
-  modalMsg.style.width="100%"; modalMsg.style.height="100%";
-  modalMsg.style.background="rgba(0,0,0,0.6)";
-  modalMsg.style.display="flex"; modalMsg.style.alignItems="center"; modalMsg.style.justifyContent="center";
-  modalMsg.style.zIndex="9999"; modalMsg.style.color="#fff"; modalMsg.style.fontSize="18px";
-  modalMsg.innerHTML = "Переносим вас на оплату! буквально пару секунд...";
-  document.body.appendChild(modalMsg);
-
   try {
+    if (window.Telegram?.WebApp) Telegram.WebApp.ready();
+
+    alert("Переносим вас на оплату! буквально пару секунд...");
+
     const fd = new FormData(orderForm);
     let deliveryCost = 0;
-    switch(fd.get("delivery")){
-      case "СДЭК": deliveryCost=450; break;
-      case "Почта России": deliveryCost=550; break;
-      case "Яндекс.Доставка": deliveryCost=400; break;
-      default: deliveryCost=0;
+    switch (fd.get("delivery")) {
+      case "СДЭК": deliveryCost = 450; break;
+      case "Почта России": deliveryCost = 550; break;
+      case "Яндекс.Доставка": deliveryCost = 400; break;
+      default: deliveryCost = 0;
     }
-    const total = cart.reduce((s,i)=>s+i.count*i.product.price,0)+deliveryCost;
+    const total = cart.reduce((s, i) => s + i.count * i.product.price, 0) + deliveryCost;
     const orderId = Date.now();
 
     sendTelegramOrder({
@@ -284,19 +266,34 @@ orderForm.onsubmit = async (e) => {
       telegram: fd.get("telegram"),
       delivery: fd.get("delivery"),
       address: fd.get("address"),
-      products: cart.map(i=>`• ${i.product.name} x${i.count}`).join("\n"),
+      products: cart.map(i => `• ${i.product.name} x${i.count}`).join("\n"),
       total
     });
 
-    const res = await fetch("https://telegram-catalog-alpha.vercel.app/api/create-payment",{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({amount: total, return_url:`${window.location.origin}?payment=success`})
+    const res = await fetch("https://telegram-catalog-alpha.vercel.app/api/create-payment", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ amount: total, order_id: orderId, return_url: "https://t.me/ChronicleChainsZAKAZI_Bot" })
     });
+
     const data = await res.json();
-    if(data.payment_url){
-      if(window.Telegram?.WebApp?.openLink) Telegram.WebApp.openLink(data.payment_url);
-      else window.location.href = data.payment_url;
-    }else alert("Ошибка оплаты");
-  }catch(e){console.error(e); alert("Ошибка оплаты");}
+    if (!data.payment_url) { console.error("Нет payment_url:", data); alert("Ошибка создания платежа"); return; }
+
+    if (window.Telegram?.WebApp?.openLink) Telegram.WebApp.openLink(data.payment_url, { try_instant_view: false });
+    else window.open(data.payment_url, "_blank");
+
+    // Сброс корзины после оплаты
+    cart = [];
+    updateCartUI();
+
+  } catch (err) {
+    console.error(err);
+    alert("Ошибка оплаты, попробуйте позже.");
+  } finally {
+    isSubmitting = false;
+  }
 };
+
+// ================== СТАРТ ==================
+renderProducts(products);
+

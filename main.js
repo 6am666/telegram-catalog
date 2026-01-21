@@ -47,8 +47,7 @@ const products = [
   {id:6,name:"Обвес Lighter",price:3600,image:"https://i.pinimg.com/736x/e8/cb/c2/e8cbc2287025b23930c20e030755a0b5.jpg",category:"Обвесы",description:["Материал изделия:","Фурнитура из нержавеющей стали;","Хирургическая и нержавеющая сталь.","","Срок изготовления — до 5 рабочих дней."]},
   {id:7,name:"Обвес Star",price:2000,image:"https://i.pinimg.com/736x/16/36/75/163675cf410dfc51ef97238bbbab1056.jpg",category:"Обвесы",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
   {id:8,name:"Серьги Moonlight",price:2000,image:"https://i.pinimg.com/736x/93/e4/e5/93e4e5ee7594f6ef436f8b994ef04016.jpg",category:"Серьги",description:["Материал изделия:","Лунные бусины;","Хирургическая сталь;","Фурнитура из нержавеющей и хирургической стали.","","Срок изготовления — до 5 рабочих дней."]},
-  {id:9,name:"Кольчужный топ",price:18000,image:"https://i.pinimg.com/736x/a9/95/24/a995240ff0d58266a65e1edc78c366ed.jpg",category:"Тест",description:["Материал изделия: Полностью хирургическая сталь.","","Срок изготовления — до 14 рабочих дней."]},
-  {id:10,name:"Тестовый товар",price:1,image:"https://i.pinimg.com/736x/aa/aa/aa/aaaaaa.jpg",category:"Тест",description:["Тестовый товар за 1₽","Для проверки корзины."]}
+  {id:9,name:"Кольчужный топ",price:18000,image:"https://i.pinimg.com/736x/a9/95/24/a995240ff0d58266a65e1edc78c366ed.jpg",category:"Тест",description:["Материал изделия: Полностью хирургическая сталь.","","Срок изготовления — до 14 рабочих дней."]}
 ];
 
 // ================== ФОРМА ==================
@@ -78,21 +77,25 @@ $(function(){
   });
 });
 
-// ================== ФУНКЦИИ КОРЗИНЫ ==================
-function addToCart(p){
-  let item = cart.find(x=>x.product.id===p.id);
-  if(item) item.count++; 
-  else cart.push({product:p,count:1});
-  animateAddToCart();
-  renderProducts(getCurrentList());
+// ================== РАСЧЁТ СУММЫ ==================
+const deliverySelectEl = document.getElementById("deliverySelect");
+const deliveryInfoEl = document.getElementById("deliveryInfo");
+const orderSumEl = document.getElementById("orderSum");
+function updateOrderSum() {
+  let total = cart.reduce((s,i)=>s+i.count*i.product.price,0);
+  let deliveryCost = 0;
+  switch(deliverySelectEl.value){
+    case "СДЭК": deliveryCost = 450; break;
+    case "Почта России": deliveryCost = 550; break;
+    case "Яндекс.Доставка": deliveryCost = 400; break;
+    default: deliveryCost = 0;
+  }
+  orderSumEl.textContent = "Итоговая сумма: "+(total+deliveryCost)+" ₽";
+  deliveryInfoEl.textContent = deliverySelectEl.value==="Самовывоз"?"Забрать заказ — Санкт-Петербург, Русановская 18к8":"";
 }
+deliverySelectEl.addEventListener("change", updateOrderSum);
 
-function removeFromCart(p){
-  cart = cart.filter(x=>x.product.id!==p.id);
-  renderProducts(getCurrentList());
-}
-
-// ================== РЕНДЕР ==================
+// ================== РЕНДЕР ТОВАРОВ ==================
 function renderProducts(list){
   productsEl.innerHTML="";
   list.forEach(p=>{
@@ -117,21 +120,21 @@ function renderProducts(list){
 
     card.append(img,title,price,controls);
     productsEl.appendChild(card);
+    requestAnimationFrame(()=>{ card.style.opacity="1"; card.style.transform="translateY(0)"; });
   });
   updateCartUI();
 }
 
-// ================== ОБНОВЛЕНИЕ UI ==================
-function updateCartUI(){
-  const count = cart.reduce((s,i)=>s+i.count,0);
-  const total = cart.reduce((s,i)=>s+i.count*i.product.price,0);
-  cartCount.textContent = count;
-  cartTotal.textContent = total?"Итого: "+total+" ₽":"";
-  cartTotal.style.display = inCartScreen?"block":"none";
-  checkoutButton.style.display = inCartScreen && count?"block":"none";
-  footerButtons.style.display = inCartScreen?"none":"flex";
-  searchInput.style.display = inCartScreen?"none":"block";
-  updateOrderSum();
+// ================== КОРЗИНА ==================
+function addToCart(p){
+  let item = cart.find(x=>x.product.id===p.id);
+  if(item) item.count++; else cart.push({product:p,count:1});
+  updateCartUI();
+}
+
+function removeFromCart(p){
+  cart = cart.filter(x=>x.product.id!==p.id);
+  updateCartUI();
 }
 
 // ================== МОДАЛКА ==================
@@ -145,25 +148,90 @@ function openModal(p){
 modalClose.onclick = ()=>modal.style.display="none";
 modal.onclick = e=>{if(e.target===modal) modal.style.display="none";}
 
-// ================== КОРЗИНА ==================
-cartButton.onclick = ()=>{ if(!cart.length) return alert("Корзина пуста!"); inCartScreen=true; renderProducts(cart.map(i=>i.product)); };
-mainTitle.onclick = ()=>{ inCartScreen=false; currentCategory="Главная"; renderProducts(products); };
+// ================== КОРЗИНА НА ГЛАВНОЙ ==================
+cartButton.onclick = ()=>{ 
+  if(!cart.length) return alert("Корзина пуста!");
+  inCartScreen = true;
+  document.body.classList.add("cart-mode");
+  renderProducts(cart.map(i=>i.product));
+};
+mainTitle.onclick = ()=>{ 
+  inCartScreen = false;
+  document.body.classList.remove("cart-mode");
+  currentCategory="Главная";
+  renderProducts(products);
+};
+
+// ================== ОБНОВЛЕНИЕ КОРЗИНЫ ==================
+function updateCartUI(){
+  const c = cart.reduce((s,i)=>s+i.count,0);
+  const t = cart.reduce((s,i)=>s+i.count*i.product.price,0);
+  cartCount.textContent = c;
+  cartTotal.textContent = t?"Итого: "+t+" ₽":"";
+  cartTotal.style.display = inCartScreen?"block":"none";
+  checkoutButton.style.display = c && inCartScreen?"block":"none";
+  footerButtons.style.display = inCartScreen?"none":"flex";
+  searchInput.style.display = inCartScreen?"none":"block";
+
+  [...productsEl.children].forEach(card=>{
+    const pName = card.querySelector("h3")?.textContent;
+    const item = cart.find(x=>x.product.name===pName);
+    const controls = card.querySelector(".count-block");
+    if(!controls) return;
+    controls.innerHTML = "";
+    if(item){
+      const minus = document.createElement("button"); minus.textContent="–"; minus.onclick=e=>{e.stopPropagation(); removeFromCart(cart.find(x=>x.product.name===pName).product)};
+      const count = document.createElement("div"); count.className="count-number"; count.textContent=item.count;
+      const plus = document.createElement("button"); plus.textContent="+"; plus.onclick=e=>{e.stopPropagation(); addToCart(cart.find(x=>x.product.name===pName).product)};
+      controls.append(minus,count,plus);
+    }else{
+      const btn = document.createElement("button"); btn.textContent="В корзину"; btn.onclick=e=>{e.stopPropagation(); addToCart(products.find(x=>x.name===pName))};
+      btn.classList.add("micro-btn");
+      controls.appendChild(btn);
+    }
+  });
+  updateOrderSum();
+}
 
 // ================== ГАМБУРГЕР ==================
 menuIcon.onclick = ()=> categoriesEl.classList.toggle("show");
-document.addEventListener("click", (e)=>{ if(!categoriesEl.contains(e.target) && !menuIcon.contains(e.target) && e.target!==searchInput){ categoriesEl.classList.remove("show"); } });
+document.addEventListener("click", (e)=>{
+  if(!categoriesEl.contains(e.target) && !menuIcon.contains(e.target) && e.target !== searchInput){
+    categoriesEl.classList.remove("show");
+    searchInput.blur();
+  }
+});
+categoriesEl.querySelectorAll("div").forEach(cat=>{
+  cat.onclick = ()=>{ 
+    currentCategory = cat.dataset.category; 
+    inCartScreen=false; 
+    categoriesEl.classList.remove("show"); 
+    renderProducts(getCurrentList()); 
+  }
+});
 
 // ================== ПОИСК ==================
-searchInput.oninput = ()=>{ const val = searchInput.value.toLowerCase(); renderProducts(getCurrentList().filter(p=>p.name.toLowerCase().includes(val))); };
-function getCurrentList(){ if(inCartScreen) return cart.map(i=>i.product); if(currentCategory==="Главная") return products; return products.filter(p=>p.category===currentCategory); }
+searchInput.oninput = ()=>{ 
+  const val = searchInput.value.toLowerCase(); 
+  renderProducts(getCurrentList().filter(p=>p.name.toLowerCase().includes(val))); 
+};
+
+// ================== GET LIST ==================
+function getCurrentList(){ 
+  if(inCartScreen) return cart.map(i=>i.product); 
+  if(currentCategory==="Главная") return products; 
+  return products.filter(p=>p.category===currentCategory); 
+}
 
 // ================== ОПЛАТА ==================
-orderForm.onsubmit = async (e)=>{
+orderForm.onsubmit = async (e) => {
   e.preventDefault();
+  if(isSubmitting) return;
   if(!cart.length){ alert("Корзина пуста"); return; }
-  isSubmitting=true;
+  isSubmitting = true;
+
   const fd = new FormData(orderForm);
-  let deliveryCost=0;
+  let deliveryCost = 0;
   switch(fd.get("delivery")){
     case "СДЭК": deliveryCost=450; break;
     case "Почта России": deliveryCost=550; break;
@@ -171,6 +239,8 @@ orderForm.onsubmit = async (e)=>{
     default: deliveryCost=0;
   }
   const total = cart.reduce((s,i)=>s+i.count*i.product.price,0)+deliveryCost;
+  const orderId = Date.now();
+
   sendTelegramOrder({
     fullname: fd.get("fullname"),
     phone: fd.get("phone"),
@@ -180,15 +250,32 @@ orderForm.onsubmit = async (e)=>{
     products: cart.map(i=>`• ${i.product.name} x${i.count}`).join("\n"),
     total
   });
-  try{
+
+  try {
     const res = await fetch("https://telegram-catalog-alpha.vercel.app/api/create-payment",{
       method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({total})
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ orderId, total })
     });
     const data = await res.json();
     window.location.href = data.pay_url;
-  }catch(err){ alert("Ошибка оплаты: "+err.message); }
+  } catch(err){
+    alert("Ошибка при оплате: "+err.message);
+  } finally {
+    isSubmitting = false;
+  }
 };
 
+// ================== МОДАЛКА ЗАКАЗА ==================
+checkoutButton.onclick = ()=>{
+  if(!cart.length) return alert("Корзина пуста!");
+  orderModal.style.display="flex";
+  orderModal.style.pointerEvents="auto";
+  updateOrderSum();
+  document.activeElement.blur();
+};
+orderClose.onclick = ()=>orderModal.style.display="none";
+orderModal.onclick = e=>{if(e.target===orderModal) orderModal.style.display="none";}
+
+// ================== INITIAL RENDER ==================
 renderProducts(products);

@@ -84,15 +84,15 @@ function addToCart(p){
   let item = cart.find(x=>x.product.id===p.id);
   if(item) item.count++;
   else cart.push({product:p,count:1});
-  updateCartUI();
+  renderProducts(getCurrentList());
 }
 
 function removeFromCart(p){
-  cart = cart.filter(x => x.product.id !== p.id);
-  updateCartUI();
+  cart = cart.filter(x=>x.product.id!==p.id);
+  renderProducts(getCurrentList());
 }
 
-// ================== РЕНДЕР ТОВАРОВ ==================
+// ================== РЕНДЕР ==================
 function renderProducts(list){
   productsEl.innerHTML="";
   list.forEach(p=>{
@@ -147,14 +147,14 @@ modal.onclick = e=>{if(e.target===modal) modal.style.display="none";}
 // ================== КНОПКИ ==================
 cartButton.onclick = ()=>{
   if(!cart.length) return alert("Корзина пуста!");
-  inCartScreen = true; 
-  document.body.classList.add("cart-mode"); 
+  inCartScreen=true;
   renderProducts(cart.map(i=>i.product));
+  document.body.classList.add("cart-mode");
 };
 mainTitle.onclick = ()=>{
-  inCartScreen = false; 
-  document.body.classList.remove("cart-mode"); 
-  currentCategory="Главная"; 
+  inCartScreen=false;
+  document.body.classList.remove("cart-mode");
+  currentCategory="Главная";
   renderProducts(products);
 };
 checkoutButton.onclick = ()=>{
@@ -178,8 +178,15 @@ document.addEventListener("click", (e)=>{
 // ================== ПОИСК ==================
 searchInput.oninput = ()=>{ 
   const val = searchInput.value.toLowerCase(); 
-  renderProducts(products.filter(p=>p.name.toLowerCase().includes(val)));
+  renderProducts(getCurrentList().filter(p=>p.name.toLowerCase().includes(val)));
 };
+
+// ================== GET LIST ==================
+function getCurrentList(){
+  if(inCartScreen) return cart.map(i=>i.product);
+  if(currentCategory==="Главная") return products;
+  return products.filter(p=>p.category===currentCategory);
+}
 
 // ================== СУММА ==================
 const deliverySelectEl = document.getElementById("deliverySelect");
@@ -189,10 +196,10 @@ function updateOrderSum(){
   let total = cart.reduce((s,i)=>s+i.count*i.product.price,0);
   let deliveryCost = 0;
   switch(deliverySelectEl.value){
-    case "СДЭК": deliveryCost = 450; break;
-    case "Почта России": deliveryCost = 550; break;
-    case "Яндекс.Доставка": deliveryCost = 400; break;
-    default: deliveryCost = 0;
+    case "СДЭК": deliveryCost=450; break;
+    case "Почта России": deliveryCost=550; break;
+    case "Яндекс.Доставка": deliveryCost=400; break;
+    default: deliveryCost=0;
   }
   orderSumEl.textContent = "Итоговая сумма: "+(total+deliveryCost)+" ₽";
   deliveryInfoEl.textContent = deliverySelectEl.value==="Самовывоз"?"Забрать заказ — Санкт-Петербург, Русановская 18к8":"";

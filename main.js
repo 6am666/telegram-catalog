@@ -271,6 +271,64 @@ function getCurrentList(){
   return products.filter(p=>p.category===currentCategory);
 }
 
+// ================== ОПЛАТА (YooKassa + Telegram Mini App) ==================
+orderForm.onsubmit = async (e) => {
+  e.preventDefault();
+  if (isSubmitting) return;
+  if (!cart.length) return alert("Корзина пуста");
+
+  isSubmitting = true;
+
+  const fd = new FormData(orderForm);
+
+  let deliveryCost = 0;
+  switch (fd.get("delivery")) {
+    case "СДЭК": deliveryCost = 450; break;
+    case "Почта России": deliveryCost = 550; break;
+    case "Яндекс.Доставка": deliveryCost = 400; break;
+    default: deliveryCost = 0;
+  }
+
+  const total =
+    cart.reduce((s, i) => s + i.count * i.product.price, 0) +
+    deliveryCost;
+
+  try {
+    const res = await fetch("/api/create-payment", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        amount: total,
+        order_id: Date.now(),
+        return_url: window.location.href
+      })
+    });
+
+    const data = await res.json();
+
+    if (!data.payment_url) {
+      alert("Ошибка создания платежа");
+      console.error(data);
+      return;
+    }
+
+    // ✅ ПРАВИЛЬНОЕ открытие для Telegram Mini App
+    if (window.Telegram?.WebApp) {
+      Telegram.WebApp.openLink(data.payment_url, {
+        try_instant_view: false
+      });
+    } else {
+      window.location.href = data.payment_url;
+    }
+
+  } catch (err) {
+    console.error(err);
+    alert("Ошибка при оплате");
+  } finally {
+    isSubmitting = false;
+  }
+};
+
 // ================== СТАРТ ==================
 renderProducts(products);
 updateCartUI();

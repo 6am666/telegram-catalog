@@ -294,7 +294,7 @@ orderForm.onsubmit = async (e) => {
       body: JSON.stringify({
         amount: total,
         order_id: orderId,
-        return_url: "https://t.me/ChronicleChainsZAKAZI_Bot"
+        return_url: "https://t.me"
       })
     });
     const data = await res.json();

@@ -89,7 +89,7 @@ function updateOrderSum() {
     case "Яндекс.Доставка": deliveryCost = 400; break;
   }
   orderSumEl.textContent = "Итоговая сумма: "+(total+deliveryCost)+" ₽";
-  deliveryInfoEl.textContent = deliverySelectEl.value==="Самовывоз"?"Забрать заказ — Санкт-Петербург, Русановская 18к8":"";
+  deliveryInfoEl.textContent = deliverySelectEl.value==="Самовывоз"?"Забрать заказ — Санкт-Петербург, Русановская 18к8":""; 
 }
 deliverySelectEl.addEventListener("change", updateOrderSum);
 
@@ -114,7 +114,9 @@ function animateAddToCart() {
 }
 
 // ================== КНОПКА КОРЗИНЫ 🛒 С КРУЖКОМ ==================
-cartButton.style.position = "relative";
+cartButton.style.position = "fixed"; 
+cartButton.style.top = "10px"; 
+cartButton.style.right = "20px"; 
 cartButton.style.background = "none";
 cartButton.style.border = "none";
 cartButton.style.fontSize = "28px";
@@ -124,18 +126,17 @@ cartButton.style.justifyContent = "center";
 cartButton.style.cursor = "pointer";
 cartButton.style.padding = "0";
 cartButton.style.lineHeight = "1";
+cartButton.style.zIndex = "10000";
 
-// Эмодзи корзины
-cartButton.innerHTML = `🛒<span id="cartCountCircle"></span>`;
+cartButton.innerHTML = `🛒<span id="cartCountCircle" style="display:none"></span>`;
 
-// Стили счетчика
 const style = document.createElement("style");
 style.innerHTML = `
 #cartCountCircle {
   position: absolute;
-  top: -8px;
-  right: -8px;
-  background: red;
+  top: -6px;
+  right: -6px;
+  background: #aaa;
   color: white;
   font-size: 12px;
   font-weight: 600;
@@ -146,15 +147,22 @@ style.innerHTML = `
   align-items: center;
   justify-content: center;
   pointer-events: none;
+  transition: all 0.2s ease;
 }
 `;
 document.head.appendChild(style);
 
-// Функция обновления счетчика
 function updateCartCounter() {
   const c = cart.reduce((s,i)=>s+i.count,0);
   const counter = document.getElementById("cartCountCircle");
-  if(counter) counter.textContent = c > 0 ? c : "";
+  if(counter) {
+    if(c > 0){
+      counter.style.display = "flex";  
+      counter.textContent = c;
+    } else {
+      counter.style.display = "none";  
+    }
+  }
 }
 
 // ================== РЕНДЕР ==================
@@ -185,6 +193,7 @@ function renderProducts(list){
     requestAnimationFrame(()=>{ card.style.opacity="1"; card.style.transform="translateY(0)"; });
   });
   updateCartUI();
+  updateCartCounter();
 }
 
 // ================== КОРЗИНА ==================
@@ -193,6 +202,7 @@ function addToCart(p){
   if(item) item.count++;
   else cart.push({product: p, count:1});
   updateCartUI();
+  updateCartCounter();
   if(inCartScreen){ renderProducts(cart.map(i=>i.product)); } 
   else {
     const card = [...productsEl.children].find(c=>c.querySelector("h3")?.textContent===p.name);
@@ -218,6 +228,7 @@ function removeFromCart(p){
   item.count--;
   if(item.count <= 0) cart = cart.filter(x=>x.product.id!==p.id);
   updateCartUI();
+  updateCartCounter();
   if(inCartScreen){ renderProducts(cart.map(i=>i.product)); } 
   else {
     const card = [...productsEl.children].find(c=>c.querySelector("h3")?.textContent===p.name);
@@ -253,10 +264,10 @@ mainTitle.onclick = ()=>{ inCartScreen = false; document.body.classList.remove("
 
 // ================== ОБНОВЛЕНИЕ КОРЗИНЫ ==================
 function updateCartUI(){
-  updateCartCounter(); // <-- обновляем новый счетчик
   const c = cart.reduce((s,i)=>s+i.count,0);
   const t = cart.reduce((s,i)=>s+i.count*i.product.price,0);
-  cartTotal.textContent = t?"Итого: "+t+" ₽":"";
+  cartCount.textContent = c;
+  cartTotal.textContent = t?"Итого: "+t+" ₽":"";  
   cartTotal.style.display = inCartScreen?"block":"none";
   checkoutButton.style.display = c && inCartScreen?"block":"none";
   footerButtons.style.display = inCartScreen?"none":"flex";
@@ -393,3 +404,4 @@ orderForm.onsubmit = async (e) => {
 renderProducts(products);
 updateCartUI();
 updateOrderSum();
+updateCartCounter();

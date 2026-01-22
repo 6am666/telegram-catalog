@@ -48,7 +48,7 @@ const products = [
   {id:7,name:"Обвес Star",price:2000,image:"https://i.pinimg.com/736x/16/36/75/163675cf410dfc51ef97238bbbab1056.jpg",category:"Обвесы",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
   {id:8,name:"Серьги Moonlight",price:2000,image:"https://i.pinimg.com/736x/93/e4/e5/93e4e5ee7594f6ef436f8b994ef04016.jpg",category:"Серьги",description:["Материал изделия:","Лунные бусины;","Хирургическая сталь;","Фурнитура из нержавеющей и хирургической стали.","","Срок изготовления — до 5 рабочих дней."]},
   {id:9,name:"Тестовый товар",price:1,image:"https://via.placeholder.com/150",category:"Тест",description:["Тестовый товар для проверки.","","Срок изготовления — 1 день."]},
-  {id:10,name:"Кольчужный топ",price:18000,image:"https://i.pinimg.com/736x/a9/95/24/a995240ff0d58266a65e1edc78c366ed.jpg",category:"Топы",description:["Материал изделия: Полностью хирургическая сталь","","Срок изготовления — до 14 рабочих дней."]}
+  {id:10,name:"Кольчужный топ",price:18000,image:"https://i.pinimg.com/736x/a9/95/24/a995240ff0d58266a65e1edc78c366ed.jpg",category:"Топы",description:["Материал изделия: Полностью хирургическая сталь","","Срок изготовления — до 14 рабочих дней."]},
 ];
 
 // ================== ФОРМА ==================
@@ -83,7 +83,7 @@ const orderSumEl = document.getElementById("orderSum");
 function updateOrderSum() {
   let total = cart.reduce((s,i)=>s+i.count*i.product.price,0);
   let deliveryCost = 0;
-  switch(deliverySelectEl.value){
+  switch (deliverySelectEl.value){
     case "СДЭК": deliveryCost = 450; break;
     case "Почта России": deliveryCost = 550; break;
     case "Яндекс.Доставка": deliveryCost = 400; break;
@@ -230,23 +230,19 @@ categoriesEl.querySelectorAll("div").forEach(cat=>{
 document.addEventListener("click", (e)=>{ if(!categoriesEl.contains(e.target) && !menuIcon.contains(e.target) && e.target !== searchInput){ categoriesEl.classList.remove("show"); searchInput.blur(); } });
 
 // ================== ПОИСК ==================
-searchInput.oninput = ()=>{
-  const val = searchInput.value.toLowerCase();
-  const filtered = getCurrentList().filter(p=>p.name.toLowerCase().includes(val));
-  renderProducts(filtered);
-};
+searchInput.oninput = ()=>{ const val = searchInput.value.toLowerCase(); renderProducts(getCurrentList().filter(p=>p.name.toLowerCase().includes(val))); };
 
 // ================== GET LIST ==================
 function getCurrentList(){ if(inCartScreen) return cart.map(i=>i.product); if(currentCategory==="Главная") return products; return products.filter(p=>p.category===currentCategory); }
 
-// ================== ОПЛАТА ==================
+// ================== ОПЛАТА С ФИКСОМ ==================
 orderForm.onsubmit = async (e) => {
   e.preventDefault();
   if (isSubmitting) return;
   if (!cart.length) { alert("Корзина пуста"); return; }
   isSubmitting = true;
 
-  // ================= МОДАЛКА ОЖИДАНИЯ =================
+  // Модалка ожидания
   const waitModal = document.createElement("div");
   waitModal.style.position = "fixed";
   waitModal.style.top = "0";
@@ -262,14 +258,14 @@ orderForm.onsubmit = async (e) => {
   waitModal.style.fontSize = "16px";
   waitModal.style.textAlign = "center";
   waitModal.style.zIndex = 9999;
-  waitModal.style.pointerEvents = "auto"; 
+  waitModal.style.pointerEvents = "auto";
   waitModal.innerHTML = `
     <div style="margin-bottom:5px; font-weight:600;">Переносим вас на оплату</div>
     <div>Пожалуйста, подождите пару секунд...</div>
   `;
   document.body.appendChild(waitModal);
 
-  // ================= ДАННЫЕ ЗАКАЗА =================
+  // Данные заказа
   const fd = new FormData(orderForm);
   let deliveryCost = 0;
   switch (fd.get("delivery")) {
@@ -289,13 +285,17 @@ orderForm.onsubmit = async (e) => {
     total
   });
 
-  // ================= ОТКРЫТИЕ ПЛАТЕЖА =================
+  // Открытие платежа
   try {
     const orderId = Date.now();
     const res = await fetch("https://telegram-catalog-alpha.vercel.app/api/create-payment", {
       method:"POST",
       headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({ amount: total, order_id: orderId })
+      body: JSON.stringify({
+        amount: total,
+        order_id: orderId,
+        return_url: "https://t.me/ChronicleChainsZAKAZI_Bot"
+      })
     });
     const data = await res.json();
     if(!data.payment_url){ alert("Ошибка создания платежа"); isSubmitting=false; document.body.removeChild(waitModal); return; }
@@ -313,7 +313,7 @@ orderForm.onsubmit = async (e) => {
     return;
   }
 
-  // ================= СПАСИБО ЧЕРЕЗ 10 СЕКУНД =================
+  // Спасибо через 10 секунд
   setTimeout(() => {
     if(document.body.contains(waitModal)) document.body.removeChild(waitModal);
 

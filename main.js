@@ -138,7 +138,6 @@ function renderProducts(list){
 
     card.append(img,title,price,controls);
     productsEl.appendChild(card);
-
     requestAnimationFrame(()=>{ card.style.opacity="1"; card.style.transform="translateY(0)"; });
   });
   updateCartUI();
@@ -150,10 +149,8 @@ function addToCart(p){
   if(item) item.count++;
   else cart.push({product: p, count:1});
   updateCartUI();
-
-  if(inCartScreen){
-    renderProducts(cart.map(i=>i.product));
-  } else {
+  if(inCartScreen){ renderProducts(cart.map(i=>i.product)); } 
+  else {
     const card = [...productsEl.children].find(c=>c.querySelector("h3")?.textContent===p.name);
     if(card){
       const countDiv = card.querySelector(".count-number");
@@ -177,16 +174,13 @@ function removeFromCart(p){
   item.count--;
   if(item.count <= 0) cart = cart.filter(x=>x.product.id!==p.id);
   updateCartUI();
-
-  if(inCartScreen){
-    renderProducts(cart.map(i=>i.product));
-  } else {
+  if(inCartScreen){ renderProducts(cart.map(i=>i.product)); } 
+  else {
     const card = [...productsEl.children].find(c=>c.querySelector("h3")?.textContent===p.name);
     if(card){
       const controls = card.querySelector(".count-block");
-      if(item.count > 0){
-        controls.querySelector(".count-number").textContent = item.count;
-      } else {
+      if(item.count > 0){ controls.querySelector(".count-number").textContent = item.count; } 
+      else {
         controls.innerHTML = "";
         const btn = document.createElement("button");
         btn.textContent = "В корзину";
@@ -268,14 +262,17 @@ orderForm.onsubmit = async (e) => {
   waitModal.style.fontSize = "16px";
   waitModal.style.textAlign = "center";
   waitModal.style.zIndex = 9999;
-  waitModal.style.pointerEvents = "auto";
-  waitModal.innerHTML = `<div style="margin-bottom:5px; font-weight:600;">Переносим вас на оплату</div><div>Пожалуйста, подождите пару секунд...</div>`;
+  waitModal.style.pointerEvents = "auto"; 
+  waitModal.innerHTML = `
+    <div style="margin-bottom:5px; font-weight:600;">Переносим вас на оплату</div>
+    <div>Пожалуйста, подождите пару секунд...</div>
+  `;
   document.body.appendChild(waitModal);
 
-  // ================= ДАННЫЕ =================
+  // ================= ДАННЫЕ ЗАКАЗА =================
   const fd = new FormData(orderForm);
   let deliveryCost = 0;
-  switch(fd.get("delivery")){
+  switch (fd.get("delivery")) {
     case "СДЭК": deliveryCost = 450; break;
     case "Почта России": deliveryCost = 550; break;
     case "Яндекс.Доставка": deliveryCost = 400; break;
@@ -292,24 +289,34 @@ orderForm.onsubmit = async (e) => {
     total
   });
 
+  // ================= ОТКРЫТИЕ ПЛАТЕЖА =================
   try {
     const orderId = Date.now();
     const res = await fetch("https://telegram-catalog-alpha.vercel.app/api/create-payment", {
       method:"POST",
       headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({amount: total, order_id: orderId})
+      body: JSON.stringify({ amount: total, order_id: orderId })
     });
     const data = await res.json();
     if(!data.payment_url){ alert("Ошибка создания платежа"); isSubmitting=false; document.body.removeChild(waitModal); return; }
 
-    if(window.Telegram?.WebApp?.openLink) Telegram.WebApp.openLink(data.payment_url, {try_instant_view:false});
-    else window.location.href = data.payment_url;
+    if(window.Telegram?.WebApp?.openLink){
+      Telegram.WebApp.openLink(data.payment_url, { try_instant_view:false });
+    } else {
+      window.location.href = data.payment_url;
+    }
+  } catch(err){
+    console.error(err);
+    alert("Ошибка при оплате");
+    isSubmitting=false;
+    document.body.removeChild(waitModal);
+    return;
+  }
 
-  } catch(err){ console.error(err); alert("Ошибка при оплате"); isSubmitting=false; document.body.removeChild(waitModal); return; }
-
-  // ================= СПАСИБО =================
-  setTimeout(()=>{
+  // ================= СПАСИБО ЧЕРЕЗ 10 СЕКУНД =================
+  setTimeout(() => {
     if(document.body.contains(waitModal)) document.body.removeChild(waitModal);
+
     const thankModal = document.createElement("div");
     thankModal.style.position="fixed";
     thankModal.style.top="0";
@@ -320,17 +327,22 @@ orderForm.onsubmit = async (e) => {
     thankModal.style.color="#fff";
     thankModal.style.display="flex";
     thankModal.style.alignItems="center";
-    thankModal.style.justifyContent="center";
-    thankModal.style.fontSize="18px";
-    thankModal.style.textAlign="center";
-    thankModal.style.padding="20px";
-    thankModal.style.zIndex=9999;
-    thankModal.style.cursor="pointer";
-    thankModal.style.flexDirection="column";
-    thankModal.innerText="СПАСИБО ЗА ВЫБОР CHRONICLE CHAINS!\nМЫ УЖЕ ПРИНЯЛИ ВАШ ЗАКАЗ И НАЧИНАЕМ ЕГО СОБИРАТЬ <3";
-    thankModal.onclick=()=>{ document.body.removeChild(thankModal); isSubmitting=false; };
+    thankModal.style.justifyContent = "center";
+    thankModal.style.fontSize = "18px";
+    thankModal.style.textAlign = "center";
+    thankModal.style.padding = "20px";
+    thankModal.style.zIndex = 9999;
+    thankModal.style.cursor = "pointer";
+    thankModal.style.flexDirection = "column";
+    thankModal.innerText = "СПАСИБО ЗА ВЫБОР CHRONICLE CHAINS!\nМЫ УЖЕ ПРИНЯЛИ ВАШ ЗАКАЗ И НАЧИНАЕМ ЕГО СОБИРАТЬ <3";
+
+    thankModal.onclick = () => {
+      document.body.removeChild(thankModal);
+      isSubmitting = false;
+    };
+
     document.body.appendChild(thankModal);
-  },10000);
+  }, 10000);
 };
 
 // ================== СТАРТ ==================

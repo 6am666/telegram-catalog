@@ -150,56 +150,20 @@ function renderProducts(list){
 // ================== КОРЗИНА ==================
 function addToCart(p){
   let item = cart.find(x=>x.product.id===p.id);
-  const isNew = !item;
-
   if(item) item.count++;
-  else { item = {product:p,count:1}; cart.push(item); }
-
+  else cart.push({product: p, count:1});
   updateCartUI();
-
-  const card = [...productsEl.children].find(c=>c.querySelector("h3")?.textContent===p.name);
-  if(!card) return;
-  const controls = card.querySelector(".count-block");
-
-  if(isNew && !inCartScreen){
-    controls.innerHTML="";
-    const minus=document.createElement("button"); minus.textContent="–"; minus.onclick=e=>{e.stopPropagation();removeFromCart(p)};
-    const count=document.createElement("div"); count.className="count-number"; count.textContent="1";
-    const plus=document.createElement("button"); plus.textContent="+"; plus.onclick=e=>{e.stopPropagation();addToCart(p)};
-    controls.append(minus,count,plus);
-  } else if(!inCartScreen){
-    controls.querySelector(".count-number").textContent=item.count;
-  }
-
+  renderProducts(inCartScreen ? cart.map(i=>i.product) : getCurrentList());
   animateAddToCart();
 }
 
-function removeFromCart(p) {
-  const item = cart.find(x => x.product.id === p.id);
-  if (!item) return;
-
+function removeFromCart(p){
+  let item = cart.find(x=>x.product.id===p.id);
+  if(!item) return;
   item.count--;
-  if (item.count <= 0) cart = cart.filter(x => x.product.id !== p.id);
-
+  if(item.count <= 0) cart = cart.filter(x=>x.product.id!==p.id);
   updateCartUI();
-
-  const card = [...productsEl.children].find(c => c.querySelector("h3")?.textContent === p.name);
-  if (!card) return;
-  const controls = card.querySelector(".count-block");
-
-  if (item && item.count > 0) {
-    const countDiv = controls.querySelector(".count-number");
-    if (countDiv) countDiv.textContent = item.count;
-  } else {
-    controls.innerHTML = "";
-    const btn = document.createElement("button");
-    btn.textContent = "В корзину";
-    btn.classList.add("micro-btn");
-    btn.onclick = e => { e.stopPropagation(); addToCart(p); };
-    controls.appendChild(btn);
-  }
-
-  if (inCartScreen) renderProducts(cart.map(i=>i.product));
+  renderProducts(inCartScreen ? cart.map(i=>i.product) : getCurrentList());
 }
 
 // ================== МОДАЛКА ==================
@@ -240,7 +204,12 @@ categoriesEl.querySelectorAll("div").forEach(cat=>{
 document.addEventListener("click", (e)=>{ if(!categoriesEl.contains(e.target) && !menuIcon.contains(e.target) && e.target !== searchInput){ categoriesEl.classList.remove("show"); searchInput.blur(); } });
 
 // ================== ПОИСК ==================
-searchInput.oninput = ()=>{ const val = searchInput.value.toLowerCase(); renderProducts(getCurrentList().filter(p=>p.name.toLowerCase().includes(val))); };
+searchInput.oninput = ()=>{
+  const val = searchInput.value.toLowerCase();
+  const filtered = getCurrentList().filter(p=>p.name.toLowerCase().includes(val));
+  renderProducts(filtered);
+  document.body.style.background = "#111"; // сохраняем фон
+};
 
 // ================== GET LIST ==================
 function getCurrentList(){ if(inCartScreen) return cart.map(i=>i.product); if(currentCategory==="Главная") return products; return products.filter(p=>p.category===currentCategory); }
@@ -255,23 +224,25 @@ orderForm.onsubmit = async (e) => {
   try {
     if (window.Telegram?.WebApp) Telegram.WebApp.ready();
 
-    // Модалка оплаты
+    // Модалка ожидания оплаты
     const waitModal = document.createElement("div");
     waitModal.style.position = "fixed";
-    waitModal.style.top = 0;
-    waitModal.style.left = 0;
-    waitModal.style.width = "100%";
-    waitModal.style.height = "100%";
+    waitModal.style.top = "50%";
+    waitModal.style.left = "50%";
+    waitModal.style.transform = "translate(-50%, -50%)";
+    waitModal.style.minWidth = "250px";
+    waitModal.style.padding = "20px 30px";
     waitModal.style.backgroundColor = "#2c2c2c";
     waitModal.style.color = "#fff";
+    waitModal.style.borderRadius = "12px";
     waitModal.style.display = "flex";
+    waitModal.style.flexDirection = "column";
     waitModal.style.alignItems = "center";
     waitModal.style.justifyContent = "center";
+    waitModal.style.textAlign = "center";
     waitModal.style.fontSize = "16px";
     waitModal.style.zIndex = 9999;
-    waitModal.style.flexDirection = "column";
-    waitModal.style.textAlign = "center";
-    waitModal.innerHTML = `<div style="margin-bottom:5px;">Переносим вас на оплату!</div><div>Пожалуйста, подождите пару секунд...</div>`;
+    waitModal.innerHTML = `<div style="margin-bottom:5px; font-weight:600;">Переносим вас на страницу оплаты</div><div>Пожалуйста, подождите пару секунд...</div>`;
     document.body.appendChild(waitModal);
 
     const fd = new FormData(orderForm);
@@ -305,10 +276,30 @@ orderForm.onsubmit = async (e) => {
     if (window.Telegram?.WebApp?.openLink) Telegram.WebApp.openLink(data.payment_url, { try_instant_view: false });
     else window.location.href = data.payment_url;
 
+    // Сообщение после оплаты
+    const thankYou = document.createElement("div");
+    thankYou.style.position = "fixed";
+    thankYou.style.top = "50%";
+    thankYou.style.left = "50%";
+    thankYou.style.transform = "translate(-50%, -50%)";
+    thankYou.style.backgroundColor = "rgba(44,44,44,0.9)";
+    thankYou.style.color = "#fff";
+    thankYou.style.padding = "20px 30px";
+    thankYou.style.borderRadius = "12px";
+    thankYou.style.fontSize = "16px";
+    thankYou.style.textAlign = "center";
+    thankYou.style.cursor = "pointer";
+    thankYou.style.zIndex = 9999;
+    thankYou.innerText = "СПАСИБО ЗА ТО, ЧТО ВЫБРАЛИ CHRONICLE CHAINS! МЫ УЖЕ ПРИНЯЛИ ВАШ ЗАКАЗ И НАЧИНАЕМ ЕГО СОБИРАТЬ <3";
+    thankYou.onclick = () => document.body.removeChild(thankYou);
+    document.body.appendChild(thankYou);
+
   } catch(err) {
     console.error(err);
     alert("Ошибка при оплате");
-  } finally { isSubmitting = false; }
+  } finally { 
+    isSubmitting = false; 
+  }
 };
 
 // ================== СТАРТ ==================

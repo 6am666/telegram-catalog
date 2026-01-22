@@ -85,11 +85,10 @@ const orderSumEl = document.getElementById("orderSum");
 function updateOrderSum() {
   let total = cart.reduce((s,i)=>s+i.count*i.product.price,0);
   let deliveryCost = 0;
-  switch(deliverySelectEl.value){
+  switch (deliverySelectEl.value){
     case "СДЭК": deliveryCost = 450; break;
     case "Почта России": deliveryCost = 550; break;
     case "Яндекс.Доставка": deliveryCost = 400; break;
-    default: deliveryCost = 0;
   }
   orderSumEl.textContent = "Итоговая сумма: "+(total+deliveryCost)+" ₽";
   deliveryInfoEl.textContent = deliverySelectEl.value==="Самовывоз"?"Забрать заказ — Санкт-Петербург, Русановская 18к8":"";
@@ -258,17 +257,15 @@ orderForm.onsubmit = async (e) => {
   try {
     if (window.Telegram?.WebApp) Telegram.WebApp.ready();
 
-    // Модалка ожидания оплаты
+    // ================= МОДАЛКА ОЖИДАНИЯ =================
     const waitModal = document.createElement("div");
     waitModal.style.position = "fixed";
-    waitModal.style.top = "50%";
-    waitModal.style.left = "50%";
-    waitModal.style.transform = "translate(-50%, -50%)";
-    waitModal.style.minWidth = "250px";
-    waitModal.style.padding = "20px 30px";
-    waitModal.style.backgroundColor = "#2c2c2c";
+    waitModal.style.top = "0";
+    waitModal.style.left = "0";
+    waitModal.style.width = "100%";
+    waitModal.style.height = "100%";
+    waitModal.style.backgroundColor = "rgba(44,44,44,0.9)";
     waitModal.style.color = "#fff";
-    waitModal.style.borderRadius = "12px";
     waitModal.style.display = "flex";
     waitModal.style.flexDirection = "column";
     waitModal.style.alignItems = "center";
@@ -276,9 +273,11 @@ orderForm.onsubmit = async (e) => {
     waitModal.style.textAlign = "center";
     waitModal.style.fontSize = "16px";
     waitModal.style.zIndex = 9999;
+    waitModal.style.pointerEvents = "auto"; // блокирует все клики
     waitModal.innerHTML = `<div style="margin-bottom:5px; font-weight:600;">Переносим вас на страницу оплаты</div><div>Пожалуйста, подождите пару секунд...</div>`;
     document.body.appendChild(waitModal);
 
+    // ================= СОБИРАЕМ ДАННЫЕ ЗАКАЗА =================
     const fd = new FormData(orderForm);
     let deliveryCost = 0;
     switch (fd.get("delivery")) {
@@ -299,34 +298,44 @@ orderForm.onsubmit = async (e) => {
       total
     });
 
+    // ================= СОЗДАЕМ ПЛАТЕЖ =================
     const res = await fetch("https://telegram-catalog-alpha.vercel.app/api/create-payment", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ amount: total, order_id: orderId })
+      body: JSON.stringify({
+        amount: total,
+        order_id: orderId,
+        return_url: "tg://web_app?start=main"
+      })
     });
     const data = await res.json();
     if (!data.payment_url) { alert("Ошибка создания платежа"); return; }
 
+    // ================= ОТКРЫВАЕМ ПЛАТЕЖ =================
     if (window.Telegram?.WebApp?.openLink) Telegram.WebApp.openLink(data.payment_url, { try_instant_view: false });
     else window.location.href = data.payment_url;
 
-    // После оплаты показываем сообщение внутри мини-аппа
-    const thankYou = document.createElement("div");
-    thankYou.style.position = "fixed";
-    thankYou.style.top = "50%";
-    thankYou.style.left = "50%";
-    thankYou.style.transform = "translate(-50%, -50%)";
-    thankYou.style.backgroundColor = "rgba(44,44,44,0.9)";
-    thankYou.style.color = "#fff";
-    thankYou.style.padding = "20px 30px";
-    thankYou.style.borderRadius = "12px";
-    thankYou.style.fontSize = "16px";
-    thankYou.style.textAlign = "center";
-    thankYou.style.cursor = "pointer";
-    thankYou.style.zIndex = 9999;
-    thankYou.innerText = "СПАСИБО ЗА ТО, ЧТО ВЫБРАЛИ CHRONICLE CHAINS! МЫ УЖЕ ПРИНЯЛИ ВАШ ЗАКАЗ И НАЧИНАЕМ ЕГО СОБИРАТЬ <3";
-    thankYou.onclick = () => document.body.removeChild(thankYou);
-    document.body.appendChild(thankYou);
+    // ================= ПОСЛЕ ОПЛАТЫ =================
+    window.addEventListener("load", ()=> {
+      if(document.body.contains(waitModal)) document.body.removeChild(waitModal);
+
+      const thankYou = document.createElement("div");
+      thankYou.style.position = "fixed";
+      thankYou.style.top = "50%";
+      thankYou.style.left = "50%";
+      thankYou.style.transform = "translate(-50%, -50%)";
+      thankYou.style.backgroundColor = "rgba(44,44,44,0.9)";
+      thankYou.style.color = "#fff";
+      thankYou.style.padding = "20px 30px";
+      thankYou.style.borderRadius = "12px";
+      thankYou.style.fontSize = "16px";
+      thankYou.style.textAlign = "center";
+      thankYou.style.cursor = "pointer";
+      thankYou.style.zIndex = 9999;
+      thankYou.innerText = "СПАСИБО ЗА ТО, ЧТО ВЫБРАЛИ CHRONICLE CHAINS! МЫ УЖЕ ПРИНЯЛИ ВАШ ЗАКАЗ И НАЧИНАЕМ ЕГО СОБИРАТЬ <3";
+      thankYou.onclick = () => document.body.removeChild(thankYou);
+      document.body.appendChild(thankYou);
+    });
 
   } catch(err) {
     console.error(err);

@@ -48,7 +48,7 @@ const products = [
   {id:7,name:"Обвес Star",price:2000,image:"https://i.pinimg.com/736x/16/36/75/163675cf410dfc51ef97238bbbab1056.jpg",category:"Обвесы",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
   {id:8,name:"Серьги Moonlight",price:2000,image:"https://i.pinimg.com/736x/93/e4/e5/93e4e5ee7594f6ef436f8b994ef04016.jpg",category:"Серьги",description:["Материал изделия:","Лунные бусины;","Хирургическая сталь;","Фурнитура из нержавеющей и хирургической стали.","","Срок изготовления — до 5 рабочих дней."]},
   {id:9,name:"Тестовый товар",price:1,image:"https://via.placeholder.com/150",category:"Тест",description:["Тестовый товар для проверки.","","Срок изготовления — 1 день."]},
-  {id:10,name:"Кольчужный топ",price:18000,image:"https://i.pinimg.com/736x/a9/95/24/a995240ff0d58266a65e1edc78c366ed.jpg",category:"Топы",description:["Материал изделия: Полностью хирургическая сталь","","Срок изготовления — до 14 рабочих дней."]}
+  {id:10,name:"Кольчужный топ",price:18000,image:"https://i.pinimg.com/736x/a9/95/24/a995240ff0d58266a65e1edc78c366ed.jpg",category:"Топы",description:["Материал изделия: Полностью хирургическая сталь","","Срок изготовления — до 14 рабочих дней."]},
 ];
 
 // ================== ФОРМА ==================
@@ -92,12 +92,6 @@ function updateOrderSum() {
   deliveryInfoEl.textContent = deliverySelectEl.value==="Самовывоз"?"Забрать заказ — Санкт-Петербург, Русановская 18к8":"";
 }
 deliverySelectEl.addEventListener("change", updateOrderSum);
-
-// ================== КОРЗИНА С ЭМОДЗИ ==================
-cartButton.innerText = "🛒";
-cartButton.style.fontSize = "32px";
-cartButton.style.position = "relative";
-cartButton.style.top = "-3px";
 
 // ================== КНОПКА ОФОРМИТЬ ЗАКАЗ ==================
 checkoutButton.onclick = () => {
@@ -219,10 +213,6 @@ function updateCartUI(){
   const t = cart.reduce((s,i)=>s+i.count*i.product.price,0);
   cartCount.textContent = c;
   cartTotal.textContent = t?"Итого: "+t+" ₽":"";
-
-Продолжение кода с оплатой и «Спасибо»:
-
-```js
   cartTotal.style.display = inCartScreen?"block":"none";
   checkoutButton.style.display = c && inCartScreen?"block":"none";
   footerButtons.style.display = inCartScreen?"none":"flex";

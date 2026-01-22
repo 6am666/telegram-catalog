@@ -76,17 +76,6 @@ $("#addressInput").suggestions({
   hint:false
 });
 
-// ================== КНОПКА КОРЗИНЫ (Эмодзи) ==================
-cartButton.style.background = "none";
-cartButton.style.border = "none";
-cartButton.style.fontSize = "28px";
-cartButton.style.display = "flex";
-cartButton.style.alignItems = "center";
-cartButton.style.justifyContent = "center";
-cartButton.style.cursor = "pointer";
-cartButton.style.padding = "0";
-cartButton.innerHTML = `🛒 <span id="cartCount">${cart.reduce((s,i)=>s+i.count,0)}</span>`;
-
 // ================== РАСЧЁТ СУММЫ ==================
 const deliverySelectEl = document.getElementById("deliverySelect");
 const deliveryInfoEl = document.getElementById("deliveryInfo");
@@ -122,6 +111,50 @@ function animateAddToCart() {
   cartButton.classList.remove("cart-pulse");
   void cartButton.offsetWidth;
   cartButton.classList.add("cart-pulse");
+}
+
+// ================== КНОПКА КОРЗИНЫ 🛒 С КРУЖКОМ ==================
+cartButton.style.position = "relative";
+cartButton.style.background = "none";
+cartButton.style.border = "none";
+cartButton.style.fontSize = "28px";
+cartButton.style.display = "flex";
+cartButton.style.alignItems = "center";
+cartButton.style.justifyContent = "center";
+cartButton.style.cursor = "pointer";
+cartButton.style.padding = "0";
+cartButton.style.lineHeight = "1";
+
+// Эмодзи корзины
+cartButton.innerHTML = `🛒<span id="cartCountCircle"></span>`;
+
+// Стили счетчика
+const style = document.createElement("style");
+style.innerHTML = `
+#cartCountCircle {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: red;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+`;
+document.head.appendChild(style);
+
+// Функция обновления счетчика
+function updateCartCounter() {
+  const c = cart.reduce((s,i)=>s+i.count,0);
+  const counter = document.getElementById("cartCountCircle");
+  if(counter) counter.textContent = c > 0 ? c : "";
 }
 
 // ================== РЕНДЕР ==================
@@ -220,12 +253,9 @@ mainTitle.onclick = ()=>{ inCartScreen = false; document.body.classList.remove("
 
 // ================== ОБНОВЛЕНИЕ КОРЗИНЫ ==================
 function updateCartUI(){
+  updateCartCounter(); // <-- обновляем новый счетчик
   const c = cart.reduce((s,i)=>s+i.count,0);
   const t = cart.reduce((s,i)=>s+i.count*i.product.price,0);
-
-  const countSpan = cartButton.querySelector("#cartCount");
-  if(countSpan) countSpan.textContent = c;
-
   cartTotal.textContent = t?"Итого: "+t+" ₽":"";
   cartTotal.style.display = inCartScreen?"block":"none";
   checkoutButton.style.display = c && inCartScreen?"block":"none";

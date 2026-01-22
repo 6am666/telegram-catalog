@@ -76,6 +76,17 @@ $("#addressInput").suggestions({
   hint:false
 });
 
+// ================== КНОПКА КОРЗИНЫ (Эмодзи) ==================
+cartButton.style.background = "none";
+cartButton.style.border = "none";
+cartButton.style.fontSize = "28px";
+cartButton.style.display = "flex";
+cartButton.style.alignItems = "center";
+cartButton.style.justifyContent = "center";
+cartButton.style.cursor = "pointer";
+cartButton.style.padding = "0";
+cartButton.innerHTML = `🛒 <span id="cartCount">${cart.reduce((s,i)=>s+i.count,0)}</span>`;
+
 // ================== РАСЧЁТ СУММЫ ==================
 const deliverySelectEl = document.getElementById("deliverySelect");
 const deliveryInfoEl = document.getElementById("deliveryInfo");
@@ -211,7 +222,10 @@ mainTitle.onclick = ()=>{ inCartScreen = false; document.body.classList.remove("
 function updateCartUI(){
   const c = cart.reduce((s,i)=>s+i.count,0);
   const t = cart.reduce((s,i)=>s+i.count*i.product.price,0);
-  cartCount.textContent = c;
+
+  const countSpan = cartButton.querySelector("#cartCount");
+  if(countSpan) countSpan.textContent = c;
+
   cartTotal.textContent = t?"Итого: "+t+" ₽":"";
   cartTotal.style.display = inCartScreen?"block":"none";
   checkoutButton.style.display = c && inCartScreen?"block":"none";

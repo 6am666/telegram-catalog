@@ -69,15 +69,6 @@ orderForm.innerHTML = `
 <button type="submit">Оплатить</button>
 `;
 
-// ================== DaData ==================
-$(function(){
-  $("#addressInput").suggestions({
-    token:"4563b9c9765a1a2d7bf39e1c8944f7fadae05970",
-    type:"ADDRESS",
-    hint:false
-  });
-});
-
 // ================== РАСЧЁТ СУММЫ ==================
 const deliverySelectEl = document.getElementById("deliverySelect");
 const deliveryInfoEl = document.getElementById("deliveryInfo");
@@ -85,7 +76,7 @@ const orderSumEl = document.getElementById("orderSum");
 function updateOrderSum() {
   let total = cart.reduce((s,i)=>s+i.count*i.product.price,0);
   let deliveryCost = 0;
-  switch (deliverySelectEl.value){
+  switch(deliverySelectEl.value){
     case "СДЭК": deliveryCost = 450; break;
     case "Почта России": deliveryCost = 550; break;
     case "Яндекс.Доставка": deliveryCost = 400; break;
@@ -241,106 +232,92 @@ document.addEventListener("click", (e)=>{ if(!categoriesEl.contains(e.target) &&
 searchInput.oninput = ()=>{
   const val = searchInput.value.toLowerCase();
   const filtered = getCurrentList().filter(p=>p.name.toLowerCase().includes(val));
-  renderProducts(filtered); // фон не трогаем — остаётся как на главной
+  renderProducts(filtered);
 };
 
 // ================== GET LIST ==================
 function getCurrentList(){ if(inCartScreen) return cart.map(i=>i.product); if(currentCategory==="Главная") return products; return products.filter(p=>p.category===currentCategory); }
 
 // ================== ОПЛАТА ==================
-orderForm.onsubmit = async (e) => {
+orderForm.onsubmit = (e) => {
   e.preventDefault();
   if (isSubmitting) return;
   if (!cart.length) { alert("Корзина пуста"); return; }
   isSubmitting = true;
 
-  try {
-    if (window.Telegram?.WebApp) Telegram.WebApp.ready();
+  // ================= МОДАЛКА ОЖИДАНИЯ =================
+  const waitModal = document.createElement("div");
+  waitModal.style.position = "fixed";
+  waitModal.style.top = "0";
+  waitModal.style.left = "0";
+  waitModal.style.width = "100%";
+  waitModal.style.height = "100%";
+  waitModal.style.backgroundColor = "rgba(44,44,44,0.95)";
+  waitModal.style.color = "#fff";
+  waitModal.style.display = "flex";
+  waitModal.style.flexDirection = "column";
+  waitModal.style.alignItems = "center";
+  waitModal.style.justifyContent = "center";
+  waitModal.style.fontSize = "16px";
+  waitModal.style.textAlign = "center";
+  waitModal.style.zIndex = 9999;
+  waitModal.style.pointerEvents = "auto";
+  waitModal.innerHTML = `
+    <div style="margin-bottom:5px; font-weight:600;">Переносим вас на оплату</div>
+    <div>Пожалуйста, подождите пару секунд...</div>
+  `;
+  document.body.appendChild(waitModal);
 
-    // ================= МОДАЛКА ОЖИДАНИЯ =================
-    const waitModal = document.createElement("div");
-    waitModal.style.position = "fixed";
-    waitModal.style.top = "0";
-    waitModal.style.left = "0";
-    waitModal.style.width = "100%";
-    waitModal.style.height = "100%";
-    waitModal.style.backgroundColor = "rgba(44,44,44,0.9)";
-    waitModal.style.color = "#fff";
-    waitModal.style.display = "flex";
-    waitModal.style.flexDirection = "column";
-    waitModal.style.alignItems = "center";
-    waitModal.style.justifyContent = "center";
-    waitModal.style.textAlign = "center";
-    waitModal.style.fontSize = "16px";
-    waitModal.style.zIndex = 9999;
-    waitModal.style.pointerEvents = "auto"; // блокирует все клики
-    waitModal.innerHTML = `<div style="margin-bottom:5px; font-weight:600;">Переносим вас на страницу оплаты</div><div>Пожалуйста, подождите пару секунд...</div>`;
-    document.body.appendChild(waitModal);
+  // ================= ОТПРАВКА ЗАКАЗА В TELEGRAM =================
+  const fd = new FormData(orderForm);
+  let deliveryCost = 0;
+  switch (fd.get("delivery")) {
+    case "СДЭК": deliveryCost = 450; break;
+    case "Почта России": deliveryCost = 550; break;
+    case "Яндекс.Доставка": deliveryCost = 400; break;
+  }
+  const total = cart.reduce((s,i)=>s+i.count*i.product.price,0) + deliveryCost;
 
-    // ================= СОБИРАЕМ ДАННЫЕ ЗАКАЗА =================
-    const fd = new FormData(orderForm);
-    let deliveryCost = 0;
-    switch (fd.get("delivery")) {
-      case "СДЭК": deliveryCost = 450; break;
-      case "Почта России": deliveryCost = 550; break;
-      case "Яндекс.Доставка": deliveryCost = 400; break;
-    }
-    const total = cart.reduce((s, i) => s + i.count * i.product.price, 0) + deliveryCost;
-    const orderId = Date.now();
+  sendTelegramOrder({
+    fullname: fd.get("fullname"),
+    phone: fd.get("phone"),
+    telegram: fd.get("telegram"),
+    delivery: fd.get("delivery"),
+    address: fd.get("address"),
+    products: cart.map(i=>`• ${i.product.name} x${i.count}`).join("\n"),
+    total
+  });
 
-    sendTelegramOrder({
-      fullname: fd.get("fullname"),
-      phone: fd.get("phone"),
-      telegram: fd.get("telegram"),
-      delivery: fd.get("delivery"),
-      address: fd.get("address"),
-      products: cart.map(i => `• ${i.product.name} x${i.count}`).join("\n"),
-      total
-    });
+  // ================= ЧЕРЕЗ 10 СЕКУНД ПОЯВЛЯЕТСЯ СПАСИБО =================
+  setTimeout(() => {
+    if(document.body.contains(waitModal)) document.body.removeChild(waitModal);
 
-    // ================= СОЗДАЕМ ПЛАТЕЖ =================
-    const res = await fetch("https://telegram-catalog-alpha.vercel.app/api/create-payment", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        amount: total,
-        order_id: orderId,
-        return_url: "tg://web_app?start=main"
-      })
-    });
-    const data = await res.json();
-    if (!data.payment_url) { alert("Ошибка создания платежа"); return; }
+    const thankModal = document.createElement("div");
+    thankModal.style.position = "fixed";
+    thankModal.style.top = "0";
+    thankModal.style.left = "0";
+    thankModal.style.width = "100%";
+    thankModal.style.height = "100%";
+    thankModal.style.backgroundColor = "rgba(44,44,44,0.95)";
+    thankModal.style.color = "#fff";
+    thankModal.style.display = "flex";
+    thankModal.style.alignItems = "center";
+    thankModal.style.justifyContent = "center";
+    thankModal.style.fontSize = "18px";
+    thankModal.style.textAlign = "center";
+    thankModal.style.padding = "20px";
+    thankModal.style.zIndex = 9999;
+    thankModal.style.cursor = "pointer";
+    thankModal.style.flexDirection = "column";
+    thankModal.innerText = "СПАСИБО ЗА ВЫБОР CHRONICLE CHAINS!\nМЫ УЖЕ ПРИНЯЛИ ВАШ ЗАКАЗ И НАЧИНАЕМ ЕГО СОБИРАТЬ <3";
 
-    // ================= ОТКРЫВАЕМ ПЛАТЕЖ =================
-    if (window.Telegram?.WebApp?.openLink) Telegram.WebApp.openLink(data.payment_url, { try_instant_view: false });
-    else window.location.href = data.payment_url;
+    thankModal.onclick = () => {
+      document.body.removeChild(thankModal);
+      isSubmitting = false;
+    };
 
-    // ================= ПОСЛЕ ОПЛАТЫ =================
-    window.addEventListener("load", ()=> {
-      if(document.body.contains(waitModal)) document.body.removeChild(waitModal);
-
-      const thankYou = document.createElement("div");
-      thankYou.style.position = "fixed";
-      thankYou.style.top = "50%";
-      thankYou.style.left = "50%";
-      thankYou.style.transform = "translate(-50%, -50%)";
-      thankYou.style.backgroundColor = "rgba(44,44,44,0.9)";
-      thankYou.style.color = "#fff";
-      thankYou.style.padding = "20px 30px";
-      thankYou.style.borderRadius = "12px";
-      thankYou.style.fontSize = "16px";
-      thankYou.style.textAlign = "center";
-      thankYou.style.cursor = "pointer";
-      thankYou.style.zIndex = 9999;
-      thankYou.innerText = "СПАСИБО ЗА ТО, ЧТО ВЫБРАЛИ CHRONICLE CHAINS! МЫ УЖЕ ПРИНЯЛИ ВАШ ЗАКАЗ И НАЧИНАЕМ ЕГО СОБИРАТЬ <3";
-      thankYou.onclick = () => document.body.removeChild(thankYou);
-      document.body.appendChild(thankYou);
-    });
-
-  } catch(err) {
-    console.error(err);
-    alert("Ошибка при оплате");
-  } finally { isSubmitting = false; }
+    document.body.appendChild(thankModal);
+  }, 10000);
 };
 
 // ================== СТАРТ ==================

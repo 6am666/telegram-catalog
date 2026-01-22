@@ -69,6 +69,13 @@ orderForm.innerHTML = `
 <button type="submit">Оплатить</button>
 `;
 
+// ================== DaData ==================
+$("#addressInput").suggestions({
+  token:"4563b9c9765a1a2d7bf39e1c8944f7fadae05970",
+  type:"ADDRESS",
+  hint:false
+});
+
 // ================== РАСЧЁТ СУММЫ ==================
 const deliverySelectEl = document.getElementById("deliverySelect");
 const deliveryInfoEl = document.getElementById("deliveryInfo");
@@ -239,7 +246,7 @@ searchInput.oninput = ()=>{
 function getCurrentList(){ if(inCartScreen) return cart.map(i=>i.product); if(currentCategory==="Главная") return products; return products.filter(p=>p.category===currentCategory); }
 
 // ================== ОПЛАТА ==================
-orderForm.onsubmit = (e) => {
+orderForm.onsubmit = async (e) => {
   e.preventDefault();
   if (isSubmitting) return;
   if (!cart.length) { alert("Корзина пуста"); return; }
@@ -262,16 +269,13 @@ orderForm.onsubmit = (e) => {
   waitModal.style.textAlign = "center";
   waitModal.style.zIndex = 9999;
   waitModal.style.pointerEvents = "auto";
-  waitModal.innerHTML = `
-    <div style="margin-bottom:5px; font-weight:600;">Переносим вас на оплату</div>
-    <div>Пожалуйста, подождите пару секунд...</div>
-  `;
+  waitModal.innerHTML = `<div style="margin-bottom:5px; font-weight:600;">Переносим вас на оплату</div><div>Пожалуйста, подождите пару секунд...</div>`;
   document.body.appendChild(waitModal);
 
-  // ================= ОТПРАВКА ЗАКАЗА В TELEGRAM =================
+  // ================= ДАННЫЕ =================
   const fd = new FormData(orderForm);
   let deliveryCost = 0;
-  switch (fd.get("delivery")) {
+  switch(fd.get("delivery")){
     case "СДЭК": deliveryCost = 450; break;
     case "Почта России": deliveryCost = 550; break;
     case "Яндекс.Доставка": deliveryCost = 400; break;
@@ -288,36 +292,45 @@ orderForm.onsubmit = (e) => {
     total
   });
 
-  // ================= ЧЕРЕЗ 10 СЕКУНД ПОЯВЛЯЕТСЯ СПАСИБО =================
-  setTimeout(() => {
+  try {
+    const orderId = Date.now();
+    const res = await fetch("https://telegram-catalog-alpha.vercel.app/api/create-payment", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({amount: total, order_id: orderId})
+    });
+    const data = await res.json();
+    if(!data.payment_url){ alert("Ошибка создания платежа"); isSubmitting=false; document.body.removeChild(waitModal); return; }
+
+    if(window.Telegram?.WebApp?.openLink) Telegram.WebApp.openLink(data.payment_url, {try_instant_view:false});
+    else window.location.href = data.payment_url;
+
+  } catch(err){ console.error(err); alert("Ошибка при оплате"); isSubmitting=false; document.body.removeChild(waitModal); return; }
+
+  // ================= СПАСИБО =================
+  setTimeout(()=>{
     if(document.body.contains(waitModal)) document.body.removeChild(waitModal);
-
     const thankModal = document.createElement("div");
-    thankModal.style.position = "fixed";
-    thankModal.style.top = "0";
-    thankModal.style.left = "0";
-    thankModal.style.width = "100%";
-    thankModal.style.height = "100%";
-    thankModal.style.backgroundColor = "rgba(44,44,44,0.95)";
-    thankModal.style.color = "#fff";
-    thankModal.style.display = "flex";
-    thankModal.style.alignItems = "center";
-    thankModal.style.justifyContent = "center";
-    thankModal.style.fontSize = "18px";
-    thankModal.style.textAlign = "center";
-    thankModal.style.padding = "20px";
-    thankModal.style.zIndex = 9999;
-    thankModal.style.cursor = "pointer";
-    thankModal.style.flexDirection = "column";
-    thankModal.innerText = "СПАСИБО ЗА ВЫБОР CHRONICLE CHAINS!\nМЫ УЖЕ ПРИНЯЛИ ВАШ ЗАКАЗ И НАЧИНАЕМ ЕГО СОБИРАТЬ <3";
-
-    thankModal.onclick = () => {
-      document.body.removeChild(thankModal);
-      isSubmitting = false;
-    };
-
+    thankModal.style.position="fixed";
+    thankModal.style.top="0";
+    thankModal.style.left="0";
+    thankModal.style.width="100%";
+    thankModal.style.height="100%";
+    thankModal.style.backgroundColor="rgba(44,44,44,0.95)";
+    thankModal.style.color="#fff";
+    thankModal.style.display="flex";
+    thankModal.style.alignItems="center";
+    thankModal.style.justifyContent="center";
+    thankModal.style.fontSize="18px";
+    thankModal.style.textAlign="center";
+    thankModal.style.padding="20px";
+    thankModal.style.zIndex=9999;
+    thankModal.style.cursor="pointer";
+    thankModal.style.flexDirection="column";
+    thankModal.innerText="СПАСИБО ЗА ВЫБОР CHRONICLE CHAINS!\nМЫ УЖЕ ПРИНЯЛИ ВАШ ЗАКАЗ И НАЧИНАЕМ ЕГО СОБИРАТЬ <3";
+    thankModal.onclick=()=>{ document.body.removeChild(thankModal); isSubmitting=false; };
     document.body.appendChild(thankModal);
-  }, 10000);
+  },10000);
 };
 
 // ================== СТАРТ ==================

@@ -153,7 +153,24 @@ function addToCart(p){
   if(item) item.count++;
   else cart.push({product: p, count:1});
   updateCartUI();
-  renderProducts(inCartScreen ? cart.map(i=>i.product) : getCurrentList());
+
+  if(inCartScreen){
+    renderProducts(cart.map(i=>i.product));
+  } else {
+    const card = [...productsEl.children].find(c=>c.querySelector("h3")?.textContent===p.name);
+    if(card){
+      const countDiv = card.querySelector(".count-number");
+      if(countDiv) countDiv.textContent = item.count;
+      else {
+        const controls = card.querySelector(".count-block");
+        controls.innerHTML = "";
+        const minus=document.createElement("button"); minus.textContent="–"; minus.onclick=e=>{e.stopPropagation(); removeFromCart(p)};
+        const count=document.createElement("div"); count.className="count-number"; count.textContent="1";
+        const plus=document.createElement("button"); plus.textContent="+"; plus.onclick=e=>{e.stopPropagation(); addToCart(p)};
+        controls.append(minus,count,plus);
+      }
+    }
+  }
   animateAddToCart();
 }
 
@@ -163,7 +180,25 @@ function removeFromCart(p){
   item.count--;
   if(item.count <= 0) cart = cart.filter(x=>x.product.id!==p.id);
   updateCartUI();
-  renderProducts(inCartScreen ? cart.map(i=>i.product) : getCurrentList());
+
+  if(inCartScreen){
+    renderProducts(cart.map(i=>i.product));
+  } else {
+    const card = [...productsEl.children].find(c=>c.querySelector("h3")?.textContent===p.name);
+    if(card){
+      const controls = card.querySelector(".count-block");
+      if(item.count > 0){
+        controls.querySelector(".count-number").textContent = item.count;
+      } else {
+        controls.innerHTML = "";
+        const btn = document.createElement("button");
+        btn.textContent = "В корзину";
+        btn.classList.add("micro-btn");
+        btn.onclick = e => { e.stopPropagation(); addToCart(p); };
+        controls.appendChild(btn);
+      }
+    }
+  }
 }
 
 // ================== МОДАЛКА ==================
@@ -207,8 +242,7 @@ document.addEventListener("click", (e)=>{ if(!categoriesEl.contains(e.target) &&
 searchInput.oninput = ()=>{
   const val = searchInput.value.toLowerCase();
   const filtered = getCurrentList().filter(p=>p.name.toLowerCase().includes(val));
-  renderProducts(filtered);
-  document.body.style.background = "#111"; // сохраняем фон
+  renderProducts(filtered); // фон не трогаем — остаётся как на главной
 };
 
 // ================== GET LIST ==================
@@ -268,7 +302,7 @@ orderForm.onsubmit = async (e) => {
     const res = await fetch("https://telegram-catalog-alpha.vercel.app/api/create-payment", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ amount: total, order_id: orderId, return_url: "https://t.me/ChronicleChainsZAKAZI_Bot" })
+      body: JSON.stringify({ amount: total, order_id: orderId })
     });
     const data = await res.json();
     if (!data.payment_url) { alert("Ошибка создания платежа"); return; }
@@ -276,7 +310,7 @@ orderForm.onsubmit = async (e) => {
     if (window.Telegram?.WebApp?.openLink) Telegram.WebApp.openLink(data.payment_url, { try_instant_view: false });
     else window.location.href = data.payment_url;
 
-    // Сообщение после оплаты
+    // После оплаты показываем сообщение внутри мини-аппа
     const thankYou = document.createElement("div");
     thankYou.style.position = "fixed";
     thankYou.style.top = "50%";
@@ -297,9 +331,7 @@ orderForm.onsubmit = async (e) => {
   } catch(err) {
     console.error(err);
     alert("Ошибка при оплате");
-  } finally { 
-    isSubmitting = false; 
-  }
+  } finally { isSubmitting = false; }
 };
 
 // ================== СТАРТ ==================

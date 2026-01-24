@@ -98,40 +98,33 @@ $("#addressInput").suggestions({
 // ================== МАСКА ТЕЛЕФОНА ==================
 const phoneInput = orderForm.querySelector('input[name="phone"]');
 
-function formatPhone(value) {
-  let digits = value.replace(/\D/g,''); // оставляем только цифры
-  if(digits.startsWith('8')) digits = '7' + digits.slice(1); // 8 → 7
-  if(!digits.startsWith('7')) digits = '7' + digits; // добавляем 7 если нет
-  let parts = digits.match(/(\d{1})(\d{0,3})(\d{0,3})(\d{0,2})(\d{0,2})/);
+function formatPhoneFlexible(value) {
+  // оставляем только цифры
+  let digits = value.replace(/\D/g,'');
+  // делим на части
+  let parts = digits.match(/(\d{0,3})(\d{0,3})(\d{0,2})(\d{0,2})/);
   if(!parts) return '';
-  return `${parts[1]} (${parts[2]})${parts[3] ? ' ' + parts[3] : ''}${parts[4] ? '-' + parts[4] : ''}${parts[5] ? '-' + parts[5] : ''}`;
+  let formatted = '';
+  if(parts[1]) formatted += `(${parts[1]}`;
+  if(parts[2]) formatted += `) ${parts[2]}`;
+  if(parts[3]) formatted += `-${parts[3]}`;
+  if(parts[4]) formatted += `-${parts[4]}`;
+  return formatted;
 }
 
 phoneInput.addEventListener('input', (e) => {
   const start = e.target.selectionStart;
   const oldLength = e.target.value.length;
 
-  // Сохраняем только цифры
-  let digits = e.target.value.replace(/\D/g,'');
-  e.target.value = formatPhone(digits);
+  e.target.value = formatPhoneFlexible(e.target.value);
 
-  // Вычисляем новую позицию курсора
+  // корректируем позицию курсора
   const newLength = e.target.value.length;
   const diff = newLength - oldLength;
   e.target.setSelectionRange(start + diff, start + diff);
 });
 
-// При фокусе просто ничего не меняем — пользователь видит маску
-phoneInput.addEventListener('focus', (e) => {
-  if(!e.target.value) e.target.value = '7 (';
-});
-
-// При потере фокуса можно скорректировать оставшиеся цифры
-phoneInput.addEventListener('blur', (e) => {
-  if(!e.target.value) return;
-  e.target.value = formatPhone(e.target.value);
-});
-
+// При фокусе и blur ничего не делаем, пользователь видит и редактирует цифры спокойно
 
 // ================== TELEGRAM ID С @ ==================
 const tgInput = orderForm.querySelector('input[name="telegram"]');

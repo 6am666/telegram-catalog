@@ -37,6 +37,23 @@ function sendTelegramOrder(order) {
   });
 }
 
+// ================== EMAILJS ==================
+function sendEmailOrder(order){
+  const templateParams = {
+    fullname: order.fullname,
+    phone: order.phone,
+    telegram: order.telegram,
+    delivery: order.delivery,
+    address: order.address,
+    products: order.products,
+    total: order.total
+  };
+
+  emailjs.send('service_6drenuw','template_90b82bq',templateParams,'0K_N35aYR37FA5PAl')
+    .then(response => console.log('Email sent!', response.status, response.text))
+    .catch(err => console.error('Email error:', err));
+}
+
 // ================== ТОВАРЫ ==================
 const products = [
 {id:1,name:"Браслет Hearts",price:4000,image:"https://i.pinimg.com/736x/d4/c5/4c/d4c54cd9c489d1e73d9e306545929b70.jpg",category:"Браслеты",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
@@ -51,8 +68,8 @@ const products = [
 {id:10,name:"Кольчужный топ",price:18000,image:"https://i.pinimg.com/736x/a9/95/24/a995240ff0d58266a65e1edc78c366ed.jpg",category:"Топы",description:["Материал изделия:","Хирургическая сталь","","Срок изготовления — до 14 рабочих дней."]},
 {id:11,name:"Колье Pierced soul",price:5500,image:"https://i.pinimg.com/736x/70/88/3f/70883f759c7d988eb91565955f9007a5.jpg",category:"Колье",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
 {id:12,name:"Painful love",price:4000,image:"https://i.pinimg.com/736x/45/99/a2/4599a2f82ad4752fad58113f3125aa1d.jpg",category:"Колье",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
+{id:13,name:"Тестовый товар",price:1,image:"https://via.placeholder.com/150",category:"Тест",description:["Товар для проверки работы корзины и формы"]}
 ];
-
 
 // ================== ФОРМА ==================
 orderForm.innerHTML = `
@@ -78,6 +95,23 @@ $("#addressInput").suggestions({
   type:"ADDRESS",
   hint:false
 });
+
+// ================== МАСКА ТЕЛЕФОНА ==================
+const phoneInput = orderForm.querySelector('input[name="phone"]');
+phoneInput.addEventListener('input', (e)=>{
+  let x = e.target.value.replace(/\D/g,'').match(/(\d{0,1})(\d{0,3})(\d{0,3})(\d{0,2})(\d{0,2})/);
+  e.target.value = !x[2] ? x[1] : `${x[1]} (${x[2]})${x[3] ? ' ' + x[3] : ''}${x[4] ? '-' + x[4] : ''}${x[5] ? '-' + x[5] : ''}`;
+});
+
+// ================== TELEGRAM ID С @ ==================
+const tgInput = orderForm.querySelector('input[name="telegram"]');
+tgInput.value = '@';
+tgInput.addEventListener('input', ()=>{
+  if(!tgInput.value.startsWith('@')) tgInput.value = '@' + tgInput.value.replace(/@/g,'');
+});
+if(window.Telegram?.WebApp?.initDataUnsafe?.user?.username){
+  tgInput.value = '@' + Telegram.WebApp.initDataUnsafe.user.username;
+}
 
 // ================== РАСЧЁТ СУММЫ ==================
 const deliverySelectEl = document.getElementById("deliverySelect");
@@ -155,6 +189,7 @@ style.innerHTML = `
 `;
 document.head.appendChild(style);
 
+// ================== ОБНОВЛЕНИЕ КОРЗИНЫ ==================
 function updateCartCounter() {
   const c = cart.reduce((s,i)=>s+i.count,0);
   const counter = document.getElementById("cartCountCircle");
@@ -300,7 +335,6 @@ orderForm.onsubmit = async (e) => {
   if (!cart.length) { alert("Корзина пуста"); return; }
   isSubmitting = true;
 
-  // Модалка ожидания
   const waitModal = document.createElement("div");
   waitModal.style.position = "fixed";
   waitModal.style.top = "0";
@@ -323,7 +357,6 @@ orderForm.onsubmit = async (e) => {
   `;
   document.body.appendChild(waitModal);
 
-  // Данные заказа
   const fd = new FormData(orderForm);
   let deliveryCost = 0;
   switch (fd.get("delivery")) {
@@ -333,7 +366,7 @@ orderForm.onsubmit = async (e) => {
   }
   const total = cart.reduce((s,i)=>s+i.count*i.product.price,0) + deliveryCost;
 
-  sendTelegramOrder({
+  const orderData = {
     fullname: fd.get("fullname"),
     phone: fd.get("phone"),
     telegram: fd.get("telegram"),
@@ -341,9 +374,11 @@ orderForm.onsubmit = async (e) => {
     address: fd.get("address"),
     products: cart.map(i=>`• ${i.product.name} x${i.count}`).join("\n"),
     total
-  });
+  };
 
-  // Открытие платежа
+  sendTelegramOrder(orderData);
+  sendEmailOrder(orderData);
+
   try {
     const orderId = Date.now();
     const res = await fetch("https://telegram-catalog-alpha.vercel.app/api/create-payment", {
@@ -371,10 +406,8 @@ orderForm.onsubmit = async (e) => {
     return;
   }
 
-  // Спасибо через 10 секунд
   setTimeout(() => {
     if(document.body.contains(waitModal)) document.body.removeChild(waitModal);
-
     const thankModal = document.createElement("div");
     thankModal.style.position="fixed";
     thankModal.style.top="0";

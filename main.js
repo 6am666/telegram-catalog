@@ -98,30 +98,38 @@ $("#addressInput").suggestions({
 // ================== МАСКА ТЕЛЕФОНА ==================
 const phoneInput = orderForm.querySelector('input[name="phone"]');
 
-// Ввод: оставляем только цифры
+function formatPhone(value) {
+  let digits = value.replace(/\D/g,''); // оставляем только цифры
+  if(digits.startsWith('8')) digits = '7' + digits.slice(1); // 8 → 7
+  if(!digits.startsWith('7')) digits = '7' + digits; // добавляем 7 если нет
+  let parts = digits.match(/(\d{1})(\d{0,3})(\d{0,3})(\d{0,2})(\d{0,2})/);
+  if(!parts) return '';
+  return `${parts[1]} (${parts[2]})${parts[3] ? ' ' + parts[3] : ''}${parts[4] ? '-' + parts[4] : ''}${parts[5] ? '-' + parts[5] : ''}`;
+}
+
 phoneInput.addEventListener('input', (e) => {
-  let cursorPos = e.target.selectionStart;
-  let cleaned = e.target.value.replace(/\D/g, '');
-  e.target.value = cleaned;
-  e.target.setSelectionRange(cursorPos, cursorPos);
+  const start = e.target.selectionStart;
+  const oldLength = e.target.value.length;
+
+  // Сохраняем только цифры
+  let digits = e.target.value.replace(/\D/g,'');
+  e.target.value = formatPhone(digits);
+
+  // Вычисляем новую позицию курсора
+  const newLength = e.target.value.length;
+  const diff = newLength - oldLength;
+  e.target.setSelectionRange(start + diff, start + diff);
 });
 
-// Фокус: снимаем маску, оставляем только цифры
+// При фокусе просто ничего не меняем — пользователь видит маску
 phoneInput.addEventListener('focus', (e) => {
-  let digits = e.target.value.replace(/\D/g,'');
-  if(digits.startsWith('7')) e.target.value = digits;
-  else if(digits.startsWith('8')) e.target.value = '7' + digits.slice(1);
-  else if(digits.length > 0) e.target.value = '7' + digits;
-  else e.target.value = '';
+  if(!e.target.value) e.target.value = '7 (';
 });
 
-// Потеря фокуса: форматируем красиво
+// При потере фокуса можно скорректировать оставшиеся цифры
 phoneInput.addEventListener('blur', (e) => {
-  let digits = e.target.value.replace(/\D/g,'');
-  if(!digits) return;
-  if(!digits.startsWith('7')) digits = '7' + digits;
-  let x = digits.match(/(\d{1})(\d{0,3})(\d{0,3})(\d{0,2})(\d{0,2})/);
-  e.target.value = `${x[1]} (${x[2]})${x[3] ? ' ' + x[3] : ''}${x[4] ? '-' + x[4] : ''}${x[5] ? '-' + x[5] : ''}`;
+  if(!e.target.value) return;
+  e.target.value = formatPhone(e.target.value);
 });
 
 

@@ -97,10 +97,33 @@ $("#addressInput").suggestions({
 
 // ================== МАСКА ТЕЛЕФОНА ==================
 const phoneInput = orderForm.querySelector('input[name="phone"]');
-phoneInput.addEventListener('input', (e)=>{
-  let x = e.target.value.replace(/\D/g,'').match(/(\d{0,1})(\d{0,3})(\d{0,3})(\d{0,2})(\d{0,2})/);
-  e.target.value = !x[2] ? x[1] : `${x[1]} (${x[2]})${x[3] ? ' ' + x[3] : ''}${x[4] ? '-' + x[4] : ''}${x[5] ? '-' + x[5] : ''}`;
+
+// Ввод: оставляем только цифры
+phoneInput.addEventListener('input', (e) => {
+  let cursorPos = e.target.selectionStart;
+  let cleaned = e.target.value.replace(/\D/g, '');
+  e.target.value = cleaned;
+  e.target.setSelectionRange(cursorPos, cursorPos);
 });
+
+// Фокус: снимаем маску, оставляем только цифры
+phoneInput.addEventListener('focus', (e) => {
+  let digits = e.target.value.replace(/\D/g,'');
+  if(digits.startsWith('7')) e.target.value = digits;
+  else if(digits.startsWith('8')) e.target.value = '7' + digits.slice(1);
+  else if(digits.length > 0) e.target.value = '7' + digits;
+  else e.target.value = '';
+});
+
+// Потеря фокуса: форматируем красиво
+phoneInput.addEventListener('blur', (e) => {
+  let digits = e.target.value.replace(/\D/g,'');
+  if(!digits) return;
+  if(!digits.startsWith('7')) digits = '7' + digits;
+  let x = digits.match(/(\d{1})(\d{0,3})(\d{0,3})(\d{0,2})(\d{0,2})/);
+  e.target.value = `${x[1]} (${x[2]})${x[3] ? ' ' + x[3] : ''}${x[4] ? '-' + x[4] : ''}${x[5] ? '-' + x[5] : ''}`;
+});
+
 
 // ================== TELEGRAM ID С @ ==================
 const tgInput = orderForm.querySelector('input[name="telegram"]');

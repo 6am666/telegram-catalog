@@ -98,18 +98,22 @@ $("#addressInput").suggestions({
 // ================== МАСКА ТЕЛЕФОНА ==================
 const phoneInput = orderForm.querySelector('input[name="phone"]');
 
-function formatPhoneUserCode(value) {
+function formatPhoneFlexible(value) {
   // оставляем только цифры
   let digits = value.replace(/\D/g,'');
-  // делим на части (без авто‑подстановки кода страны)
+  if(!digits) return '';
+
+  // части номера
   let parts = digits.match(/(\d{0,1})(\d{0,3})(\d{0,3})(\d{0,2})(\d{0,2})/);
   if(!parts) return '';
+
   let formatted = '';
-  if(parts[1]) formatted += parts[1];            // первая цифра — пользовательский код
-  if(parts[2]) formatted += ` (${parts[2]})`;   // следующая группа — скобки
-  if(parts[3]) formatted += ` ${parts[3]}`;     // основная часть номера
+  if(parts[1]) formatted += parts[1];          // код страны или первая цифра
+  if(parts[2]) formatted += ` (${parts[2]}`;  // открывающая скобка только если есть цифры внутри
+  if(parts[3]) formatted += `) ${parts[3]}`;  // закрывающая скобка только если есть следующая группа
   if(parts[4]) formatted += `-${parts[4]}`;
   if(parts[5]) formatted += `-${parts[5]}`;
+
   return formatted;
 }
 
@@ -117,9 +121,8 @@ phoneInput.addEventListener('input', (e) => {
   const start = e.target.selectionStart;
   const oldLength = e.target.value.length;
 
-  e.target.value = formatPhoneUserCode(e.target.value);
+  e.target.value = formatPhoneFlexible(e.target.value);
 
-  // корректируем позицию курсора
   const newLength = e.target.value.length;
   const diff = newLength - oldLength;
   e.target.setSelectionRange(start + diff, start + diff);

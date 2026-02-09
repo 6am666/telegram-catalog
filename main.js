@@ -28,7 +28,7 @@ const orderForm = document.getElementById("orderForm");
 
 // ================== ПРОМОКОДЫ ==================
 const promoCodes = {
-  "Love69": 10 // 10% скидка
+  "Valentine'sDay": 10 // 10% скидка
 };
 let appliedPromo = null; // текущий примененный промокод
 

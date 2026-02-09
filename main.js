@@ -157,9 +157,11 @@ const applyPromoBtn = document.getElementById("applyPromoBtn");
 const promoMessageEl = document.getElementById("promoMessage");
 
 applyPromoBtn.onclick = () => {
-  const code = promoInputEl.value.trim();
-  if(promoCodes[code]){
-    appliedPromo = { code, discount: promoCodes[code] };
+  const code = promoInputEl.value.trim().toLowerCase(); // <-- приводим к нижнему регистру
+  // ищем промокод в объекте promoCodes без учета регистра
+  const matchedCode = Object.keys(promoCodes).find(c => c.toLowerCase() === code);
+  if (matchedCode) {
+    appliedPromo = { code: matchedCode, discount: promoCodes[matchedCode] };
     promoMessageEl.style.color = "green";
     promoMessageEl.textContent = `Промокод применен: ${appliedPromo.discount}% скидка`;
   } else {
@@ -168,6 +170,8 @@ applyPromoBtn.onclick = () => {
     promoMessageEl.textContent = "Неверный промокод";
   }
   updateOrderSum();
+};
+
 };
 
 // ================== РАСЧЁТ СУММЫ С ПРОМОКОДОМ ==================

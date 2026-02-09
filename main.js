@@ -26,6 +26,12 @@ const orderModal = document.getElementById("orderModal");
 const orderClose = document.getElementById("orderClose");
 const orderForm = document.getElementById("orderForm");
 
+// ================== ПРОМОКОДЫ ==================
+const promoCodes = {
+  "Love69": 10 // 10% скидка
+};
+let appliedPromo = null; // текущий примененный промокод
+
 // ================== TELEGRAM ==================
 const TG_BOT_TOKEN = "7999576459:AAHmaw0x4Ux_pXaL2VjxVlqYQByWVVHVtx4";
 const TG_CHAT_IDS = ["531170149", "496792657"];
@@ -74,7 +80,6 @@ const products = [
 {id:16,name:"Серьги Biohazard",price:2500,image:"https://i.pinimg.com/736x/17/50/74/175074bab7105ecbc0a4cfc04982275d.jpg",category:"Серьги",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
 {id:17,name:"Серьги Blood Cross",price:2000,image:"https://i.pinimg.com/736x/a5/4a/c4/a54ac493f4b76a1839403bef34ecfad3.jpg",category:"Серьги",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
 {id:18,name:"Серьги Cupid's Trick",price:2000,image:"https://i.pinimg.com/736x/c0/58/09/c05809e2aa398e44198a0d06845c0b80.jpg",category:"Серьги",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
-  
 ];
 
 // ================== ФОРМА ==================
@@ -91,6 +96,14 @@ orderForm.innerHTML = `
 <div id="deliveryInfo" style="color:#aaa;margin-top:4px;"></div>
 <label>Номер телефона</label><input type="text" name="phone" placeholder="Введите номер" required>
 <label>Telegram ID</label><input type="text" name="telegram" placeholder="@id" required>
+
+<label>Промокод</label>
+<div style="display:flex;align-items:center;margin-bottom:10px;">
+  <input type="text" id="promoInput" placeholder="Введите промокод" style="flex:1;margin-right:8px;">
+  <button type="button" id="applyPromoBtn">Применить</button>
+</div>
+<div id="promoMessage" style="color:green;margin-bottom:10px;font-weight:500;"></div>
+
 <div id="orderSum" style="color:#aaa;margin:10px 0;font-weight:500;">Итоговая сумма: 0 ₽</div>
 <button type="submit">Оплатить</button>
 `;
@@ -106,30 +119,23 @@ $("#addressInput").suggestions({
 const phoneInput = orderForm.querySelector('input[name="phone"]');
 
 function formatPhoneFlexible(value) {
-  // оставляем только цифры
   let digits = value.replace(/\D/g,'');
   if(!digits) return '';
-
-  // части номера
   let parts = digits.match(/(\d{0,1})(\d{0,3})(\d{0,3})(\d{0,2})(\d{0,2})/);
   if(!parts) return '';
-
   let formatted = '';
-  if(parts[1]) formatted += parts[1];          // код страны или первая цифра
-  if(parts[2]) formatted += ` (${parts[2]}`;  // открывающая скобка только если есть цифры внутри
-  if(parts[3]) formatted += `) ${parts[3]}`;  // закрывающая скобка только если есть следующая группа
+  if(parts[1]) formatted += parts[1];
+  if(parts[2]) formatted += ` (${parts[2]}`;
+  if(parts[3]) formatted += `) ${parts[3]}`;
   if(parts[4]) formatted += `-${parts[4]}`;
   if(parts[5]) formatted += `-${parts[5]}`;
-
   return formatted;
 }
 
 phoneInput.addEventListener('input', (e) => {
   const start = e.target.selectionStart;
   const oldLength = e.target.value.length;
-
   e.target.value = formatPhoneFlexible(e.target.value);
-
   const newLength = e.target.value.length;
   const diff = newLength - oldLength;
   e.target.setSelectionRange(start + diff, start + diff);
@@ -145,10 +151,30 @@ if(window.Telegram?.WebApp?.initDataUnsafe?.user?.username){
   tgInput.value = '@' + Telegram.WebApp.initDataUnsafe.user.username;
 }
 
-// ================== РАСЧЁТ СУММЫ ==================
+// ================== ПРИМЕНЕНИЕ ПРОМОКОДА ==================
+const promoInputEl = document.getElementById("promoInput");
+const applyPromoBtn = document.getElementById("applyPromoBtn");
+const promoMessageEl = document.getElementById("promoMessage");
+
+applyPromoBtn.onclick = () => {
+  const code = promoInputEl.value.trim();
+  if(promoCodes[code]){
+    appliedPromo = { code, discount: promoCodes[code] };
+    promoMessageEl.style.color = "green";
+    promoMessageEl.textContent = `Промокод применен: ${appliedPromo.discount}% скидка`;
+  } else {
+    appliedPromo = null;
+    promoMessageEl.style.color = "red";
+    promoMessageEl.textContent = "Неверный промокод";
+  }
+  updateOrderSum();
+};
+
+// ================== РАСЧЁТ СУММЫ С ПРОМОКОДОМ ==================
 const deliverySelectEl = document.getElementById("deliverySelect");
 const deliveryInfoEl = document.getElementById("deliveryInfo");
 const orderSumEl = document.getElementById("orderSum");
+
 function updateOrderSum() {
   let total = cart.reduce((s,i)=>s+i.count*i.product.price,0);
   let deliveryCost = 0;
@@ -157,8 +183,17 @@ function updateOrderSum() {
     case "Почта России": deliveryCost = 550; break;
     case "Яндекс.Доставка": deliveryCost = 400; break;
   }
-  orderSumEl.textContent = "Итоговая сумма: "+(total+deliveryCost)+" ₽";
-  deliveryInfoEl.textContent = deliverySelectEl.value==="Самовывоз"?"Забрать заказ — Санкт-Петербург, Русановская 18к8":""; 
+  let finalTotal = total + deliveryCost;
+
+  if(appliedPromo){
+    const discountAmount = Math.round(total * appliedPromo.discount / 100);
+    finalTotal = finalTotal - discountAmount;
+    orderSumEl.innerHTML = `Итоговая сумма: <span style="text-decoration:line-through;color:#aaa;">${total + deliveryCost} ₽</span> → ${finalTotal} ₽`;
+  } else {
+    orderSumEl.textContent = "Итоговая сумма: "+finalTotal+" ₽";
+  }
+
+  deliveryInfoEl.textContent = deliverySelectEl.value==="Самовывоз"?"Забрать заказ — Санкт-Петербург, Русановская 18к8":"";
 }
 deliverySelectEl.addEventListener("change", updateOrderSum);
 
@@ -182,7 +217,7 @@ function animateAddToCart() {
   cartButton.classList.add("cart-pulse");
 }
 
-// ================== КНОПКА КОРЗИНЫ 🛒 С КРУЖКОМ ==================
+// ================== КНОПКА КОРЗИНЫ ==================
 cartButton.style.position = "fixed"; 
 cartButton.style.top = "10px"; 
 cartButton.style.right = "20px"; 
@@ -396,7 +431,14 @@ orderForm.onsubmit = async (e) => {
     case "Почта России": deliveryCost = 550; break;
     case "Яндекс.Доставка": deliveryCost = 400; break;
   }
-  const total = cart.reduce((s,i)=>s+i.count*i.product.price,0) + deliveryCost;
+
+  let total = cart.reduce((s,i)=>s+i.count*i.product.price,0) + deliveryCost;
+
+  // применяем промокод при отправке заказа
+  if(appliedPromo){
+    const discountAmount = Math.round(cart.reduce((s,i)=>s+i.count*i.product.price,0) * appliedPromo.discount / 100);
+    total -= discountAmount;
+  }
 
   const orderData = {
     fullname: fd.get("fullname"),

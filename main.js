@@ -30,7 +30,11 @@ const modalImageWrapper = document.querySelector(".modal-img-wrapper");
 const modalPrevBtn = document.createElement("button");
 const modalNextBtn = document.createElement("button");
 const modalDots = document.createElement("div");
+const modalOptionsPanel = document.createElement("div");
 const modalOptions = document.createElement("div");
+const modalActions = document.createElement("div");
+const modalBuyBtn = document.createElement("button");
+const modalAddBtn = document.createElement("button");
 let modalImages = [];
 let modalImageIndex = 0;
 let touchStartX = 0;
@@ -38,8 +42,8 @@ let currentModalProduct = null;
 
 const productOptionConfig = {
   9: [
-    { label: "Круги", imageIndex: 0 },
-    { label: "Конусы", imageIndex: 1 }
+    { label: "Конус", imageIndex: 0 },
+    { label: "Круг", imageIndex: 1 }
   ]
 };
 const selectedProductOptions = {};
@@ -88,10 +92,10 @@ const products = [
 {id:6,name:"Обвес Lighter",price:3600,image:"https://i.pinimg.com/736x/09/10/b3/0910b3ff42bac41aedf580f284a59e2a.jpg",category:"Обвесы",description:["Материал изделия:","Фурнитура из нержавеющей стали;","Хирургическая и нержавеющая сталь.","","Срок изготовления — до 5 рабочих дней."]},
 {id:7,name:"Обвес Star",price:2000,image:"https://i.pinimg.com/736x/9b/e1/a5/9be1a5a1213fd3a6b1610ac6ae0ac1af.jpg",category:"Обвесы",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
 {id:8,name:"Серьги Moonlight",price:2000,image:"https://i.pinimg.com/736x/a8/c9/14/a8c9147f95a4e40ecebcb6c9b4e9ad8a.jpg",category:"Серьги",description:["Материал изделия:","Лунные бусины;","Хирургическая сталь;","Фурнитура из нержавеющей и хирургической стали.","","Срок изготовления — до 5 рабочих дней."]},
-{id:9,name:"Кулон ILG",price:2500,image:"https://i.pinimg.com/736x/7d/a6/8b/7da68b9a23b9a56785387c0e2d128121.jpg",images:["https://i.pinimg.com/736x/7d/a6/8b/7da68b9a23b9a56785387c0e2d128121.jpg","https://i.pinimg.com/736x/66/40/4a/66404aac6b5200512d664e7f00be7f8b.jpg"],category:"Кулоны",description:["Материал изделия:","Хирургическая и нержавеющая сталь.","","Цепочка:","Нержавеющая сталь.","","Срок изготовления - до 5 рабочих дне."]},
+{id:9,name:"Кулон ILG",price:2500,image:"https://i.pinimg.com/736x/7d/a6/8b/7da68b9a23b9a56785387c0e2d128121.jpg",images:["https://i.pinimg.com/736x/7d/a6/8b/7da68b9a23b9a56785387c0e2d128121.jpg","https://i.pinimg.com/736x/66/40/4a/66404aac6b5200512d664e7f00be7f8b.jpg"],category:"Кулоны",description:["Материал изделия:","Хирургическая и нержавеющая сталь.","","Цепочка:","Нержавеющая сталь.","","Срок изготовления - до 5 рабочих дней."]},
 {id:10,name:"Кольчужный топ",price:18000,image:"https://i.pinimg.com/736x/a9/95/24/a995240ff0d58266a65e1edc78c366ed.jpg",category:"Топы",description:["Материал изделия:","Хирургическая сталь","","Срок изготовления — до 14 рабочих дней."]},
 {id:11,name:"Колье Pierced Soul",price:5500,image:"https://i.pinimg.com/736x/70/88/3f/70883f759c7d988eb91565955f9007a5.jpg",category:"Колье",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
-{id:12,name:"Колье Painful Love",price:4000,image:"https://i.pinimg.com/736x/45/99/a2/4599a2f82ad4752fad58113f3125aa1d.jpg",category:"Колье",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
+{id:12,name:"Колье Painful Love",price:4000,image:"https://i.pinimg.com/736x/45/99/a2/4599a2f82ad4752fad58113f3125aa1d.jpg",category:"Колье",description:["Материа изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
 {id:13,name:"Колье Fragile Faith",price:6200,image:"https://i.pinimg.com/736x/71/a1/f5/71a1f572d11613962d0fbd9b1ccb4953.jpg",category:"Колье",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
 {id:14,name:"Браслет Trifecta",price:4000,image:"https://i.pinimg.com/736x/00/10/85/001085bdd3559fe09db4bfc229dfea3e.jpg",category:"Браслеты",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
 {id:15,name:"Колье Nightfire",price:4000,image:"https://i.pinimg.com/736x/b8/f7/6e/b8f76e177cb9ab24a6b26c8a3a5332ee.jpg",category:"Колье",description:["Материал изделия:","Нержавеющая сталь;","Хирургическая сталь и фианиты.","","Срок изготовления — до 5 рабочих дней."]},
@@ -316,11 +320,18 @@ style.innerHTML = `
 .modal-dot.active {
   background: #fff;
 }
-.modal-options {
+.modal-option-panel {
   display: none;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  background: #3a3a3a;
+  border-radius: 10px;
+  padding: 10px;
+}
+.modal-options {
+  display: flex;
   gap: 8px;
   justify-content: center;
-  margin-top: 10px;
 }
 .modal-option-btn {
   border: 1px solid #666;
@@ -333,10 +344,33 @@ style.innerHTML = `
 }
 .modal-option-btn.active {
   border-color: #fff;
-  background: #444;
+  background: #4a4a4a;
+}
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+.modal-action-btn {
+  flex: 1;
+  border: 1px solid #777;
+  border-radius: 8px;
+  padding: 10px 12px;
+  cursor: pointer;
+  font-size: 14px;
+}
+.modal-action-btn.buy {
+  background: #d9d9d9;
+  color: #111;
+}
+.modal-action-btn.cart {
+  background: #2c2c2c;
+  color: #fff;
 }
 `;
 document.head.appendChild(style);
+modalClose.style.position = "relative";
+modalClose.style.zIndex = "30";
 
 // ================== ОБНОВЛЕНИЕ КОРЗИНЫ ==================
 function updateCartCounter() {
@@ -386,8 +420,13 @@ function renderProducts(list){
 // ================== КОРЗИНА ==================
 function addToCart(p){
   const optionIndex = getSelectedOptionIndex(p.id);
-  let item = cart.find(x=>x.product.id===p.id && (x.selectedOptionIndex ?? 0)===optionIndex);
-  if(item) item.count++;
+  let item = cart.find(x=>x.product.id===p.id);
+  if(item) {
+    item.count++;
+    if(productOptionConfig[p.id] && item.selectedOptionIndex === undefined){
+      item.selectedOptionIndex = optionIndex;
+    }
+  }
   else {
     item = {product: p, count:1, selectedOptionIndex: optionIndex};
     cart.push(item);
@@ -414,9 +453,7 @@ function addToCart(p){
 }
 
 function removeFromCart(p){
-  const optionIndex = getSelectedOptionIndex(p.id);
-  let item = cart.find(x=>x.product.id===p.id && (x.selectedOptionIndex ?? 0)===optionIndex);
-  if(!item) item = cart.find(x=>x.product.id===p.id);
+  let item = cart.find(x=>x.product.id===p.id);
   if(!item) return;
   item.count--;
   if(item.count <= 0) cart = cart.filter(x=>x.product.id!==p.id);
@@ -447,13 +484,34 @@ if(modalImageWrapper){
   modalNextBtn.className = "modal-gallery-btn next";
   modalNextBtn.innerHTML = "&#8250;";
   modalDots.className = "modal-dots";
+
+  modalOptionsPanel.className = "modal-option-panel";
   modalOptions.className = "modal-options";
+  modalOptionsPanel.appendChild(modalOptions);
+
+  modalActions.className = "modal-actions";
+  modalBuyBtn.type = "button";
+  modalBuyBtn.className = "modal-action-btn buy";
+  modalBuyBtn.textContent = "Купить";
+  modalAddBtn.type = "button";
+  modalAddBtn.className = "modal-action-btn cart";
+  modalAddBtn.textContent = "В корзину";
+  modalActions.append(modalBuyBtn, modalAddBtn);
+
   modalImageWrapper.append(modalPrevBtn, modalNextBtn);
   modalImageWrapper.insertAdjacentElement("afterend", modalDots);
-  modalDots.insertAdjacentElement("afterend", modalOptions);
+  modalPrice.insertAdjacentElement("afterend", modalOptionsPanel);
+  modalDescription.insertAdjacentElement("afterend", modalActions);
 
   modalPrevBtn.onclick = (e) => { e.stopPropagation(); changeModalImage(-1); };
   modalNextBtn.onclick = (e) => { e.stopPropagation(); changeModalImage(1); };
+  modalBuyBtn.onclick = (e) => { e.stopPropagation(); openOrderFromModal(); };
+  modalAddBtn.onclick = (e) => {
+    e.stopPropagation();
+    if(!currentModalProduct) return;
+    addToCart(currentModalProduct);
+    modal.style.display = "none";
+  };
 
   modalImageWrapper.addEventListener("touchstart", (e) => {
     touchStartX = e.changedTouches[0].clientX;
@@ -481,8 +539,7 @@ function setSelectedOption(productId, optionIndex){
 function getCartProductLabel(item){
   const options = productOptionConfig[item.product.id];
   if(!options || !options.length) return item.product.name;
-  const selectedIndex = item.selectedOptionIndex ?? getSelectedOptionIndex(item.product.id);
-  const selectedOption = options[selectedIndex] || options[0];
+  const selectedOption = options[item.selectedOptionIndex ?? 0] || options[0];
   return `${item.product.name} (${selectedOption.label})`;
 }
 
@@ -491,7 +548,7 @@ function renderProductOptions(p){
   modalOptions.innerHTML = "";
 
   if(!options || !options.length){
-    modalOptions.style.display = "none";
+    modalOptionsPanel.style.display = "none";
     return;
   }
 
@@ -511,12 +568,20 @@ function renderProductOptions(p){
     modalOptions.appendChild(btn);
   });
 
-  modalOptions.style.display = "flex";
+  modalOptionsPanel.style.display = "block";
+}
+
+function openOrderFromModal(){
+  if(!currentModalProduct) return;
+  addToCart(currentModalProduct);
+  modal.style.display = "none";
+  orderModal.style.display = "flex";
+  orderModal.style.pointerEvents = "auto";
+  updateOrderSum();
 }
 
 function renderModalImage(){
   if(!modalImages.length) return;
-  modalImageIndex = Math.max(0, Math.min(modalImageIndex, modalImages.length - 1));
   modalImage.src = modalImages[modalImageIndex];
   modalDots.innerHTML = "";
   modalImages.forEach((_, idx) => {
@@ -538,9 +603,11 @@ function changeModalImage(step){
   if(currentModalProduct){
     const options = productOptionConfig[currentModalProduct.id];
     if(options?.length){
-      const matchedIdx = options.findIndex(option => option.imageIndex === modalImageIndex);
-      if(matchedIdx >= 0) setSelectedOption(currentModalProduct.id, matchedIdx);
-      renderProductOptions(currentModalProduct);
+      const optionIdx = options.findIndex(option => option.imageIndex === modalImageIndex);
+      if(optionIdx >= 0){
+        setSelectedOption(currentModalProduct.id, optionIdx);
+        renderProductOptions(currentModalProduct);
+      }
     }
   }
 
@@ -550,13 +617,12 @@ function changeModalImage(step){
 function openModal(p){
   currentModalProduct = p;
   modalImages = getProductImages(p);
+
   const options = productOptionConfig[p.id];
   const selectedIndex = getSelectedOptionIndex(p.id);
-  if(options?.[selectedIndex]){
-    modalImageIndex = options[selectedIndex].imageIndex;
-  } else {
-    modalImageIndex = 0;
-  }
+  if(options?.[selectedIndex]) modalImageIndex = options[selectedIndex].imageIndex;
+  else modalImageIndex = 0;
+
   renderModalImage();
   renderProductOptions(p);
 
@@ -572,7 +638,7 @@ function openModal(p){
   modal.style.display="flex";
 }
 modalClose.onclick = ()=>{ modal.style.display="none"; currentModalProduct = null; };
-modal.onclick = e=>{if(e.target===modal) { modal.style.display="none"; currentModalProduct = null; }};
+modal.onclick = e=>{if(e.target===modal) { modal.style.display="none"; currentModalProduct = null; }}
 document.addEventListener("keydown", (e) => {
   if(modal.style.display !== "flex") return;
   if(e.key === "ArrowLeft") changeModalImage(-1);
@@ -599,7 +665,7 @@ function updateCartUI(){
 // ================== ГАМБУРГЕР ==================
 menuIcon.onclick = ()=> categoriesEl.classList.toggle("show");
 categoriesEl.querySelectorAll("div").forEach(cat=>{
-  cat.onclick = ()=>{ currentCategory = cat.dataset.category; inCartScreen=false; categoriesEl.classList.remove("show"); renderProducts(getCurrentList()); };
+  cat.onclick = ()=>{ currentCategory = cat.dataset.category; inCartScreen=false; categoriesEl.classList.remove("show"); renderProducts(getCurrentList()); }
 });
 
 // ================== КЛИК ПО ПУСТОМУ МЕСТУ ==================

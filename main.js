@@ -95,7 +95,7 @@ const products = [
 {id:9,name:"Кулон ILG",price:2500,image:"https://i.pinimg.com/736x/7d/a6/8b/7da68b9a23b9a56785387c0e2d128121.jpg",images:["https://i.pinimg.com/736x/7d/a6/8b/7da68b9a23b9a56785387c0e2d128121.jpg","https://i.pinimg.com/736x/66/40/4a/66404aac6b5200512d664e7f00be7f8b.jpg"],category:"Кулоны",description:["Материал изделия:","Хирургическая и нержавеющая сталь.","","Цепочка:","Нержавеющая сталь.","","Срок изготовления - до 5 рабочих дней."]},
 {id:10,name:"Кольчужный топ",price:18000,image:"https://i.pinimg.com/736x/a9/95/24/a995240ff0d58266a65e1edc78c366ed.jpg",category:"Топы",description:["Материал изделия:","Хирургическая сталь","","Срок изготовления — до 14 рабочих дней."]},
 {id:11,name:"Колье Pierced Soul",price:5500,image:"https://i.pinimg.com/736x/70/88/3f/70883f759c7d988eb91565955f9007a5.jpg",category:"Колье",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
-{id:12,name:"Колье Painful Love",price:4000,image:"https://i.pinimg.com/736x/45/99/a2/4599a2f82ad4752fad58113f3125aa1d.jpg",category:"Колье",description:["Материа изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
+{id:12,name:"Колье Painful Love",price:4000,image:"https://i.pinimg.com/736x/45/99/a2/4599a2f82ad4752fad58113f3125aa1d.jpg",category:"Колье",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
 {id:13,name:"Колье Fragile Faith",price:6200,image:"https://i.pinimg.com/736x/71/a1/f5/71a1f572d11613962d0fbd9b1ccb4953.jpg",category:"Колье",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
 {id:14,name:"Браслет Trifecta",price:4000,image:"https://i.pinimg.com/736x/00/10/85/001085bdd3559fe09db4bfc229dfea3e.jpg",category:"Браслеты",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
 {id:15,name:"Колье Nightfire",price:4000,image:"https://i.pinimg.com/736x/b8/f7/6e/b8f76e177cb9ab24a6b26c8a3a5332ee.jpg",category:"Колье",description:["Материал изделия:","Нержавеющая сталь;","Хирургическая сталь и фианиты.","","Срок изготовления — до 5 рабочих дней."]},
@@ -245,9 +245,9 @@ function animateAddToCart() {
 }
 
 // ================== КНОПКА КОРЗИНЫ ==================
-cartButton.style.position = "fixed";
-cartButton.style.top = "10px";
-cartButton.style.right = "20px";
+cartButton.style.position = "fixed"; 
+cartButton.style.top = "10px"; 
+cartButton.style.right = "20px"; 
 cartButton.style.background = "none";
 cartButton.style.border = "none";
 cartButton.style.fontSize = "28px";
@@ -257,7 +257,7 @@ cartButton.style.justifyContent = "center";
 cartButton.style.cursor = "pointer";
 cartButton.style.padding = "0";
 cartButton.style.lineHeight = "1";
-cartButton.style.zIndex = "10000";
+cartButton.style.zIndex = "20000";
 
 cartButton.innerHTML = `🛒<span id="cartCountCircle" style="display:none"></span>`;
 
@@ -324,7 +324,7 @@ style.innerHTML = `
   display: none;
   margin-top: 10px;
   margin-bottom: 10px;
-  background: #3a3a3a;
+  background: #252525;
   border-radius: 10px;
   padding: 10px;
 }
@@ -360,8 +360,8 @@ style.innerHTML = `
   font-size: 14px;
 }
 .modal-action-btn.buy {
-  background: #d9d9d9;
-  color: #111;
+  background: #2c2c2c;
+  color: #fff;
 }
 .modal-action-btn.cart {
   background: #2c2c2c;
@@ -369,8 +369,10 @@ style.innerHTML = `
 }
 `;
 document.head.appendChild(style);
-modalClose.style.position = "relative";
-modalClose.style.zIndex = "30";
+modalClose.style.position = "absolute";
+modalClose.style.top = "10px";
+modalClose.style.right = "10px";
+modalClose.style.zIndex = "40";
 
 // ================== ОБНОВЛЕНИЕ КОРЗИНЫ ==================
 function updateCartCounter() {
@@ -378,10 +380,10 @@ function updateCartCounter() {
   const counter = document.getElementById("cartCountCircle");
   if(counter) {
     if(c > 0){
-      counter.style.display = "flex";
+      counter.style.display = "flex";  
       counter.textContent = c;
     } else {
-      counter.style.display = "none";
+      counter.style.display = "none";  
     }
   }
 }
@@ -433,7 +435,7 @@ function addToCart(p){
   }
   updateCartUI();
   updateCartCounter();
-  if(inCartScreen){ renderProducts(cart.map(i=>i.product)); }
+  if(inCartScreen){ renderProducts(cart.map(i=>i.product)); } 
   else {
     const card = [...productsEl.children].find(c=>c.querySelector("h3")?.textContent===p.name);
     if(card){
@@ -459,12 +461,12 @@ function removeFromCart(p){
   if(item.count <= 0) cart = cart.filter(x=>x.product.id!==p.id);
   updateCartUI();
   updateCartCounter();
-  if(inCartScreen){ renderProducts(cart.map(i=>i.product)); }
+  if(inCartScreen){ renderProducts(cart.map(i=>i.product)); } 
   else {
     const card = [...productsEl.children].find(c=>c.querySelector("h3")?.textContent===p.name);
     if(card){
       const controls = card.querySelector(".count-block");
-      if(item.count > 0){ controls.querySelector(".count-number").textContent = item.count; }
+      if(item.count > 0){ controls.querySelector(".count-number").textContent = item.count; } 
       else {
         controls.innerHTML = "";
         const btn = document.createElement("button");
@@ -510,7 +512,6 @@ if(modalImageWrapper){
     e.stopPropagation();
     if(!currentModalProduct) return;
     addToCart(currentModalProduct);
-    modal.style.display = "none";
   };
 
   modalImageWrapper.addEventListener("touchstart", (e) => {
@@ -646,7 +647,16 @@ document.addEventListener("keydown", (e) => {
 });
 
 // ================== КОРЗИНА НА ГЛАВНОЙ ==================
-cartButton.onclick = ()=>{ if(!cart.length) return alert("Корзина пуста!"); inCartScreen = true; document.body.classList.add("cart-mode"); renderProducts(cart.map(i=>i.product)); };
+cartButton.onclick = ()=>{
+  if(!cart.length) return alert("Корзина пуста!");
+  if(modal.style.display === "flex"){
+    modal.style.display = "none";
+    currentModalProduct = null;
+  }
+  inCartScreen = true;
+  document.body.classList.add("cart-mode");
+  renderProducts(cart.map(i=>i.product));
+};
 mainTitle.onclick = ()=>{ inCartScreen = false; document.body.classList.remove("cart-mode"); currentCategory="Главная"; renderProducts(products); };
 
 // ================== ОБНОВЛЕНИЕ КОРЗИНЫ ==================
@@ -654,7 +664,7 @@ function updateCartUI(){
   const c = cart.reduce((s,i)=>s+i.count,0);
   const t = cart.reduce((s,i)=>s+i.count*i.product.price,0);
   cartCount.textContent = c;
-  cartTotal.textContent = t?"Итого: "+t+" ₽":"";
+  cartTotal.textContent = t?"Итого: "+t+" ₽":"";  
   cartTotal.style.display = inCartScreen?"block":"none";
   checkoutButton.style.display = c && inCartScreen?"block":"none";
   footerButtons.style.display = inCartScreen?"none":"flex";
@@ -781,7 +791,7 @@ orderForm.onsubmit = async (e) => {
     thankModal.style.zIndex = 9999;
     thankModal.style.cursor = "pointer";
     thankModal.style.flexDirection = "column";
-    thankModal.innerText = "СПАСИБО ЗА ВЫБОР CHRONICLE CHAINS!\nМЫ УЖЕ ПРИНЯЛИ ВАШ ЗАКАЗ И НАЧИНАЕМ ЕГО СОБИРАТЬ <3";
+    thankModal.innerText = "СПАСИБО ЗА ВЫБОР CHRONICLE CHAINS!\n\nМЫ УЖЕ ПРИНЯЛИ ВАШ ЗАКАЗ И НАЧИНАЕМ ЕГО СОБИРАТЬ <3\n\nС вами свяжутся когда посылка будет отправлена!!";
 
     thankModal.onclick = () => {
       document.body.removeChild(thankModal);

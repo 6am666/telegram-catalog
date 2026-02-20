@@ -26,6 +26,14 @@ const orderModal = document.getElementById("orderModal");
 const orderClose = document.getElementById("orderClose");
 const orderForm = document.getElementById("orderForm");
 
+const modalImageWrapper = document.querySelector(".modal-img-wrapper");
+const modalPrevBtn = document.createElement("button");
+const modalNextBtn = document.createElement("button");
+const modalDots = document.createElement("div");
+let modalImages = [];
+let modalImageIndex = 0;
+let touchStartX = 0;
+
 // ================== ПРОМОКОДЫ ==================
 const promoCodes = {
   "ValentinesDay": 10 // 10% скидка
@@ -71,6 +79,7 @@ const products = [
 {id:7,name:"Обвес Star",price:2000,image:"https://i.pinimg.com/736x/9b/e1/a5/9be1a5a1213fd3a6b1610ac6ae0ac1af.jpg",category:"Обвесы",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
 {id:8,name:"Серьги Moonlight",price:2000,image:"https://i.pinimg.com/736x/a8/c9/14/a8c9147f95a4e40ecebcb6c9b4e9ad8a.jpg",category:"Серьги",description:["Материал изделия:","Лунные бусины;","Хирургическая сталь;","Фурнитура из нержавеющей и хирургической стали.","","Срок изготовления — до 5 рабочих дней."]},
 {id:9,name:"Кулон ILG",price:2500,image:"https://i.pinimg.com/736x/7d/a6/8b/7da68b9a23b9a56785387c0e2d128121.jpg",category:"Кулоны",description:["Материал изделия:","Хирургическая и нержавеющая сталь.","","Цепочка:","Нержавеющая сталь.","","Срок изготовления - до 5 рабочих дней."]},
+{id:9,name:"Кулон ILG",price:2500,image:"https://i.pinimg.com/736x/7d/a6/8b/7da68b9a23b9a56785387c0e2d128121.jpg",images:["https://i.pinimg.com/736x/7d/a6/8b/7da68b9a23b9a56785387c0e2d128121.jpg","https://i.pinimg.com/736x/66/40/4a/66404aac6b5200512d664e7f00be7f8b.jpg"],category:"Кулоны",description:["Материал изделия:","Хирургическая и нержавеющая сталь.","","Цепочка:","Нержавеющая сталь.","","Срок изготовления - до 5 рабочих дней."]},
 {id:10,name:"Кольчужный топ",price:18000,image:"https://i.pinimg.com/736x/a9/95/24/a995240ff0d58266a65e1edc78c366ed.jpg",category:"Топы",description:["Материал изделия:","Хирургическая сталь","","Срок изготовления — до 14 рабочих дней."]},
 {id:11,name:"Колье Pierced Soul",price:5500,image:"https://i.pinimg.com/736x/70/88/3f/70883f759c7d988eb91565955f9007a5.jpg",category:"Колье",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
 {id:12,name:"Колье Painful Love",price:4000,image:"https://i.pinimg.com/736x/45/99/a2/4599a2f82ad4752fad58113f3125aa1d.jpg",category:"Колье",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
@@ -96,143 +105,7 @@ orderForm.innerHTML = `
 <option value="СДЭК">СДЭК — 450₽</option>
 <option value="Почта России">Почта России — 550₽</option>
 <option value="Яндекс.Доставка">Яндекс.Доставка — 400₽</option>
-<option value="Самовывоз">Самовывоз</option>
-</select>
-<div id="deliveryInfo" style="color:#aaa;margin-top:4px;"></div>
-<label>Номер телефона</label><input type="text" name="phone" placeholder="Введите номер" required>
-<label>Telegram ID</label><input type="text" name="telegram" placeholder="@id" required>
-
-<label>Промокод</label>
-<div style="display:flex;align-items:center;margin-bottom:10px;">
-  <input type="text" id="promoInput" placeholder="Введите промокод" style="flex:1;margin-right:8px;">
-  <button type="button" id="applyPromoBtn">Применить</button>
-</div>
-<div id="promoMessage" style="color:green;margin-bottom:10px;font-weight:500;"></div>
-
-<div id="orderSum" style="color:#aaa;margin:10px 0;font-weight:500;">Итоговая сумма: 0 ₽</div>
-<button type="submit">Оплатить</button>
-`;
-
-// ================== DaData ==================
-$("#addressInput").suggestions({
-  token:"4563b9c9765a1a2d7bf39e1c8944f7fadae05970",
-  type:"ADDRESS",
-  hint:false
-});
-
-// ================== МАСКА ТЕЛЕФОНА ==================
-const phoneInput = orderForm.querySelector('input[name="phone"]');
-
-function formatPhoneFlexible(value) {
-  let digits = value.replace(/\D/g,'');
-  if(!digits) return '';
-  let parts = digits.match(/(\d{0,1})(\d{0,3})(\d{0,3})(\d{0,2})(\d{0,2})/);
-  if(!parts) return '';
-  let formatted = '';
-  if(parts[1]) formatted += parts[1];
-  if(parts[2]) formatted += ` (${parts[2]}`;
-  if(parts[3]) formatted += `) ${parts[3]}`;
-  if(parts[4]) formatted += `-${parts[4]}`;
-  if(parts[5]) formatted += `-${parts[5]}`;
-  return formatted;
-}
-
-phoneInput.addEventListener('input', (e) => {
-  const start = e.target.selectionStart;
-  const oldLength = e.target.value.length;
-  e.target.value = formatPhoneFlexible(e.target.value);
-  const newLength = e.target.value.length;
-  const diff = newLength - oldLength;
-  e.target.setSelectionRange(start + diff, start + diff);
-});
-
-// ================== TELEGRAM ID С @ ==================
-const tgInput = orderForm.querySelector('input[name="telegram"]');
-tgInput.value = '@';
-tgInput.addEventListener('input', ()=>{
-  if(!tgInput.value.startsWith('@')) tgInput.value = '@' + tgInput.value.replace(/@/g,'');
-});
-if(window.Telegram?.WebApp?.initDataUnsafe?.user?.username){
-  tgInput.value = '@' + Telegram.WebApp.initDataUnsafe.user.username;
-}
-
-// ================== ПРИМЕНЕНИЕ ПРОМОКОДА ==================
-const promoInputEl = document.getElementById("promoInput");
-const applyPromoBtn = document.getElementById("applyPromoBtn");
-const promoMessageEl = document.getElementById("promoMessage");
-
-applyPromoBtn.onclick = () => {
-  const code = promoInputEl.value.trim();
-  if(promoCodes[code]){
-    appliedPromo = { code, discount: promoCodes[code] };
-    promoMessageEl.style.color = "green";
-    promoMessageEl.textContent = `Промокод применен: ${appliedPromo.discount}% скидка`;
-  } else {
-    appliedPromo = null;
-    promoMessageEl.style.color = "red";
-    promoMessageEl.textContent = "Неверный промокод";
-  }
-  updateOrderSum();
-};
-
-// ================== РАСЧЁТ СУММЫ С ПРОМОКОДОМ ==================
-const deliverySelectEl = document.getElementById("deliverySelect");
-const deliveryInfoEl = document.getElementById("deliveryInfo");
-const orderSumEl = document.getElementById("orderSum");
-
-function updateOrderSum() {
-  let total = cart.reduce((s,i)=>s+i.count*i.product.price,0);
-  let deliveryCost = 0;
-  switch (deliverySelectEl.value){
-    case "СДЭК": deliveryCost = 450; break;
-    case "Почта России": deliveryCost = 550; break;
-    case "Яндекс.Доставка": deliveryCost = 400; break;
-  }
-  let finalTotal = total + deliveryCost;
-
-  if(appliedPromo){
-    const discountAmount = Math.round(total * appliedPromo.discount / 100);
-    finalTotal = finalTotal - discountAmount;
-    orderSumEl.innerHTML = `Итоговая сумма: <span style="text-decoration:line-through;color:#aaa;">${total + deliveryCost} ₽</span> → ${finalTotal} ₽`;
-  } else {
-    orderSumEl.textContent = "Итоговая сумма: "+finalTotal+" ₽";
-  }
-
-  deliveryInfoEl.textContent = deliverySelectEl.value==="Самовывоз"?"Забрать заказ — Санкт-Петербург, Русановская 18к8":"";
-}
-deliverySelectEl.addEventListener("change", updateOrderSum);
-
-// ================== КНОПКА ОФОРМИТЬ ЗАКАЗ ==================
-checkoutButton.onclick = () => {
-  if(!cart.length) return alert("Корзина пуста!");
-  orderModal.style.display="flex";
-  orderModal.style.pointerEvents="auto";
-  updateOrderSum();
-  document.activeElement.blur();
-};
-
-// ================== ЗАКРЫТИЕ МОДАЛКИ ==================
-orderClose.onclick = ()=>orderModal.style.display="none";
-orderModal.onclick = e=>{if(e.target===orderModal) orderModal.style.display="none";};
-
-// ================== ПОДСВЕТКА КОРЗИНЫ ==================
-function animateAddToCart() {
-  cartButton.classList.remove("cart-pulse");
-  void cartButton.offsetWidth;
-  cartButton.classList.add("cart-pulse");
-}
-
-// ================== КНОПКА КОРЗИНЫ ==================
-cartButton.style.position = "fixed"; 
-cartButton.style.top = "10px"; 
-cartButton.style.right = "20px"; 
-cartButton.style.background = "none";
-cartButton.style.border = "none";
-cartButton.style.fontSize = "28px";
-cartButton.style.display = "flex";
-cartButton.style.alignItems = "center";
-cartButton.style.justifyContent = "center";
-cartButton.style.cursor = "pointer";
+@@ -236,50 +244,90 @@ cartButton.style.cursor = "pointer";
 cartButton.style.padding = "0";
 cartButton.style.lineHeight = "1";
 cartButton.style.zIndex = "10000";
@@ -257,6 +130,46 @@ style.innerHTML = `
   justify-content: center;
   pointer-events: none;
   transition: all 0.2s ease;
+}
+.modal-img-wrapper {
+  position: relative;
+}
+.modal-gallery-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.5);
+  color: #fff;
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+}
+.modal-gallery-btn.prev { left: 8px; }
+.modal-gallery-btn.next { right: 8px; }
+.modal-dots {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin-top: 10px;
+}
+.modal-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.45);
+  padding: 0;
+}
+.modal-dot.active {
+  background: #fff;
 }
 `;
 document.head.appendChild(style);
@@ -283,56 +196,7 @@ function renderProducts(list){
     const img=document.createElement("img"); img.src=p.image; img.onclick=()=>openModal(p);
     const title=document.createElement("h3"); title.textContent=p.name;
     const price=document.createElement("p"); price.textContent=p.price+" ₽";
-
-    const controls=document.createElement("div"); controls.className="count-block";
-    const item = cart.find(i=>i.product.id===p.id);
-
-    if(item){
-      const minus = document.createElement("button"); minus.textContent="–"; minus.onclick=e=>{e.stopPropagation(); removeFromCart(p)};
-      const count = document.createElement("div"); count.className="count-number"; count.textContent=item.count;
-      const plus = document.createElement("button"); plus.textContent="+"; plus.onclick=e=>{e.stopPropagation(); addToCart(p)};
-      controls.append(minus,count,plus);
-    }else{
-      const btn = document.createElement("button"); btn.textContent="В корзину"; btn.onclick=e=>{e.stopPropagation(); addToCart(p)};
-      btn.classList.add("micro-btn");
-      controls.appendChild(btn);
-    }
-
-    card.append(img,title,price,controls);
-    productsEl.appendChild(card);
-    requestAnimationFrame(()=>{ card.style.opacity="1"; card.style.transform="translateY(0)"; });
-  });
-  updateCartUI();
-  updateCartCounter();
-}
-
-// ================== КОРЗИНА ==================
-function addToCart(p){
-  let item = cart.find(x=>x.product.id===p.id);
-  if(item) item.count++;
-  else cart.push({product: p, count:1});
-  updateCartUI();
-  updateCartCounter();
-  if(inCartScreen){ renderProducts(cart.map(i=>i.product)); } 
-  else {
-    const card = [...productsEl.children].find(c=>c.querySelector("h3")?.textContent===p.name);
-    if(card){
-      const countDiv = card.querySelector(".count-number");
-      if(countDiv) countDiv.textContent = item.count;
-      else {
-        const controls = card.querySelector(".count-block");
-        controls.innerHTML = "";
-        const minus=document.createElement("button"); minus.textContent="–"; minus.onclick=e=>{e.stopPropagation(); removeFromCart(p)};
-        const count=document.createElement("div"); count.className="count-number"; count.textContent="1";
-        const plus=document.createElement("button"); plus.textContent="+"; plus.onclick=e=>{e.stopPropagation(); addToCart(p)};
-        controls.append(minus,count,plus);
-      }
-    }
-  }
-  animateAddToCart();
-}
-
-function removeFromCart(p){
+@@ -336,59 +384,122 @@ function removeFromCart(p){
   let item = cart.find(x=>x.product.id===p.id);
   if(!item) return;
   item.count--;
@@ -358,8 +222,67 @@ function removeFromCart(p){
 }
 
 // ================== МОДАЛКА ==================
+if(modalImageWrapper){
+  modalPrevBtn.className = "modal-gallery-btn prev";
+  modalPrevBtn.innerHTML = "&#8249;";
+  modalNextBtn.className = "modal-gallery-btn next";
+  modalNextBtn.innerHTML = "&#8250;";
+  modalDots.className = "modal-dots";
+  modalImageWrapper.append(modalPrevBtn, modalNextBtn);
+  modalImageWrapper.insertAdjacentElement("afterend", modalDots);
+
+  modalPrevBtn.onclick = (e) => { e.stopPropagation(); changeModalImage(-1); };
+  modalNextBtn.onclick = (e) => { e.stopPropagation(); changeModalImage(1); };
+
+  modalImageWrapper.addEventListener("touchstart", (e) => {
+    touchStartX = e.changedTouches[0].clientX;
+  });
+  modalImageWrapper.addEventListener("touchend", (e) => {
+    const delta = e.changedTouches[0].clientX - touchStartX;
+    if(Math.abs(delta) > 40){
+      changeModalImage(delta > 0 ? -1 : 1);
+    }
+  });
+}
+
+function getProductImages(p){
+  return Array.isArray(p.images) && p.images.length ? p.images : [p.image];
+}
+
+function renderModalImage(){
+  if(!modalImages.length) return;
+  modalImage.src = modalImages[modalImageIndex];
+  modalDots.innerHTML = "";
+  modalImages.forEach((_, idx) => {
+    const dot = document.createElement("button");
+    dot.className = "modal-dot" + (idx === modalImageIndex ? " active" : "");
+    dot.onclick = (e) => {
+      e.stopPropagation();
+      modalImageIndex = idx;
+      renderModalImage();
+    };
+    modalDots.appendChild(dot);
+  });
+}
+
+function changeModalImage(step){
+  if(modalImages.length < 2) return;
+  modalImageIndex = (modalImageIndex + step + modalImages.length) % modalImages.length;
+  renderModalImage();
+}
+
 function openModal(p){
   modalImage.src=p.image;
+  modalImages = getProductImages(p);
+  modalImageIndex = 0;
+  renderModalImage();
+
+  const hasGallery = modalImages.length > 1;
+  modalPrevBtn.style.display = hasGallery ? "flex" : "none";
+  modalNextBtn.style.display = hasGallery ? "flex" : "none";
+  modalDots.style.display = hasGallery ? "flex" : "none";
+
+  modalImage.alt = p.name;
   modalTitle.textContent=p.name;
   modalPrice.textContent=p.price+" ₽";
   modalDescription.innerHTML=p.description.join("<br>");
@@ -367,6 +290,11 @@ function openModal(p){
 }
 modalClose.onclick = ()=>modal.style.display="none";
 modal.onclick = e=>{if(e.target===modal) modal.style.display="none";}
+document.addEventListener("keydown", (e) => {
+  if(modal.style.display !== "flex") return;
+  if(e.key === "ArrowLeft") changeModalImage(-1);
+  if(e.key === "ArrowRight") changeModalImage(1);
+});
 
 // ================== КОРЗИНА НА ГЛАВНОЙ ==================
 cartButton.onclick = ()=>{ if(!cart.length) return alert("Корзина пуста!"); inCartScreen = true; document.body.classList.add("cart-mode"); renderProducts(cart.map(i=>i.product)); };

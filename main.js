@@ -382,10 +382,10 @@ style.innerHTML = `
 #orderForm #deliveryInfo,
 #orderForm #promoMessage,
 #orderForm #orderSum {
-  margin-bottom: 19px;
+  margin-bottom: 12px;
 }
 #promoLabel {
-  margin-top: 38px;
+  margin-top: 20px;
 }
 .add-toast {
   position: fixed;
@@ -411,7 +411,7 @@ style.innerHTML = `
 `;
 document.head.appendChild(style);
 addToast.className = "add-toast";
-addToast.textContent = "Добавлен в корзину";
+addToast.textContent = "Добавлено в корзину";
 document.body.appendChild(addToast);
 modalClose.style.position = "absolute";
 modalClose.style.top = "10px";
@@ -496,7 +496,7 @@ function addToCart(p){
     }
   }
   animateAddToCart();
-  showAddToast();
+  if(!inCartScreen) showAddToast();
 }
 
 function removeFromCart(p){
@@ -790,7 +790,7 @@ orderForm.onsubmit = async (e) => {
   waitModal.style.pointerEvents = "auto";
   waitModal.innerHTML = `
     <div style="margin-bottom:5px; font-weight:600;">Переносим вас на оплату</div>
-    <div>Пожалуйста, подождите пару секунд...</div>
+    <div>Пожалуйста, подождие пару секунд...</div>
   `;
   document.body.appendChild(waitModal);
 

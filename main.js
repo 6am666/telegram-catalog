@@ -39,6 +39,8 @@ let modalImages = [];
 let modalImageIndex = 0;
 let touchStartX = 0;
 let currentModalProduct = null;
+let addToastTimeout = null;
+const addToast = document.createElement("div");
 
 const productOptionConfig = {
   9: [
@@ -100,7 +102,7 @@ const products = [
 {id:14,name:"Браслет Trifecta",price:4000,image:"https://i.pinimg.com/736x/00/10/85/001085bdd3559fe09db4bfc229dfea3e.jpg",category:"Браслеты",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
 {id:15,name:"Колье Nightfire",price:4000,image:"https://i.pinimg.com/736x/b8/f7/6e/b8f76e177cb9ab24a6b26c8a3a5332ee.jpg",category:"Колье",description:["Материал изделия:","Нержавеющая сталь;","Хирургическая сталь и фианиты.","","Срок изготовления — до 5 рабочих дней."]},
 {id:16,name:"Серьги Biohazard",price:2500,image:"https://i.pinimg.com/736x/17/50/74/175074bab7105ecbc0a4cfc04982275d.jpg",category:"Серьги",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
-{id:17,name:"Серьги Blood Cross",price:2000,image:"https://i.pinimg.com/736x/a5/4a/c4/a54ac493f4b76a1839403bef34ecfad3.jpg",category:"Серьги",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
+{id:17,name:"Серьги Blood Cross",price:2000,image:"https://i.pinimg.com/736x/a5/4a/c4/a54ac493f4b76a1839403bef34ecfad3.jpg",category:"Серьги",description:["Материал иделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
 {id:18,name:"Серьги Cupid's Trick",price:2000,image:"https://i.pinimg.com/736x/c0/58/09/c05809e2aa398e44198a0d06845c0b80.jpg",category:"Серьги",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
 {id:19,name:"Кулон Blackthorn",price:2000,image:"https://i.pinimg.com/736x/e9/d1/ed/e9d1ed17ff723fee65ee8cbd687b8de5.jpg",category:"Кулоны",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
 {id:20,name:"Кулон Seraphim",price:2500,image:"https://i.pinimg.com/736x/ae/ce/f6/aecef69cff58a290c14677449109422f.jpg",category:"Кулоны",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
@@ -124,7 +126,7 @@ orderForm.innerHTML = `
 <label>Номер телефона</label><input type="text" name="phone" placeholder="Введите номер" required>
 <label>Telegram ID</label><input type="text" name="telegram" placeholder="@id" required>
 
-<label>Промокод</label>
+<label id="promoLabel">Промокод</label>
 <div style="display:flex;align-items:center;margin-bottom:10px;">
   <input type="text" id="promoInput" placeholder="Введите промокод" style="flex:1;margin-right:8px;">
   <button type="button" id="applyPromoBtn">Применить</button>
@@ -242,6 +244,12 @@ function animateAddToCart() {
   cartButton.classList.remove("cart-pulse");
   void cartButton.offsetWidth;
   cartButton.classList.add("cart-pulse");
+}
+
+function showAddToast(){
+  addToast.classList.add("show");
+  if(addToastTimeout) clearTimeout(addToastTimeout);
+  addToastTimeout = setTimeout(() => addToast.classList.remove("show"), 500);
 }
 
 // ================== КНОПКА КОРЗИНЫ ==================
@@ -367,8 +375,43 @@ style.innerHTML = `
   background: #2c2c2c;
   color: #fff;
 }
+#orderForm label,
+#orderForm input,
+#orderForm select,
+#orderForm button,
+#orderForm #deliveryInfo,
+#orderForm #promoMessage,
+#orderForm #orderSum {
+  margin-bottom: 10px;
+}
+#promoLabel {
+  margin-top: 16px;
+}
+.add-toast {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(24,24,24,0.92);
+  color: #fff;
+  border: 1px solid #555;
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-size: 14px;
+  z-index: 30000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+.add-toast.show {
+  opacity: 1;
+}
+
 `;
 document.head.appendChild(style);
+addToast.className = "add-toast";
+addToast.textContent = "Добавлен в корзину";
+document.body.appendChild(addToast);
 modalClose.style.position = "absolute";
 modalClose.style.top = "10px";
 modalClose.style.right = "10px";
@@ -452,6 +495,7 @@ function addToCart(p){
     }
   }
   animateAddToCart();
+  showAddToast();
 }
 
 function removeFromCart(p){
@@ -671,6 +715,39 @@ function updateCartUI(){
   searchInput.style.display = inCartScreen?"none":"block";
   updateOrderSum();
 }
+
+function setupCategoriesMenu(){
+  const orderedCategories = ["Главная","Браслеты","Кулоны","Колье","Обвесы","Серьги","Кольца"];
+  const categoryMap = new Map();
+
+  categoriesEl.querySelectorAll("div").forEach(cat => {
+    categoryMap.set((cat.dataset.category || "").toLowerCase(), cat);
+  });
+
+  categoriesEl.innerHTML = "";
+  orderedCategories.forEach((name, index) => {
+    const existing = categoryMap.get(name.toLowerCase());
+    if(!existing) return;
+    existing.style.order = String(index);
+    existing.style.marginTop = index === 0 ? "0" : "";
+    if(index === 0){
+      existing.style.fontWeight = "700";
+      existing.style.paddingTop = "4px";
+      existing.style.paddingBottom = "10px";
+      existing.style.borderBottom = "1px solid rgba(255,255,255,0.2)";
+      existing.style.marginBottom = "8px";
+    } else {
+      existing.style.fontWeight = "500";
+      existing.style.borderBottom = "";
+      existing.style.marginBottom = "0";
+      existing.style.paddingTop = "";
+      existing.style.paddingBottom = "";
+    }
+    categoriesEl.appendChild(existing);
+  });
+}
+
+setupCategoriesMenu();
 
 // ================== ГАМБУРГЕР ==================
 menuIcon.onclick = ()=> categoriesEl.classList.toggle("show");

@@ -102,7 +102,7 @@ const products = [
 {id:14,name:"Браслет Trifecta",price:4000,image:"https://i.pinimg.com/736x/00/10/85/001085bdd3559fe09db4bfc229dfea3e.jpg",category:"Браслеты",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
 {id:15,name:"Колье Nightfire",price:4000,image:"https://i.pinimg.com/736x/b8/f7/6e/b8f76e177cb9ab24a6b26c8a3a5332ee.jpg",category:"Колье",description:["Материал изделия:","Нержавеющая сталь;","Хирургическая сталь и фианиты.","","Срок изготовления — до 5 рабочих дней."]},
 {id:16,name:"Серьги Biohazard",price:2500,image:"https://i.pinimg.com/736x/17/50/74/175074bab7105ecbc0a4cfc04982275d.jpg",category:"Серьги",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
-{id:17,name:"Серьги Blood Cross",price:2000,image:"https://i.pinimg.com/736x/a5/4a/c4/a54ac493f4b76a1839403bef34ecfad3.jpg",category:"Серьги",description:["Материал иделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
+{id:17,name:"Серьги Blood Cross",price:2000,image:"https://i.pinimg.com/736x/a5/4a/c4/a54ac493f4b76a1839403bef34ecfad3.jpg",category:"Серьги",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
 {id:18,name:"Серьги Cupid's Trick",price:2000,image:"https://i.pinimg.com/736x/c0/58/09/c05809e2aa398e44198a0d06845c0b80.jpg",category:"Серьги",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
 {id:19,name:"Кулон Blackthorn",price:2000,image:"https://i.pinimg.com/736x/e9/d1/ed/e9d1ed17ff723fee65ee8cbd687b8de5.jpg",category:"Кулоны",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
 {id:20,name:"Кулон Seraphim",price:2500,image:"https://i.pinimg.com/736x/ae/ce/f6/aecef69cff58a290c14677449109422f.jpg",category:"Кулоны",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
@@ -249,7 +249,7 @@ function animateAddToCart() {
 function showAddToast(){
   addToast.classList.add("show");
   if(addToastTimeout) clearTimeout(addToastTimeout);
-  addToastTimeout = setTimeout(() => addToast.classList.remove("show"), 500);
+  addToastTimeout = setTimeout(() => addToast.classList.remove("show"), 650);
 }
 
 // ================== КНОПКА КОРЗИНЫ ==================
@@ -382,16 +382,16 @@ style.innerHTML = `
 #orderForm #deliveryInfo,
 #orderForm #promoMessage,
 #orderForm #orderSum {
-  margin-bottom: 10px;
+  margin-bottom: 19px;
 }
 #promoLabel {
-  margin-top: 16px;
+  margin-top: 38px;
 }
 .add-toast {
   position: fixed;
   left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
+  top: 8%;
+  transform: translateX(-50%) translateY(-8px);
   background: rgba(24,24,24,0.92);
   color: #fff;
   border: 1px solid #555;
@@ -401,10 +401,11 @@ style.innerHTML = `
   z-index: 30000;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.15s ease;
+  transition: opacity 0.25s ease, transform 0.25s ease;
 }
 .add-toast.show {
   opacity: 1;
+  transform: translateX(-50%) translateY(0);
 }
 
 `;

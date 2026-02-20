@@ -26,6 +26,24 @@ const orderModal = document.getElementById("orderModal");
 const orderClose = document.getElementById("orderClose");
 const orderForm = document.getElementById("orderForm");
 
+const modalImageWrapper = document.querySelector(".modal-img-wrapper");
+const modalPrevBtn = document.createElement("button");
+const modalNextBtn = document.createElement("button");
+const modalDots = document.createElement("div");
+const modalOptions = document.createElement("div");
+let modalImages = [];
+let modalImageIndex = 0;
+let touchStartX = 0;
+let currentModalProduct = null;
+
+const productOptionConfig = {
+  9: [
+    { label: "Круги", imageIndex: 0 },
+    { label: "Конусы", imageIndex: 1 }
+  ]
+};
+const selectedProductOptions = {};
+
 // ================== ПРОМОКОДЫ ==================
 const promoCodes = {
   "ValentinesDay": 10 // 10% скидка
@@ -70,7 +88,7 @@ const products = [
 {id:6,name:"Обвес Lighter",price:3600,image:"https://i.pinimg.com/736x/09/10/b3/0910b3ff42bac41aedf580f284a59e2a.jpg",category:"Обвесы",description:["Материал изделия:","Фурнитура из нержавеющей стали;","Хирургическая и нержавеющая сталь.","","Срок изготовления — до 5 рабочих дней."]},
 {id:7,name:"Обвес Star",price:2000,image:"https://i.pinimg.com/736x/9b/e1/a5/9be1a5a1213fd3a6b1610ac6ae0ac1af.jpg",category:"Обвесы",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
 {id:8,name:"Серьги Moonlight",price:2000,image:"https://i.pinimg.com/736x/a8/c9/14/a8c9147f95a4e40ecebcb6c9b4e9ad8a.jpg",category:"Серьги",description:["Материал изделия:","Лунные бусины;","Хирургическая сталь;","Фурнитура из нержавеющей и хирургической стали.","","Срок изготовления — до 5 рабочих дней."]},
-{id:9,name:"Кулон ILG",price:2500,image:"https://i.pinimg.com/736x/7d/a6/8b/7da68b9a23b9a56785387c0e2d128121.jpg",category:"Кулоны",description:["Материал изделия:","Хирургическая и нержавеющая сталь.","","Цепочка:","Нержавеющая сталь.","","Срок изготовления - до 5 рабочих дней."]},
+{id:9,name:"Кулон ILG",price:2500,image:"https://i.pinimg.com/736x/7d/a6/8b/7da68b9a23b9a56785387c0e2d128121.jpg",images:["https://i.pinimg.com/736x/7d/a6/8b/7da68b9a23b9a56785387c0e2d128121.jpg","https://i.pinimg.com/736x/66/40/4a/66404aac6b5200512d664e7f00be7f8b.jpg"],category:"Кулоны",description:["Материал изделия:","Хирургическая и нержавеющая сталь.","","Цепочка:","Нержавеющая сталь.","","Срок изготовления - до 5 рабочих дне."]},
 {id:10,name:"Кольчужный топ",price:18000,image:"https://i.pinimg.com/736x/a9/95/24/a995240ff0d58266a65e1edc78c366ed.jpg",category:"Топы",description:["Материал изделия:","Хирургическая сталь","","Срок изготовления — до 14 рабочих дней."]},
 {id:11,name:"Колье Pierced Soul",price:5500,image:"https://i.pinimg.com/736x/70/88/3f/70883f759c7d988eb91565955f9007a5.jpg",category:"Колье",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
 {id:12,name:"Колье Painful Love",price:4000,image:"https://i.pinimg.com/736x/45/99/a2/4599a2f82ad4752fad58113f3125aa1d.jpg",category:"Колье",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
@@ -223,9 +241,9 @@ function animateAddToCart() {
 }
 
 // ================== КНОПКА КОРЗИНЫ ==================
-cartButton.style.position = "fixed"; 
-cartButton.style.top = "10px"; 
-cartButton.style.right = "20px"; 
+cartButton.style.position = "fixed";
+cartButton.style.top = "10px";
+cartButton.style.right = "20px";
 cartButton.style.background = "none";
 cartButton.style.border = "none";
 cartButton.style.fontSize = "28px";
@@ -258,6 +276,65 @@ style.innerHTML = `
   pointer-events: none;
   transition: all 0.2s ease;
 }
+.modal-img-wrapper {
+  position: relative;
+}
+.modal-gallery-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.5);
+  color: #fff;
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+}
+.modal-gallery-btn.prev { left: 8px; }
+.modal-gallery-btn.next { right: 8px; }
+.modal-dots {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin-top: 10px;
+}
+.modal-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.45);
+  padding: 0;
+}
+.modal-dot.active {
+  background: #fff;
+}
+.modal-options {
+  display: none;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 10px;
+}
+.modal-option-btn {
+  border: 1px solid #666;
+  background: #2c2c2c;
+  color: #fff;
+  border-radius: 999px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 13px;
+}
+.modal-option-btn.active {
+  border-color: #fff;
+  background: #444;
+}
 `;
 document.head.appendChild(style);
 
@@ -267,10 +344,10 @@ function updateCartCounter() {
   const counter = document.getElementById("cartCountCircle");
   if(counter) {
     if(c > 0){
-      counter.style.display = "flex";  
+      counter.style.display = "flex";
       counter.textContent = c;
     } else {
-      counter.style.display = "none";  
+      counter.style.display = "none";
     }
   }
 }
@@ -308,12 +385,16 @@ function renderProducts(list){
 
 // ================== КОРЗИНА ==================
 function addToCart(p){
-  let item = cart.find(x=>x.product.id===p.id);
+  const optionIndex = getSelectedOptionIndex(p.id);
+  let item = cart.find(x=>x.product.id===p.id && (x.selectedOptionIndex ?? 0)===optionIndex);
   if(item) item.count++;
-  else cart.push({product: p, count:1});
+  else {
+    item = {product: p, count:1, selectedOptionIndex: optionIndex};
+    cart.push(item);
+  }
   updateCartUI();
   updateCartCounter();
-  if(inCartScreen){ renderProducts(cart.map(i=>i.product)); } 
+  if(inCartScreen){ renderProducts(cart.map(i=>i.product)); }
   else {
     const card = [...productsEl.children].find(c=>c.querySelector("h3")?.textContent===p.name);
     if(card){
@@ -333,18 +414,20 @@ function addToCart(p){
 }
 
 function removeFromCart(p){
-  let item = cart.find(x=>x.product.id===p.id);
+  const optionIndex = getSelectedOptionIndex(p.id);
+  let item = cart.find(x=>x.product.id===p.id && (x.selectedOptionIndex ?? 0)===optionIndex);
+  if(!item) item = cart.find(x=>x.product.id===p.id);
   if(!item) return;
   item.count--;
   if(item.count <= 0) cart = cart.filter(x=>x.product.id!==p.id);
   updateCartUI();
   updateCartCounter();
-  if(inCartScreen){ renderProducts(cart.map(i=>i.product)); } 
+  if(inCartScreen){ renderProducts(cart.map(i=>i.product)); }
   else {
     const card = [...productsEl.children].find(c=>c.querySelector("h3")?.textContent===p.name);
     if(card){
       const controls = card.querySelector(".count-block");
-      if(item.count > 0){ controls.querySelector(".count-number").textContent = item.count; } 
+      if(item.count > 0){ controls.querySelector(".count-number").textContent = item.count; }
       else {
         controls.innerHTML = "";
         const btn = document.createElement("button");
@@ -358,15 +441,143 @@ function removeFromCart(p){
 }
 
 // ================== МОДАЛКА ==================
+if(modalImageWrapper){
+  modalPrevBtn.className = "modal-gallery-btn prev";
+  modalPrevBtn.innerHTML = "&#8249;";
+  modalNextBtn.className = "modal-gallery-btn next";
+  modalNextBtn.innerHTML = "&#8250;";
+  modalDots.className = "modal-dots";
+  modalOptions.className = "modal-options";
+  modalImageWrapper.append(modalPrevBtn, modalNextBtn);
+  modalImageWrapper.insertAdjacentElement("afterend", modalDots);
+  modalDots.insertAdjacentElement("afterend", modalOptions);
+
+  modalPrevBtn.onclick = (e) => { e.stopPropagation(); changeModalImage(-1); };
+  modalNextBtn.onclick = (e) => { e.stopPropagation(); changeModalImage(1); };
+
+  modalImageWrapper.addEventListener("touchstart", (e) => {
+    touchStartX = e.changedTouches[0].clientX;
+  });
+  modalImageWrapper.addEventListener("touchend", (e) => {
+    const delta = e.changedTouches[0].clientX - touchStartX;
+    if(Math.abs(delta) > 40){
+      changeModalImage(delta > 0 ? -1 : 1);
+    }
+  });
+}
+
+function getProductImages(p){
+  return Array.isArray(p.images) && p.images.length ? p.images : [p.image];
+}
+
+function getSelectedOptionIndex(productId){
+  return selectedProductOptions[productId] ?? 0;
+}
+
+function setSelectedOption(productId, optionIndex){
+  selectedProductOptions[productId] = optionIndex;
+}
+
+function getCartProductLabel(item){
+  const options = productOptionConfig[item.product.id];
+  if(!options || !options.length) return item.product.name;
+  const selectedIndex = item.selectedOptionIndex ?? getSelectedOptionIndex(item.product.id);
+  const selectedOption = options[selectedIndex] || options[0];
+  return `${item.product.name} (${selectedOption.label})`;
+}
+
+function renderProductOptions(p){
+  const options = productOptionConfig[p.id];
+  modalOptions.innerHTML = "";
+
+  if(!options || !options.length){
+    modalOptions.style.display = "none";
+    return;
+  }
+
+  const selectedIndex = getSelectedOptionIndex(p.id);
+  options.forEach((option, idx) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "modal-option-btn" + (idx === selectedIndex ? " active" : "");
+    btn.textContent = option.label;
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      setSelectedOption(p.id, idx);
+      modalImageIndex = option.imageIndex;
+      renderModalImage();
+      renderProductOptions(p);
+    };
+    modalOptions.appendChild(btn);
+  });
+
+  modalOptions.style.display = "flex";
+}
+
+function renderModalImage(){
+  if(!modalImages.length) return;
+  modalImageIndex = Math.max(0, Math.min(modalImageIndex, modalImages.length - 1));
+  modalImage.src = modalImages[modalImageIndex];
+  modalDots.innerHTML = "";
+  modalImages.forEach((_, idx) => {
+    const dot = document.createElement("button");
+    dot.className = "modal-dot" + (idx === modalImageIndex ? " active" : "");
+    dot.onclick = (e) => {
+      e.stopPropagation();
+      modalImageIndex = idx;
+      renderModalImage();
+    };
+    modalDots.appendChild(dot);
+  });
+}
+
+function changeModalImage(step){
+  if(modalImages.length < 2) return;
+  modalImageIndex = (modalImageIndex + step + modalImages.length) % modalImages.length;
+
+  if(currentModalProduct){
+    const options = productOptionConfig[currentModalProduct.id];
+    if(options?.length){
+      const matchedIdx = options.findIndex(option => option.imageIndex === modalImageIndex);
+      if(matchedIdx >= 0) setSelectedOption(currentModalProduct.id, matchedIdx);
+      renderProductOptions(currentModalProduct);
+    }
+  }
+
+  renderModalImage();
+}
+
 function openModal(p){
-  modalImage.src=p.image;
+  currentModalProduct = p;
+  modalImages = getProductImages(p);
+  const options = productOptionConfig[p.id];
+  const selectedIndex = getSelectedOptionIndex(p.id);
+  if(options?.[selectedIndex]){
+    modalImageIndex = options[selectedIndex].imageIndex;
+  } else {
+    modalImageIndex = 0;
+  }
+  renderModalImage();
+  renderProductOptions(p);
+
+  const hasGallery = modalImages.length > 1;
+  modalPrevBtn.style.display = hasGallery ? "flex" : "none";
+  modalNextBtn.style.display = hasGallery ? "flex" : "none";
+  modalDots.style.display = hasGallery ? "flex" : "none";
+
+  modalImage.alt = p.name;
   modalTitle.textContent=p.name;
   modalPrice.textContent=p.price+" ₽";
   modalDescription.innerHTML=p.description.join("<br>");
   modal.style.display="flex";
 }
-modalClose.onclick = ()=>modal.style.display="none";
-modal.onclick = e=>{if(e.target===modal) modal.style.display="none";}
+modalClose.onclick = ()=>{ modal.style.display="none"; currentModalProduct = null; };
+modal.onclick = e=>{if(e.target===modal) { modal.style.display="none"; currentModalProduct = null; }};
+document.addEventListener("keydown", (e) => {
+  if(modal.style.display !== "flex") return;
+  if(e.key === "ArrowLeft") changeModalImage(-1);
+  if(e.key === "ArrowRight") changeModalImage(1);
+});
 
 // ================== КОРЗИНА НА ГЛАВНОЙ ==================
 cartButton.onclick = ()=>{ if(!cart.length) return alert("Корзина пуста!"); inCartScreen = true; document.body.classList.add("cart-mode"); renderProducts(cart.map(i=>i.product)); };
@@ -377,7 +588,7 @@ function updateCartUI(){
   const c = cart.reduce((s,i)=>s+i.count,0);
   const t = cart.reduce((s,i)=>s+i.count*i.product.price,0);
   cartCount.textContent = c;
-  cartTotal.textContent = t?"Итого: "+t+" ₽":"";  
+  cartTotal.textContent = t?"Итого: "+t+" ₽":"";
   cartTotal.style.display = inCartScreen?"block":"none";
   checkoutButton.style.display = c && inCartScreen?"block":"none";
   footerButtons.style.display = inCartScreen?"none":"flex";
@@ -388,7 +599,7 @@ function updateCartUI(){
 // ================== ГАМБУРГЕР ==================
 menuIcon.onclick = ()=> categoriesEl.classList.toggle("show");
 categoriesEl.querySelectorAll("div").forEach(cat=>{
-  cat.onclick = ()=>{ currentCategory = cat.dataset.category; inCartScreen=false; categoriesEl.classList.remove("show"); renderProducts(getCurrentList()); }
+  cat.onclick = ()=>{ currentCategory = cat.dataset.category; inCartScreen=false; categoriesEl.classList.remove("show"); renderProducts(getCurrentList()); };
 });
 
 // ================== КЛИК ПО ПУСТОМУ МЕСТУ ==================
@@ -451,7 +662,7 @@ orderForm.onsubmit = async (e) => {
     telegram: fd.get("telegram"),
     delivery: fd.get("delivery"),
     address: fd.get("address"),
-    products: cart.map(i=>`• ${i.product.name} x${i.count}`).join("\n"),
+    products: cart.map(i=>`• ${getCartProductLabel(i)} x${i.count}`).join("\n"),
     total
   };
 

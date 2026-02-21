@@ -43,8 +43,8 @@ let currentModalProduct = null;
 
 const productOptionConfig = {
   9: [
-    { label: "Конус", imageIndex: 0 },
-    { label: "Круг", imageIndex: 1 }
+    { label: "Конусы", imageIndex: 0 },
+    { label: "Круги", imageIndex: 1 }
   ]
 };
 const selectedProductOptions = {};
@@ -672,6 +672,10 @@ function renderProductOptions(p){
     btn.onclick = (e) => {
       e.stopPropagation();
       setSelectedOption(p.id, idx);
+      if(typeof option.imageIndex === "number" && modalImages.length){
+        modalImageIndex = Math.max(0, Math.min(option.imageIndex, modalImages.length - 1));
+        renderModalImage();
+      }
       hideOptionWarning();
       renderProductOptions(p);
       renderModalCounterControls();

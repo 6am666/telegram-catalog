@@ -931,3 +931,9 @@ orderForm.onsubmit = async (e) => {
     document.body.removeChild(waitModal);
     return;
   }
+
+  // ================== СТАРТ ==================
+renderProducts(products);
+updateCartUI();
+updateOrderSum();
+updateCartCounter();

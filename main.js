@@ -45,6 +45,11 @@ const productOptionConfig = {
   9: [
     { label: "Конусы", imageIndex: 0 },
     { label: "Круги", imageIndex: 1 }
+  ],
+  22: [
+    { label: "Сердце", imageIndex: 0 },
+    { label: "Шип", imageIndex: 1 },
+    { label: "Ракушка", imageIndex: 2 }
   ]
 };
 const selectedProductOptions = {};
@@ -106,7 +111,7 @@ const products = [
 {id:19,name:"Кулон Blackthorn",price:2000,image:"https://i.pinimg.com/736x/e9/d1/ed/e9d1ed17ff723fee65ee8cbd687b8de5.jpg",category:"Кулоны",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
 {id:20,name:"Кулон Seraphim",price:2500,image:"https://i.pinimg.com/736x/ae/ce/f6/aecef69cff58a290c14677449109422f.jpg",category:"Кулоны",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
 {id:21,name:"Кулон RE:",price:2100,image:"https://i.pinimg.com/736x/a3/d3/a6/a3d3a6123076477ec7a24c4157ab7b06.jpg",category:"Кулоны",description:["Материал изделия:","Ракушка;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
-{id:22,name:"Кулон Mizzle",price:2000,image:"https://i.pinimg.com/736x/7f/49/b7/7f49b72404123edf6cd5bc94059ca04a.jpg",category:"Кулоны",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
+{id:22,name:"Кулон Mizzle",price:2000,image:"https://i.pinimg.com/736x/e1/e6/7f/e1e67f73a9a96a718959ea955f740daa.jpg",images:["https://i.pinimg.com/736x/e1/e6/7f/e1e67f73a9a96a718959ea955f740daa.jpg","https://i.pinimg.com/736x/c5/57/9c/c5579c8bb46c3cbb01acbba2c55eac04.jpg","https://i.pinimg.com/736x/6a/d2/6b/6ad26ba1cc766d286a43ff570789e88b.jpg"],category:"Кулоны",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
 {id:23,name:"Кольцо Labyrinth",price:2500,image:"https://i.pinimg.com/736x/fd/6a/de/fd6ade96f19faca8bb934659636794d4.jpg",category:"Кольца",description:["Материал изделия:","Хирургическая сталь.","","Срок изготовления — до 5 рабочих дней."]},
 ];
 

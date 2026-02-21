@@ -31,7 +31,6 @@ const modalPrevBtn = document.createElement("button");
 const modalNextBtn = document.createElement("button");
 const modalDots = document.createElement("div");
 const modalOptionsPanel = document.createElement("div");
-const modalOptionWarning = document.createElement("div");
 const modalOptions = document.createElement("div");
 const modalActions = document.createElement("div");
 const modalBuyBtn = document.createElement("button");
@@ -329,13 +328,6 @@ style.innerHTML = `
   border-radius: 10px;
   padding: 10px;
 }
-.modal-option-warning {
-  display: none;
-  font-size: 12px;
-  color: #ffb3b3;
-  margin-bottom: 8px;
-  text-align: center;
-}
 .modal-options {
   display: flex;
   gap: 8px;
@@ -359,20 +351,13 @@ style.innerHTML = `
   gap: 10px;
   margin-top: 14px;
 }
-.modal-actions > * {
-  flex: 1;
-}
-.modal-actions .count-block {
-  margin-top: 0;
-}
 .modal-action-btn {
-  border: none;
+  flex: 1;
+  border: 1px solid #777;
   border-radius: 8px;
   padding: 10px 12px;
   cursor: pointer;
   font-size: 14px;
-  min-height: 40px;
-  outline: none;
 }
 .modal-action-btn.buy {
   background: #2c2c2c;
@@ -381,21 +366,6 @@ style.innerHTML = `
 .modal-action-btn.cart {
   background: #2c2c2c;
   color: #fff;
-}
-.micro-btn {
-  border: none;
-  border-radius: 8px;
-  background: #2c2c2c;
-  color: #fff;
-  padding: 10px 12px;
-  font-size: 14px;
-  cursor: pointer;
-  min-height: 40px;
-  width: 100%;
-  outline: none;
-}
-.micro-btn:hover {
-  background: #555;
 }
 #orderForm label,
 #orderForm input,
@@ -439,16 +409,6 @@ function findCartItemByProduct(product, selectedOptionIndex){
   return cart.find(item => item.product.id===product.id && (item.selectedOptionIndex ?? null)===(selectedOptionIndex ?? null));
 }
 
-function getProductTotalCount(productId){
-  return cart.filter(item => item.product.id === productId).reduce((sum, item) => sum + item.count, 0);
-}
-
-function removeAnyVariantFromCart(product){
-  const firstVariant = cart.find(item => item.product.id === product.id);
-  if(!firstVariant) return;
-  removeFromCart(product, firstVariant.selectedOptionIndex ?? null);
-}
-
 // ================== РЕНДЕР ==================
 function renderProducts(list){
   productsEl.innerHTML="";
@@ -461,44 +421,17 @@ function renderProducts(list){
 
     const controls=document.createElement("div"); controls.className="count-block";
     const selectedOptionIndex = p.selectedOptionIndex ?? null;
-    const hasOptions = Array.isArray(productOptionConfig[originalProduct.id]);
+    const item = findCartItemByProduct(originalProduct, selectedOptionIndex);
 
-    if(inCartScreen){
-      const item = findCartItemByProduct(originalProduct, selectedOptionIndex);
-      if(item){
-        const minus = document.createElement("button"); minus.textContent="–"; minus.onclick=e=>{e.stopPropagation(); removeFromCart(originalProduct, selectedOptionIndex)};
-        const count = document.createElement("div"); count.className="count-number"; count.textContent=item.count;
-        const plus = document.createElement("button"); plus.textContent="+"; plus.onclick=e=>{e.stopPropagation(); addToCart(originalProduct, selectedOptionIndex)};
-        controls.append(minus,count,plus);
-      } else {
-        const btn = document.createElement("button"); btn.textContent="В корзину"; btn.onclick=e=>{e.stopPropagation(); addToCart(originalProduct, selectedOptionIndex)};
-        btn.classList.add("micro-btn");
-        controls.appendChild(btn);
-      }
-    } else if(hasOptions){
-      const totalCount = getProductTotalCount(originalProduct.id);
-      if(totalCount > 0){
-        const minus = document.createElement("button"); minus.textContent="–"; minus.onclick=e=>{e.stopPropagation(); removeAnyVariantFromCart(originalProduct)};
-        const count = document.createElement("div"); count.className="count-number"; count.textContent=totalCount;
-        const plus = document.createElement("button"); plus.textContent="+"; plus.onclick=e=>{e.stopPropagation(); addToCart(originalProduct)};
-        controls.append(minus,count,plus);
-      } else {
-        const btn = document.createElement("button"); btn.textContent="В корзину"; btn.onclick=e=>{e.stopPropagation(); addToCart(originalProduct)};
-        btn.classList.add("micro-btn");
-        controls.appendChild(btn);
-      }
-    } else {
-      const item = findCartItemByProduct(originalProduct, null);
-      if(item){
-        const minus = document.createElement("button"); minus.textContent="–"; minus.onclick=e=>{e.stopPropagation(); removeFromCart(originalProduct, null)};
-        const count = document.createElement("div"); count.className="count-number"; count.textContent=item.count;
-        const plus = document.createElement("button"); plus.textContent="+"; plus.onclick=e=>{e.stopPropagation(); addToCart(originalProduct, null)};
-        controls.append(minus,count,plus);
-      } else {
-        const btn = document.createElement("button"); btn.textContent="В корзину"; btn.onclick=e=>{e.stopPropagation(); addToCart(originalProduct, null)};
-        btn.classList.add("micro-btn");
-        controls.appendChild(btn);
-      }
+    if(item){
+      const minus = document.createElement("button"); minus.textContent="–"; minus.onclick=e=>{e.stopPropagation(); removeFromCart(originalProduct, selectedOptionIndex)};
+      const count = document.createElement("div"); count.className="count-number"; count.textContent=item.count;
+      const plus = document.createElement("button"); plus.textContent="+"; plus.onclick=e=>{e.stopPropagation(); addToCart(originalProduct, selectedOptionIndex)};
+      controls.append(minus,count,plus);
+    }else{
+      const btn = document.createElement("button"); btn.textContent="В корзину"; btn.onclick=e=>{e.stopPropagation(); addToCart(originalProduct, selectedOptionIndex)};
+      btn.classList.add("micro-btn");
+      controls.appendChild(btn);
     }
 
     card.append(img,title,price,controls);
@@ -512,11 +445,6 @@ function renderProducts(list){
 // ================== КОРЗИНА ==================
 function addToCart(p, forcedOptionIndex){
   const hasOptions = Array.isArray(productOptionConfig[p.id]);
-  if(!inCartScreen && hasOptions && forcedOptionIndex === undefined){
-    openModal(p);
-    showOptionWarning("Пожалуйста, выберете тип товара перед добавлением в корзину");
-    return;
-  }
   const selectedOptionIndex = forcedOptionIndex !== undefined ? forcedOptionIndex : getSelectedOptionIndex(p.id);
   const optionIndex = hasOptions ? selectedOptionIndex : null;
 
@@ -557,9 +485,8 @@ if(modalImageWrapper){
   modalDots.className = "modal-dots";
 
   modalOptionsPanel.className = "modal-option-panel";
-  modalOptionWarning.className = "modal-option-warning";
   modalOptions.className = "modal-options";
-  modalOptionsPanel.append(modalOptionWarning, modalOptions);
+  modalOptionsPanel.appendChild(modalOptions);
 
   modalActions.className = "modal-actions";
   modalBuyBtn.type = "button";
@@ -626,7 +553,6 @@ function renderProductOptions(p){
     btn.onclick = (e) => {
       e.stopPropagation();
       setSelectedOption(p.id, idx);
-      hideOptionWarning();
       renderProductOptions(p);
       renderModalCounterControls();
     };
@@ -641,21 +567,10 @@ function ensureModalOptionSelected(){
   const options = productOptionConfig[currentModalProduct.id];
   if(!options || !options.length) return true;
   if(getSelectedOptionIndex(currentModalProduct.id) === null){
-    showOptionWarning("Пожалуйста, выберете тип товара перед добавлением в корзину");
+    alert("Пожалуйста, выберите пресет перед добавлением в корзину");
     return false;
   }
-  hideOptionWarning();
   return true;
-}
-
-function showOptionWarning(message){
-  modalOptionWarning.textContent = message;
-  modalOptionWarning.style.display = "block";
-}
-
-function hideOptionWarning(){
-  modalOptionWarning.textContent = "";
-  modalOptionWarning.style.display = "none";
 }
 
 function renderModalCounterControls(){
@@ -688,7 +603,7 @@ function renderModalCounterControls(){
   } else {
     const addBtn = document.createElement("button");
     addBtn.type = "button";
-    addBtn.className = "modal-action-btn cart";
+    addBtn.className = "micro-btn";
     addBtn.textContent = "В корзину";
     addBtn.onclick = (e) => {
       e.stopPropagation();
@@ -741,7 +656,6 @@ function openModal(p){
   renderModalImage();
   renderProductOptions(p);
   renderModalCounterControls();
-  hideOptionWarning();
 
   const hasGallery = modalImages.length > 1;
   modalPrevBtn.style.display = hasGallery ? "flex" : "none";
@@ -932,7 +846,37 @@ orderForm.onsubmit = async (e) => {
     return;
   }
 
-  // ================== СТАРТ ==================
+  setTimeout(() => {
+    if(document.body.contains(waitModal)) document.body.removeChild(waitModal);
+    const thankModal = document.createElement("div");
+    thankModal.style.position="fixed";
+    thankModal.style.top="0";
+    thankModal.style.left="0";
+    thankModal.style.width="100%";
+    thankModal.style.height="100%";
+    thankModal.style.backgroundColor="rgba(44,44,44,0.95)";
+    thankModal.style.color="#fff";
+    thankModal.style.display="flex";
+    thankModal.style.alignItems="center";
+    thankModal.style.justifyContent = "center";
+    thankModal.style.fontSize = "18px";
+    thankModal.style.textAlign = "center";
+    thankModal.style.padding = "20px";
+    thankModal.style.zIndex = 9999;
+    thankModal.style.cursor = "pointer";
+    thankModal.style.flexDirection = "column";
+    thankModal.innerText = "СПАСИБО ЗА ВЫБОР CHRONICLE CHAINS!\n\nМЫ УЖЕ ПРИНЯЛИ ВАШ ЗАКАЗ И НАЧИНАЕМ ЕГО СОБИРАТЬ <3\n\nС вами свяжутся когда посылка будет отправлена!!";
+
+    thankModal.onclick = () => {
+      document.body.removeChild(thankModal);
+      isSubmitting = false;
+    };
+
+    document.body.appendChild(thankModal);
+  }, 10000);
+};
+
+// ================== СТАРТ ==================
 renderProducts(products);
 updateCartUI();
 updateOrderSum();

@@ -439,23 +439,6 @@ function findCartItemByProduct(product, selectedOptionIndex){
   return cart.find(item => item.product.id===product.id && (item.selectedOptionIndex ?? null)===(selectedOptionIndex ?? null));
 }
 
-function getProductCartCount(productId){
-  return cart
-    .filter(item => item.product.id === productId)
-    .reduce((sum, item) => sum + item.count, 0);
-}
-
-function getFilteredCurrentList(){
-  const query = searchInput.value.toLowerCase().trim();
-  const baseList = getCurrentList();
-  if(!query) return baseList;
-  return baseList.filter(p => (p.displayName || p.name).toLowerCase().includes(query));
-}
-
-function refreshProductList(){
-  renderProducts(getFilteredCurrentList());
-}
-
 // ================== РЕНДЕР ==================
 function renderProducts(list){
   productsEl.innerHTML="";
@@ -468,35 +451,17 @@ function renderProducts(list){
 
     const controls=document.createElement("div"); controls.className="count-block";
     const selectedOptionIndex = p.selectedOptionIndex ?? null;
-    const productCount = inCartScreen
-      ? (findCartItemByProduct(originalProduct, selectedOptionIndex)?.count || 0)
-      : getProductCartCount(originalProduct.id);
+    const item = inCartScreen
+      ? findCartItemByProduct(originalProduct, selectedOptionIndex)
+      : cart.find(cartItem => cartItem.product.id === originalProduct.id);
 
-    if(productCount > 0){
-      const minus = document.createElement("button");
-      minus.textContent="–";
-      minus.onclick=e=>{
-        e.stopPropagation();
-        if(!inCartScreen && Array.isArray(productOptionConfig[originalProduct.id])) return openModal(originalProduct);
-        removeFromCart(originalProduct, selectedOptionIndex);
-      };
-      const count = document.createElement("div"); count.className="count-number"; count.textContent=productCount;
-      const plus = document.createElement("button");
-      plus.textContent="+";
-      plus.onclick=e=>{
-        e.stopPropagation();
-        if(!inCartScreen) return addToCart(originalProduct);
-        addToCart(originalProduct, selectedOptionIndex);
-      };
+    if(item){
+      const minus = document.createElement("button"); minus.textContent="–"; minus.onclick=e=>{e.stopPropagation(); removeFromCart(originalProduct, selectedOptionIndex)};
+      const count = document.createElement("div"); count.className="count-number"; count.textContent=item.count;
+      const plus = document.createElement("button"); plus.textContent="+"; plus.onclick=e=>{e.stopPropagation(); addToCart(originalProduct, selectedOptionIndex)};
       controls.append(minus,count,plus);
     }else{
-      const btn = document.createElement("button");
-      btn.textContent="В корзину";
-      btn.onclick=e=>{
-        e.stopPropagation();
-        if(!inCartScreen) return addToCart(originalProduct);
-        addToCart(originalProduct, selectedOptionIndex);
-      };
+      const btn = document.createElement("button"); btn.textContent="В корзину"; btn.onclick=e=>{e.stopPropagation(); addToCart(originalProduct, selectedOptionIndex)};
       btn.classList.add("micro-btn");
       controls.appendChild(btn);
     }
@@ -512,7 +477,7 @@ function renderProducts(list){
 // ================== КОРЗИНА ==================
 function addToCart(p, forcedOptionIndex){
   const hasOptions = Array.isArray(productOptionConfig[p.id]);
-  if(!inCartScreen && hasOptions && (forcedOptionIndex === undefined || forcedOptionIndex === null)){
+  if(!inCartScreen && hasOptions && forcedOptionIndex === undefined){
     openModal(p);
     showOptionWarning("Пожалуйста, выберете тип товара перед добавлением в корзину");
     return;
@@ -528,7 +493,7 @@ function addToCart(p, forcedOptionIndex){
   }
   updateCartUI();
   updateCartCounter();
-  refreshProductList();
+  if(inCartScreen){ renderProducts(getCurrentList()); }
   if(currentModalProduct && currentModalProduct.id===p.id){ renderModalCounterControls(); }
   animateAddToCart();
 }
@@ -544,7 +509,7 @@ function removeFromCart(p, forcedOptionIndex){
   if(item.count <= 0) cart = cart.filter(x => getCartItemKey(x.product.id, x.selectedOptionIndex)!==getCartItemKey(p.id, optionIndex));
   updateCartUI();
   updateCartCounter();
-  refreshProductList();
+  if(inCartScreen){ renderProducts(getCurrentList()); }
   if(currentModalProduct && currentModalProduct.id===p.id){ renderModalCounterControls(); }
 }
 
@@ -563,7 +528,7 @@ if(modalImageWrapper){
 
   modalActions.className = "modal-actions";
   modalBuyBtn.type = "button";
-  modalBuyBtn.className = "micro-btn";
+  modalBuyBtn.className = "modal-action-btn buy";
   modalBuyBtn.textContent = "Купить";
   modalCounterControls.className = "count-block";
   modalActions.append(modalBuyBtn, modalCounterControls);
@@ -831,7 +796,7 @@ categoriesEl.querySelectorAll("div").forEach(cat=>{
 document.addEventListener("click", (e)=>{ if(!categoriesEl.contains(e.target) && !menuIcon.contains(e.target) && e.target !== searchInput){ categoriesEl.classList.remove("show"); searchInput.blur(); } });
 
 // ================== ПОИСК ==================
-searchInput.oninput = refreshProductList;
+searchInput.oninput = ()=>{ const val = searchInput.value.toLowerCase(); renderProducts(getCurrentList().filter(p=>p.name.toLowerCase().includes(val))); };
 
 // ================== GET LIST ==================
 function getCurrentList(){
@@ -938,8 +903,31 @@ orderForm.onsubmit = async (e) => {
     thankModal.style.position="fixed";
     thankModal.style.top="0";
     thankModal.style.left="0";
+    thankModal.style.width="100%";
+    thankModal.style.height="100%";
+    thankModal.style.backgroundColor="rgba(44,44,44,0.95)";
+    thankModal.style.color="#fff";
+    thankModal.style.display="flex";
+    thankModal.style.alignItems="center";
+    thankModal.style.justifyContent = "center";
+    thankModal.style.fontSize = "18px";
+    thankModal.style.textAlign = "center";
+    thankModal.style.padding = "20px";
+    thankModal.style.zIndex = 9999;
+    thankModal.style.cursor = "pointer";
+    thankModal.style.flexDirection = "column";
+    thankModal.innerText = "СПАСИБО ЗА ВЫБОР CHRONICLE CHAINS!\n\nМЫ УЖЕ ПРИНЯЛИ ВАШ ЗАКАЗ И НАЧИНАЕМ ЕГО СОБИРАТЬ <3\n\nС вами свяжутся когда посылка будет отправлена!!";
 
-    // ================== СТАРТ ==================
+    thankModal.onclick = () => {
+      document.body.removeChild(thankModal);
+      isSubmitting = false;
+    };
+
+    document.body.appendChild(thankModal);
+  }, 10000);
+};
+
+// ================== СТАРТ ==================
 renderProducts(products);
 updateCartUI();
 updateOrderSum();

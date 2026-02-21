@@ -264,6 +264,15 @@ cartButton.innerHTML = `🛒<span id="cartCountCircle" style="display:none"></sp
 
 const style = document.createElement("style");
 style.innerHTML = `
+body,
+body.cart-mode,
+body.tab-mode {
+  background-image:url("https://i.pinimg.com/originals/6d/7c/65/6d7c65bbef77082a19ff4a2a2327d50d.jpg") !important;
+  background-size:cover !important;
+  background-position:center center !important;
+  background-attachment:fixed !important;
+  background-repeat:no-repeat !important;
+}
 #cartCountCircle {
   position: absolute;
   top: -6px;
@@ -323,6 +332,7 @@ style.innerHTML = `
 }
 .modal-option-panel {
   display: none;
+  position: relative;
   margin-top: 10px;
   margin-bottom: 10px;
   background: #252525;
@@ -331,10 +341,18 @@ style.innerHTML = `
 }
 .modal-option-warning {
   display: none;
-  font-size: 12px;
-  color: #ffb3b3;
-  margin-bottom: 8px;
+  position: absolute;
+  left: 50%;
+  top: -30px;
+  transform: translateX(-50%);
+  font-size: 11px;
+  color: #ffdfdf;
+  background: rgba(170, 40, 40, 0.92);
+  border-radius: 999px;
+  padding: 4px 10px;
   text-align: center;
+  white-space: nowrap;
+  z-index: 4;
 }
 .modal-options {
   display: flex;
@@ -461,6 +479,55 @@ function refreshProductList(){
   renderProducts(getFilteredCurrentList());
 }
 
+function renderProductControls(controls, originalProduct, selectedOptionIndex){
+  const productCount = inCartScreen
+    ? (findCartItemByProduct(originalProduct, selectedOptionIndex)?.count || 0)
+    : getProductCartCount(originalProduct.id);
+
+  controls.innerHTML = "";
+
+  if(productCount > 0){
+    const minus = document.createElement("button");
+    minus.textContent="–";
+    minus.onclick=e=>{
+      e.stopPropagation();
+      if(!inCartScreen && Array.isArray(productOptionConfig[originalProduct.id])) return openModal(originalProduct);
+      removeFromCart(originalProduct, selectedOptionIndex);
+    };
+    const count = document.createElement("div");
+    count.className="count-number";
+    count.textContent=productCount;
+    const plus = document.createElement("button");
+    plus.textContent="+";
+    plus.onclick=e=>{
+      e.stopPropagation();
+      if(!inCartScreen) return addToCart(originalProduct);
+      addToCart(originalProduct, selectedOptionIndex);
+    };
+    controls.append(minus,count,plus);
+  }else{
+    const btn = document.createElement("button");
+    btn.textContent="В корзину";
+    btn.onclick=e=>{
+      e.stopPropagation();
+      if(!inCartScreen) return addToCart(originalProduct);
+      addToCart(originalProduct, selectedOptionIndex);
+    };
+    btn.classList.add("micro-btn");
+    controls.appendChild(btn);
+  }
+}
+
+function updateVisibleProductCardControls(productId){
+  if(inCartScreen) return;
+  productsEl.querySelectorAll('.count-block').forEach(controls => {
+    const cardProductId = Number(controls.dataset.productId || 0);
+    if(cardProductId !== productId) return;
+    const selectedOptionIndex = controls.dataset.selectedOptionIndex === "" ? null : Number(controls.dataset.selectedOptionIndex);
+    renderProductControls(controls, controls._originalProduct, selectedOptionIndex);
+  });
+}
+
 // ================== РЕНДЕР ==================
 function renderProducts(list){
   productsEl.innerHTML="";
@@ -473,38 +540,10 @@ function renderProducts(list){
 
     const controls=document.createElement("div"); controls.className="count-block";
     const selectedOptionIndex = p.selectedOptionIndex ?? null;
-    const productCount = inCartScreen
-      ? (findCartItemByProduct(originalProduct, selectedOptionIndex)?.count || 0)
-      : getProductCartCount(originalProduct.id);
-
-    if(productCount > 0){
-      const minus = document.createElement("button");
-      minus.textContent="–";
-      minus.onclick=e=>{
-        e.stopPropagation();
-        if(!inCartScreen && Array.isArray(productOptionConfig[originalProduct.id])) return openModal(originalProduct);
-        removeFromCart(originalProduct, selectedOptionIndex);
-      };
-      const count = document.createElement("div"); count.className="count-number"; count.textContent=productCount;
-      const plus = document.createElement("button");
-      plus.textContent="+";
-      plus.onclick=e=>{
-        e.stopPropagation();
-        if(!inCartScreen) return addToCart(originalProduct);
-        addToCart(originalProduct, selectedOptionIndex);
-      };
-      controls.append(minus,count,plus);
-    }else{
-      const btn = document.createElement("button");
-      btn.textContent="В корзину";
-      btn.onclick=e=>{
-        e.stopPropagation();
-        if(!inCartScreen) return addToCart(originalProduct);
-        addToCart(originalProduct, selectedOptionIndex);
-      };
-      btn.classList.add("micro-btn");
-      controls.appendChild(btn);
-    }
+    controls.dataset.productId = String(originalProduct.id);
+    controls.dataset.selectedOptionIndex = selectedOptionIndex ?? "";
+    controls._originalProduct = originalProduct;
+    renderProductControls(controls, originalProduct, selectedOptionIndex);
 
     card.append(img,title,price,controls);
     productsEl.appendChild(card);
@@ -519,7 +558,7 @@ function addToCart(p, forcedOptionIndex){
   const hasOptions = Array.isArray(productOptionConfig[p.id]);
   if(!inCartScreen && hasOptions && (forcedOptionIndex === undefined || forcedOptionIndex === null)){
     openModal(p);
-    showOptionWarning("Пожалуйста, выберете тип товара перед добавлением в корзину");
+    showOptionWarning("Выберите тип товара");
     return;
   }
   const selectedOptionIndex = forcedOptionIndex !== undefined ? forcedOptionIndex : getSelectedOptionIndex(p.id);
@@ -533,7 +572,8 @@ function addToCart(p, forcedOptionIndex){
   }
   updateCartUI();
   updateCartCounter();
-  refreshProductList();
+  if(inCartScreen) refreshProductList();
+  else updateVisibleProductCardControls(p.id);
   if(currentModalProduct && currentModalProduct.id===p.id){ renderModalCounterControls(); }
   animateAddToCart();
 }
@@ -549,7 +589,8 @@ function removeFromCart(p, forcedOptionIndex){
   if(item.count <= 0) cart = cart.filter(x => getCartItemKey(x.product.id, x.selectedOptionIndex)!==getCartItemKey(p.id, optionIndex));
   updateCartUI();
   updateCartCounter();
-  refreshProductList();
+  if(inCartScreen) refreshProductList();
+  else updateVisibleProductCardControls(p.id);
   if(currentModalProduct && currentModalProduct.id===p.id){ renderModalCounterControls(); }
 }
 
@@ -646,7 +687,7 @@ function ensureModalOptionSelected(){
   const options = productOptionConfig[currentModalProduct.id];
   if(!options || !options.length) return true;
   if(getSelectedOptionIndex(currentModalProduct.id) === null){
-    showOptionWarning("Пожалуйста, выберете тип товара перед добавлением в корзину");
+    showOptionWarning("Выберите тип товара");
     return false;
   }
   hideOptionWarning();

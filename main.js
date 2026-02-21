@@ -31,6 +31,7 @@ const modalPrevBtn = document.createElement("button");
 const modalNextBtn = document.createElement("button");
 const modalDots = document.createElement("div");
 const modalOptionsPanel = document.createElement("div");
+const modalOptionWarning = document.createElement("div");
 const modalOptions = document.createElement("div");
 const modalActions = document.createElement("div");
 const modalBuyBtn = document.createElement("button");
@@ -328,6 +329,13 @@ style.innerHTML = `
   border-radius: 10px;
   padding: 10px;
 }
+.modal-option-warning {
+  display: none;
+  font-size: 12px;
+  color: #ffb3b3;
+  margin-bottom: 8px;
+  text-align: center;
+}
 .modal-options {
   display: flex;
   gap: 8px;
@@ -351,13 +359,20 @@ style.innerHTML = `
   gap: 10px;
   margin-top: 14px;
 }
-.modal-action-btn {
+.modal-actions > * {
   flex: 1;
-  border: 1px solid #777;
+}
+.modal-actions .count-block {
+  margin-top: 0;
+}
+.modal-action-btn {
+  border: none;
   border-radius: 8px;
   padding: 10px 12px;
   cursor: pointer;
   font-size: 14px;
+  min-height: 40px;
+  outline: none;
 }
 .modal-action-btn.buy {
   background: #2c2c2c;
@@ -366,6 +381,21 @@ style.innerHTML = `
 .modal-action-btn.cart {
   background: #2c2c2c;
   color: #fff;
+}
+.micro-btn {
+  border: none;
+  border-radius: 8px;
+  background: #2c2c2c;
+  color: #fff;
+  padding: 10px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  min-height: 40px;
+  width: 100%;
+  outline: none;
+}
+.micro-btn:hover {
+  background: #555;
 }
 #orderForm label,
 #orderForm input,
@@ -421,7 +451,9 @@ function renderProducts(list){
 
     const controls=document.createElement("div"); controls.className="count-block";
     const selectedOptionIndex = p.selectedOptionIndex ?? null;
-    const item = findCartItemByProduct(originalProduct, selectedOptionIndex);
+    const item = inCartScreen
+      ? findCartItemByProduct(originalProduct, selectedOptionIndex)
+      : cart.find(cartItem => cartItem.product.id === originalProduct.id);
 
     if(item){
       const minus = document.createElement("button"); minus.textContent="–"; minus.onclick=e=>{e.stopPropagation(); removeFromCart(originalProduct, selectedOptionIndex)};
@@ -445,6 +477,11 @@ function renderProducts(list){
 // ================== КОРЗИНА ==================
 function addToCart(p, forcedOptionIndex){
   const hasOptions = Array.isArray(productOptionConfig[p.id]);
+  if(!inCartScreen && hasOptions && forcedOptionIndex === undefined){
+    openModal(p);
+    showOptionWarning("Пожалуйста, выберете тип товара перед добавлением в корзину");
+    return;
+  }
   const selectedOptionIndex = forcedOptionIndex !== undefined ? forcedOptionIndex : getSelectedOptionIndex(p.id);
   const optionIndex = hasOptions ? selectedOptionIndex : null;
 
@@ -485,8 +522,9 @@ if(modalImageWrapper){
   modalDots.className = "modal-dots";
 
   modalOptionsPanel.className = "modal-option-panel";
+  modalOptionWarning.className = "modal-option-warning";
   modalOptions.className = "modal-options";
-  modalOptionsPanel.appendChild(modalOptions);
+  modalOptionsPanel.append(modalOptionWarning, modalOptions);
 
   modalActions.className = "modal-actions";
   modalBuyBtn.type = "button";
@@ -553,6 +591,7 @@ function renderProductOptions(p){
     btn.onclick = (e) => {
       e.stopPropagation();
       setSelectedOption(p.id, idx);
+      hideOptionWarning();
       renderProductOptions(p);
       renderModalCounterControls();
     };
@@ -567,10 +606,21 @@ function ensureModalOptionSelected(){
   const options = productOptionConfig[currentModalProduct.id];
   if(!options || !options.length) return true;
   if(getSelectedOptionIndex(currentModalProduct.id) === null){
-    alert("Пожалуйста, выберите пресет перед добавлением в корзину");
+    showOptionWarning("Пожалуйста, выберете тип товара перед добавлением в корзину");
     return false;
   }
+  hideOptionWarning();
   return true;
+}
+
+function showOptionWarning(message){
+  modalOptionWarning.textContent = message;
+  modalOptionWarning.style.display = "block";
+}
+
+function hideOptionWarning(){
+  modalOptionWarning.textContent = "";
+  modalOptionWarning.style.display = "none";
 }
 
 function renderModalCounterControls(){
@@ -656,6 +706,7 @@ function openModal(p){
   renderModalImage();
   renderProductOptions(p);
   renderModalCounterControls();
+  hideOptionWarning();
 
   const hasGallery = modalImages.length > 1;
   modalPrevBtn.style.display = hasGallery ? "flex" : "none";

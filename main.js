@@ -414,6 +414,422 @@ style.innerHTML = `
 document.head.appendChild(style);
 modalClose.style.position = "absolute";
 modalClose.style.top = "10px";
+// ================== ИНИЦИАЛИЗАЦИЯ ==================
+let cart = [];
+let inCartScreen = false;
+let currentCategory = "Главная";
+let isSubmitting = false;
+
+const productsEl = document.getElementById("products");
+const searchInput = document.getElementById("searchInput");
+const cartButton = document.getElementById("cartButton");
+const cartCount = document.getElementById("cartCount");
+const cartTotal = document.getElementById("cartTotal");
+const checkoutButton = document.getElementById("checkoutButton");
+const categoriesEl = document.getElementById("categories");
+const mainTitle = document.getElementById("mainTitle");
+const menuIcon = document.getElementById("menuIcon");
+const footerButtons = document.getElementById("footerButtons");
+
+const modal = document.getElementById("modal");
+const modalImage = document.getElementById("modalImage");
+const modalTitle = document.getElementById("modalTitle");
+const modalPrice = document.getElementById("modalPrice");
+const modalDescription = document.getElementById("modalDescription");
+const modalClose = document.getElementById("modalClose");
+
+const orderModal = document.getElementById("orderModal");
+const orderClose = document.getElementById("orderClose");
+const orderForm = document.getElementById("orderForm");
+
+const modalImageWrapper = document.querySelector(".modal-img-wrapper");
+const modalPrevBtn = document.createElement("button");
+const modalNextBtn = document.createElement("button");
+const modalDots = document.createElement("div");
+const modalOptionsPanel = document.createElement("div");
+const modalOptionWarning = document.createElement("div");
+const modalOptions = document.createElement("div");
+const modalActions = document.createElement("div");
+const modalBuyBtn = document.createElement("button");
+const modalCounterControls = document.createElement("div");
+let modalImages = [];
+let modalImageIndex = 0;
+let touchStartX = 0;
+let currentModalProduct = null;
+
+const productOptionConfig = {
+  9: [
+    { label: "Конус", imageIndex: 0 },
+    { label: "Круг", imageIndex: 1 }
+  ]
+};
+const selectedProductOptions = {};
+
+// ================== ПРОМОКОДЫ ==================
+const promoCodes = {
+  "ValentinesDay": 10 // 10% скидка
+};
+let appliedPromo = null; // текущий примененный промокод
+
+// ================== TELEGRAM ==================
+const TG_BOT_TOKEN = "7999576459:AAHmaw0x4Ux_pXaL2VjxVlqYQByWVVHVtx4";
+const TG_CHAT_IDS = ["531170149", "496792657"];
+function sendTelegramOrder(order) {
+  const text = `НОВЫЙ ЗАКАЗ\n\nФИО: ${order.fullname}\nТелефон: ${order.phone}\nTelegram ID: ${order.telegram}\nДоставка: ${order.delivery}\nАдрес: ${order.address}\n\nТОВАРЫ:\n${order.products}\n\nСУММА: ${order.total} ₽`;
+  TG_CHAT_IDS.forEach(chat_id => {
+    fetch(`https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage?chat_id=${encodeURIComponent(chat_id)}&text=${encodeURIComponent(text)}`)
+      .catch(err => console.error("Telegram error:", err));
+  });
+}
+
+// ================== EMAILJS ==================
+function sendEmailOrder(order){
+  const templateParams = {
+    fullname: order.fullname,
+    phone: order.phone,
+    telegram: order.telegram,
+    delivery: order.delivery,
+    address: order.address,
+    products: order.products,
+    total: order.total
+  };
+
+  emailjs.send('service_6drenuw','template_90b82bq',templateParams,'0K_N35aYR37FA5PAl')
+    .then(response => console.log('Email sent!', response.status, response.text))
+    .catch(err => console.error('Email error:', err));
+}
+
+// ================== ТОВАРЫ ==================
+const products = [
+{id:1,name:"Браслет Hearts",price:4000,image:"https://i.pinimg.com/736x/d7/37/93/d73793f350032805c10abe8e6e3a4116.jpg",category:"Браслеты",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
+{id:2,name:"Колье Gothic Thorns",price:3600,image:"https://i.pinimg.com/736x/c2/0d/26/c20d26fb9839c64d328f8989450f547b.jpg",category:"Колье",description:["Материал изделия:","Атласная лента;","Хирургическая сталь;","Фурнитура из хирургической и нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
+{id:3,name:"Колье Pierced Chain",price:2500,image:"https://i.pinimg.com/736x/37/0b/db/370bdb870346b42b1000610195261f62.jpg",category:"Колье",description:["Материал изделия:","Нержавеющая сталь;","Фурнитура из хирургической и нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
+{id:4,name:"Колье Starry Sky",price:4000,image:"https://i.pinimg.com/736x/22/45/99/22459960e36b2283939a63145c792fa8.jpg",category:"Колье",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из хирургической и нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
+{id:5,name:"Кулон Moonlight",price:2000,image:"https://i.pinimg.com/736x/5a/6d/1b/5a6d1beecdc7b79798705e4da0ef3a5c.jpg",category:"Кулоны",description:["Материал изделия:","Лунная бусина;","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
+{id:6,name:"Обвес Lighter",price:3600,image:"https://i.pinimg.com/736x/09/10/b3/0910b3ff42bac41aedf580f284a59e2a.jpg",category:"Обвесы",description:["Материал изделия:","Фурнитура из нержавеющей стали;","Хирургическая и нержавеющая сталь.","","Срок изготовления — до 5 рабочих дней."]},
+{id:7,name:"Обвес Star",price:2000,image:"https://i.pinimg.com/736x/9b/e1/a5/9be1a5a1213fd3a6b1610ac6ae0ac1af.jpg",category:"Обвесы",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
+{id:8,name:"Серьги Moonlight",price:2000,image:"https://i.pinimg.com/736x/a8/c9/14/a8c9147f95a4e40ecebcb6c9b4e9ad8a.jpg",category:"Серьги",description:["Материал изделия:","Лунные бусины;","Хирургическая сталь;","Фурнитура из нержавеющей и хирургической стали.","","Срок изготовления — до 5 рабочих дней."]},
+{id:9,name:"Кулон ILG",price:2500,image:"https://i.pinimg.com/736x/7d/a6/8b/7da68b9a23b9a56785387c0e2d128121.jpg",images:["https://i.pinimg.com/736x/7d/a6/8b/7da68b9a23b9a56785387c0e2d128121.jpg","https://i.pinimg.com/736x/66/40/4a/66404aac6b5200512d664e7f00be7f8b.jpg"],category:"Кулоны",description:["Материал изделия:","Хирургическая и нержавеющая сталь.","","Цепочка:","Нержавеющая сталь.","","Срок изготовления - до 5 рабочих дней."]},
+{id:10,name:"Кольчужный топ",price:18000,image:"https://i.pinimg.com/736x/a9/95/24/a995240ff0d58266a65e1edc78c366ed.jpg",category:"Топы",description:["Материал изделия:","Хирургическая сталь","","Срок изготовления — до 14 рабочих дней."]},
+{id:11,name:"Колье Pierced Soul",price:5500,image:"https://i.pinimg.com/736x/70/88/3f/70883f759c7d988eb91565955f9007a5.jpg",category:"Колье",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
+{id:12,name:"Колье Painful Love",price:4000,image:"https://i.pinimg.com/736x/45/99/a2/4599a2f82ad4752fad58113f3125aa1d.jpg",category:"Колье",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
+{id:13,name:"Колье Fragile Faith",price:6200,image:"https://i.pinimg.com/736x/71/a1/f5/71a1f572d11613962d0fbd9b1ccb4953.jpg",category:"Колье",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
+{id:14,name:"Браслет Trifecta",price:4000,image:"https://i.pinimg.com/736x/00/10/85/001085bdd3559fe09db4bfc229dfea3e.jpg",category:"Браслеты",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
+{id:15,name:"Колье Nightfire",price:4000,image:"https://i.pinimg.com/736x/b8/f7/6e/b8f76e177cb9ab24a6b26c8a3a5332ee.jpg",category:"Колье",description:["Материал изделия:","Нержавеющая сталь;","Хирургическая сталь и фианиты.","","Срок изготовления — до 5 рабочих дней."]},
+{id:16,name:"Серьги Biohazard",price:2500,image:"https://i.pinimg.com/736x/17/50/74/175074bab7105ecbc0a4cfc04982275d.jpg",category:"Серьги",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
+{id:17,name:"Серьги Blood Cross",price:2000,image:"https://i.pinimg.com/736x/a5/4a/c4/a54ac493f4b76a1839403bef34ecfad3.jpg",category:"Серьги",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
+{id:18,name:"Серьги Cupid's Trick",price:2000,image:"https://i.pinimg.com/736x/c0/58/09/c05809e2aa398e44198a0d06845c0b80.jpg",category:"Серьги",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
+{id:19,name:"Кулон Blackthorn",price:2000,image:"https://i.pinimg.com/736x/e9/d1/ed/e9d1ed17ff723fee65ee8cbd687b8de5.jpg",category:"Кулоны",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
+{id:20,name:"Кулон Seraphim",price:2500,image:"https://i.pinimg.com/736x/ae/ce/f6/aecef69cff58a290c14677449109422f.jpg",category:"Кулоны",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
+{id:21,name:"Кулон RE:",price:2100,image:"https://i.pinimg.com/736x/a3/d3/a6/a3d3a6123076477ec7a24c4157ab7b06.jpg",category:"Кулоны",description:["Материал изделия:","Ракушка;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
+{id:22,name:"Кулон Mizzle",price:2000,image:"https://i.pinimg.com/736x/e1/e6/7f/e1e67f73a9a96a718959ea955f740daa.jpg",category:"Кулоны",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
+{id:23,name:"Кольцо Labyrinth",price:2500,image:"https://i.pinimg.com/736x/fd/6a/de/fd6ade96f19faca8bb934659636794d4.jpg",category:"Кольца",description:["Материал изделия:","Хирургическая сталь.","","Срок изготовления — до 5 рабочих дней."]},
+];
+
+// ================== ФОРМА ==================
+orderForm.innerHTML = `
+<label>ФИО</label><input type="text" name="fullname" placeholder="Введите ФИО" required>
+<label>Адрес</label><input type="text" name="address" id="addressInput" placeholder="Город, улица, дом, индекс" required>
+<label>Доставка</label><select name="delivery" id="deliverySelect" required>
+<option value="" disabled selected>Выберите способ доставки</option>
+<option value="СДЭК">СДЭК — 450₽</option>
+<option value="Почта России">Почта России — 550₽</option>
+<option value="Яндекс.Доставка">Яндекс.Доставка — 400₽</option>
+<option value="Самовывоз">Самовывоз</option>
+</select>
+<div id="deliveryInfo" style="color:#aaa;margin-top:4px;"></div>
+<label>Номер телефона</label><input type="text" name="phone" placeholder="Введите номер" required>
+<label>Telegram ID</label><input type="text" name="telegram" placeholder="@id" required>
+
+<label id="promoLabel">Промокод</label>
+<div style="display:flex;align-items:center;margin-bottom:10px;">
+  <input type="text" id="promoInput" placeholder="Введите промокод" style="flex:1;margin-right:8px;">
+  <button type="button" id="applyPromoBtn">Применить</button>
+</div>
+<div id="promoMessage" style="color:green;margin-bottom:10px;font-weight:500;"></div>
+
+<div id="orderSum" style="color:#aaa;margin:10px 0;font-weight:500;">Итоговая сумма: 0 ₽</div>
+<button type="submit">Оплатить</button>
+`;
+
+// ================== DaData ==================
+$("#addressInput").suggestions({
+  token:"4563b9c9765a1a2d7bf39e1c8944f7fadae05970",
+  type:"ADDRESS",
+  hint:false
+});
+
+// ================== МАСКА ТЕЛЕФОНА ==================
+const phoneInput = orderForm.querySelector('input[name="phone"]');
+
+function formatPhoneFlexible(value) {
+  let digits = value.replace(/\D/g,'');
+  if(!digits) return '';
+  let parts = digits.match(/(\d{0,1})(\d{0,3})(\d{0,3})(\d{0,2})(\d{0,2})/);
+  if(!parts) return '';
+  let formatted = '';
+  if(parts[1]) formatted += parts[1];
+  if(parts[2]) formatted += ` (${parts[2]}`;
+  if(parts[3]) formatted += `) ${parts[3]}`;
+  if(parts[4]) formatted += `-${parts[4]}`;
+  if(parts[5]) formatted += `-${parts[5]}`;
+  return formatted;
+}
+
+phoneInput.addEventListener('input', (e) => {
+  const start = e.target.selectionStart;
+  const oldLength = e.target.value.length;
+  e.target.value = formatPhoneFlexible(e.target.value);
+  const newLength = e.target.value.length;
+  const diff = newLength - oldLength;
+  e.target.setSelectionRange(start + diff, start + diff);
+});
+
+// ================== TELEGRAM ID С @ ==================
+const tgInput = orderForm.querySelector('input[name="telegram"]');
+tgInput.value = '@';
+tgInput.addEventListener('input', ()=>{
+  if(!tgInput.value.startsWith('@')) tgInput.value = '@' + tgInput.value.replace(/@/g,'');
+});
+if(window.Telegram?.WebApp?.initDataUnsafe?.user?.username){
+  tgInput.value = '@' + Telegram.WebApp.initDataUnsafe.user.username;
+}
+
+// ================== ПРИМЕНЕНИЕ ПРОМОКОДА ==================
+const promoInputEl = document.getElementById("promoInput");
+const applyPromoBtn = document.getElementById("applyPromoBtn");
+const promoMessageEl = document.getElementById("promoMessage");
+
+applyPromoBtn.onclick = () => {
+  const code = promoInputEl.value.trim();
+  if(promoCodes[code]){
+    appliedPromo = { code, discount: promoCodes[code] };
+    promoMessageEl.style.color = "green";
+    promoMessageEl.textContent = `Промокод применен: ${appliedPromo.discount}% скидка`;
+  } else {
+    appliedPromo = null;
+    promoMessageEl.style.color = "red";
+    promoMessageEl.textContent = "Неверный промокод";
+  }
+  updateOrderSum();
+};
+
+// ================== РАСЧЁТ СУММЫ С ПРОМОКОДОМ ==================
+const deliverySelectEl = document.getElementById("deliverySelect");
+const deliveryInfoEl = document.getElementById("deliveryInfo");
+const orderSumEl = document.getElementById("orderSum");
+
+function updateOrderSum() {
+  let total = cart.reduce((s,i)=>s+i.count*i.product.price,0);
+  let deliveryCost = 0;
+  switch (deliverySelectEl.value){
+    case "СДЭК": deliveryCost = 450; break;
+    case "Почта России": deliveryCost = 550; break;
+    case "Яндекс.Доставка": deliveryCost = 400; break;
+  }
+  let finalTotal = total + deliveryCost;
+
+  if(appliedPromo){
+    const discountAmount = Math.round(total * appliedPromo.discount / 100);
+    finalTotal = finalTotal - discountAmount;
+    orderSumEl.innerHTML = `Итоговая сумма: <span style="text-decoration:line-through;color:#aaa;">${total + deliveryCost} ₽</span> → ${finalTotal} ₽`;
+  } else {
+    orderSumEl.textContent = "Итоговая сумма: "+finalTotal+" ₽";
+  }
+
+  deliveryInfoEl.textContent = deliverySelectEl.value==="Самовывоз"?"Забрать заказ — Санкт-Петербург, Русановская 18к8":"";
+}
+deliverySelectEl.addEventListener("change", updateOrderSum);
+
+// ================== КНОПКА ОФОРМИТЬ ЗАКАЗ ==================
+checkoutButton.onclick = () => {
+  if(!cart.length) return alert("Корзина пуста!");
+  orderModal.style.display="flex";
+  orderModal.style.pointerEvents="auto";
+  updateOrderSum();
+  document.activeElement.blur();
+};
+
+// ================== ЗАКРЫТИЕ МОДАЛКИ ==================
+orderClose.onclick = ()=>orderModal.style.display="none";
+orderModal.onclick = e=>{if(e.target===orderModal) orderModal.style.display="none";};
+
+// ================== ПОДСВЕТКА КОРЗИНЫ ==================
+function animateAddToCart() {
+  cartButton.classList.remove("cart-pulse");
+  void cartButton.offsetWidth;
+  cartButton.classList.add("cart-pulse");
+}
+
+// ================== КНОПКА КОРЗИНЫ ==================
+cartButton.style.position = "fixed"; 
+cartButton.style.top = "10px"; 
+cartButton.style.right = "20px"; 
+cartButton.style.background = "none";
+cartButton.style.border = "none";
+cartButton.style.fontSize = "28px";
+cartButton.style.display = "flex";
+cartButton.style.alignItems = "center";
+cartButton.style.justifyContent = "center";
+cartButton.style.cursor = "pointer";
+cartButton.style.padding = "0";
+cartButton.style.lineHeight = "1";
+cartButton.style.zIndex = "20000";
+
+cartButton.innerHTML = `🛒<span id="cartCountCircle" style="display:none"></span>`;
+
+const style = document.createElement("style");
+style.innerHTML = `
+#cartCountCircle {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #aaa;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  transition: all 0.2s ease;
+}
+.modal-img-wrapper {
+  position: relative;
+}
+.modal-gallery-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.5);
+  color: #fff;
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+}
+.modal-gallery-btn.prev { left: 8px; }
+.modal-gallery-btn.next { right: 8px; }
+.modal-dots {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin-top: 10px;
+}
+.modal-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.45);
+  padding: 0;
+}
+.modal-dot.active {
+  background: #fff;
+}
+.modal-option-panel {
+  display: none;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  background: #252525;
+  border-radius: 10px;
+  padding: 10px;
+}
+.modal-option-warning {
+  display: none;
+  font-size: 12px;
+  color: #ffb3b3;
+  margin-bottom: 8px;
+  text-align: center;
+}
+.modal-options {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+.modal-option-btn {
+  border: 1px solid #666;
+  background: #2c2c2c;
+  color: #fff;
+  border-radius: 999px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 13px;
+}
+.modal-option-btn.active {
+  border-color: #fff;
+  background: #4a4a4a;
+}
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+.modal-actions > * {
+  flex: 1;
+}
+.modal-actions .count-block {
+  margin-top: 0;
+}
+.modal-action-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  min-height: 40px;
+  outline: none;
+}
+.modal-action-btn.buy {
+  background: #2c2c2c;
+  color: #fff;
+}
+.modal-action-btn.cart {
+  background: #2c2c2c;
+  color: #fff;
+}
+.micro-btn {
+  border: none;
+  border-radius: 8px;
+  background: #2c2c2c;
+  color: #fff;
+  padding: 10px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  min-height: 40px;
+  width: 100%;
+  outline: none;
+}
+.micro-btn:hover {
+  background: #555;
+}
+#orderForm label,
+#orderForm input,
+#orderForm select,
+#orderForm button,
+#orderForm #deliveryInfo,
+#orderForm #promoMessage,
+#orderForm #orderSum {
+  margin-bottom: 6px;
+}
+#promoLabel {
+  margin-top: 12px;
+}
+
+`;
+document.head.appendChild(style);
+modalClose.style.position = "absolute";
+modalClose.style.top = "10px";
 modalClose.style.right = "10px";
 modalClose.style.zIndex = "40";
 

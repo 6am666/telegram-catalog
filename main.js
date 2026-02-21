@@ -415,6 +415,25 @@ body.tab-mode {
 .micro-btn:hover {
   background: #555;
 }
+.modal-actions .micro-btn,
+.modal-actions .modal-action-btn {
+  width: 100%;
+  min-height: 40px;
+  background: #2c2c2c;
+  color: #fff;
+}
+#orderModal {
+  align-items: flex-start;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 14px 0;
+}
+#orderModal .order-modal-content {
+  margin: 10px auto 20px;
+  max-height: calc(100vh - 30px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
 #orderForm label,
 #orderForm input,
 #orderForm select,
@@ -534,12 +553,14 @@ function renderProducts(list){
   list.forEach(p=>{
     const card=document.createElement("div"); card.className="product fade-slide";
     const originalProduct = p.originalProduct || p;
-    const img=document.createElement("img"); img.src=originalProduct.image; img.onclick=()=>openModal(originalProduct);
+    const selectedOptionIndex = p.selectedOptionIndex ?? null;
+    const img=document.createElement("img");
+    img.src = getOptionImage(originalProduct, selectedOptionIndex);
+    img.onclick=()=>openModal(originalProduct);
     const title=document.createElement("h3"); title.textContent=p.displayName || originalProduct.name;
     const price=document.createElement("p"); price.textContent=p.price+" ₽";
 
     const controls=document.createElement("div"); controls.className="count-block";
-    const selectedOptionIndex = p.selectedOptionIndex ?? null;
     controls.dataset.productId = String(originalProduct.id);
     controls.dataset.selectedOptionIndex = selectedOptionIndex ?? "";
     controls._originalProduct = originalProduct;
@@ -636,6 +657,15 @@ if(modalImageWrapper){
 
 function getProductImages(p){
   return Array.isArray(p.images) && p.images.length ? p.images : [p.image];
+}
+
+function getOptionImage(product, selectedOptionIndex){
+  const options = productOptionConfig[product.id];
+  if(!options || !options.length || selectedOptionIndex === null || selectedOptionIndex === undefined) return product.image;
+  const option = options[selectedOptionIndex];
+  const images = getProductImages(product);
+  if(!option || typeof option.imageIndex !== "number") return images[0] || product.image;
+  return images[option.imageIndex] || images[0] || product.image;
 }
 
 function getSelectedOptionIndex(productId){

@@ -439,6 +439,16 @@ function findCartItemByProduct(product, selectedOptionIndex){
   return cart.find(item => item.product.id===product.id && (item.selectedOptionIndex ?? null)===(selectedOptionIndex ?? null));
 }
 
+function getProductTotalCount(productId){
+  return cart.filter(item => item.product.id === productId).reduce((sum, item) => sum + item.count, 0);
+}
+
+function removeAnyVariantFromCart(product){
+  const firstVariant = cart.find(item => item.product.id === product.id);
+  if(!firstVariant) return;
+  removeFromCart(product, firstVariant.selectedOptionIndex ?? null);
+}
+
 // ================== РЕНДЕР ==================
 function renderProducts(list){
   productsEl.innerHTML="";
@@ -451,19 +461,44 @@ function renderProducts(list){
 
     const controls=document.createElement("div"); controls.className="count-block";
     const selectedOptionIndex = p.selectedOptionIndex ?? null;
-    const item = inCartScreen
-      ? findCartItemByProduct(originalProduct, selectedOptionIndex)
-      : cart.find(cartItem => cartItem.product.id === originalProduct.id);
+    const hasOptions = Array.isArray(productOptionConfig[originalProduct.id]);
 
-    if(item){
-      const minus = document.createElement("button"); minus.textContent="–"; minus.onclick=e=>{e.stopPropagation(); removeFromCart(originalProduct, selectedOptionIndex)};
-      const count = document.createElement("div"); count.className="count-number"; count.textContent=item.count;
-      const plus = document.createElement("button"); plus.textContent="+"; plus.onclick=e=>{e.stopPropagation(); addToCart(originalProduct, selectedOptionIndex)};
-      controls.append(minus,count,plus);
-    }else{
-      const btn = document.createElement("button"); btn.textContent="В корзину"; btn.onclick=e=>{e.stopPropagation(); addToCart(originalProduct, selectedOptionIndex)};
-      btn.classList.add("micro-btn");
-      controls.appendChild(btn);
+    if(inCartScreen){
+      const item = findCartItemByProduct(originalProduct, selectedOptionIndex);
+      if(item){
+        const minus = document.createElement("button"); minus.textContent="–"; minus.onclick=e=>{e.stopPropagation(); removeFromCart(originalProduct, selectedOptionIndex)};
+        const count = document.createElement("div"); count.className="count-number"; count.textContent=item.count;
+        const plus = document.createElement("button"); plus.textContent="+"; plus.onclick=e=>{e.stopPropagation(); addToCart(originalProduct, selectedOptionIndex)};
+        controls.append(minus,count,plus);
+      } else {
+        const btn = document.createElement("button"); btn.textContent="В корзину"; btn.onclick=e=>{e.stopPropagation(); addToCart(originalProduct, selectedOptionIndex)};
+        btn.classList.add("micro-btn");
+        controls.appendChild(btn);
+      }
+    } else if(hasOptions){
+      const totalCount = getProductTotalCount(originalProduct.id);
+      if(totalCount > 0){
+        const minus = document.createElement("button"); minus.textContent="–"; minus.onclick=e=>{e.stopPropagation(); removeAnyVariantFromCart(originalProduct)};
+        const count = document.createElement("div"); count.className="count-number"; count.textContent=totalCount;
+        const plus = document.createElement("button"); plus.textContent="+"; plus.onclick=e=>{e.stopPropagation(); addToCart(originalProduct)};
+        controls.append(minus,count,plus);
+      } else {
+        const btn = document.createElement("button"); btn.textContent="В корзину"; btn.onclick=e=>{e.stopPropagation(); addToCart(originalProduct)};
+        btn.classList.add("micro-btn");
+        controls.appendChild(btn);
+      }
+    } else {
+      const item = findCartItemByProduct(originalProduct, null);
+      if(item){
+        const minus = document.createElement("button"); minus.textContent="–"; minus.onclick=e=>{e.stopPropagation(); removeFromCart(originalProduct, null)};
+        const count = document.createElement("div"); count.className="count-number"; count.textContent=item.count;
+        const plus = document.createElement("button"); plus.textContent="+"; plus.onclick=e=>{e.stopPropagation(); addToCart(originalProduct, null)};
+        controls.append(minus,count,plus);
+      } else {
+        const btn = document.createElement("button"); btn.textContent="В корзину"; btn.onclick=e=>{e.stopPropagation(); addToCart(originalProduct, null)};
+        btn.classList.add("micro-btn");
+        controls.appendChild(btn);
+      }
     }
 
     card.append(img,title,price,controls);
@@ -653,7 +688,7 @@ function renderModalCounterControls(){
   } else {
     const addBtn = document.createElement("button");
     addBtn.type = "button";
-    addBtn.className = "micro-btn";
+    addBtn.className = "modal-action-btn cart";
     addBtn.textContent = "В корзину";
     addBtn.onclick = (e) => {
       e.stopPropagation();
@@ -896,39 +931,3 @@ orderForm.onsubmit = async (e) => {
     document.body.removeChild(waitModal);
     return;
   }
-
-  setTimeout(() => {
-    if(document.body.contains(waitModal)) document.body.removeChild(waitModal);
-    const thankModal = document.createElement("div");
-    thankModal.style.position="fixed";
-    thankModal.style.top="0";
-    thankModal.style.left="0";
-    thankModal.style.width="100%";
-    thankModal.style.height="100%";
-    thankModal.style.backgroundColor="rgba(44,44,44,0.95)";
-    thankModal.style.color="#fff";
-    thankModal.style.display="flex";
-    thankModal.style.alignItems="center";
-    thankModal.style.justifyContent = "center";
-    thankModal.style.fontSize = "18px";
-    thankModal.style.textAlign = "center";
-    thankModal.style.padding = "20px";
-    thankModal.style.zIndex = 9999;
-    thankModal.style.cursor = "pointer";
-    thankModal.style.flexDirection = "column";
-    thankModal.innerText = "СПАСИБО ЗА ВЫБОР CHRONICLE CHAINS!\n\nМЫ УЖЕ ПРИНЯЛИ ВАШ ЗАКАЗ И НАЧИНАЕМ ЕГО СОБИРАТЬ <3\n\nС вами свяжутся когда посылка будет отправлена!!";
-
-    thankModal.onclick = () => {
-      document.body.removeChild(thankModal);
-      isSubmitting = false;
-    };
-
-    document.body.appendChild(thankModal);
-  }, 10000);
-};
-
-// ================== СТАРТ ==================
-renderProducts(products);
-updateCartUI();
-updateOrderSum();
-updateCartCounter();

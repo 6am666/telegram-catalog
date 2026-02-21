@@ -2,22 +2,27 @@
 
 body{
   font-family: Arial, sans-serif;
-  background-color:#1e1e1e;
-  background-image:url("https://i.pinimg.com/originals/6d/7c/65/6d7c65bbef77082a19ff4a2a2327d50d.jpg");
-  background-size:cover;
-  background-position:center;
-  background-attachment: fixed;
+  background: transparent;
   overflow-x:hidden;
-  transition: background 0.3s ease;
 }
+
+.bg-fixed {
+  position: fixed;
+  inset: 0;
+  background-image:url("https://i.pinimg.com/originals/6d/7c/65/6d7c65bbef77082a19ff4a2a2327d50d.jpg");
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  z-index: -2;
+}
+
 
 /* 🔴 Фикс фона при открытой корзине или вкладках */
 body.cart-mode, body.tab-mode {
-  background-image:url("https://i.pinimg.com/originals/6d/7c/65/6d7c65bbef77082a19ff4a2a2327d50d.jpg");
-  background-size:cover;
-  background-position:center;
-  background-attachment: fixed;
+  background: transparent;
 }
+
 
 /* ================== ШАПКА ================== */
 .header{
@@ -348,4 +353,3 @@ body.cart-mode, body.tab-mode {
     transform: translateY(0);
   }
 }
-

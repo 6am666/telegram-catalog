@@ -230,7 +230,10 @@ function updateOrderSum() {
     orderSumEl.textContent = "Итоговая сумма: "+finalTotal+" ₽";
   }
 
-deliverySelectEl.addEventListener("change", updateOrderSum);
+ deliveryInfoEl.textContent = deliverySelectEl.value==="Самовывоз"?"Забрать заказ — Санкт-Петербург, Русановская 18к8":"";
+}
+
+  deliverySelectEl.addEventListener("change", updateOrderSum);
 
 // ================== КНОПКА ОФОРМИТЬ ЗАКАЗ ==================
 checkoutButton.onclick = () => {

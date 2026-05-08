@@ -118,8 +118,7 @@ const products = [
 {id:26,name:"Кольцо End",price:2300,image:"https://i.pinimg.com/736x/96/70/1b/96701bd895dd35eba330eeb1e136d05b.jpg",category:"Кольца",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
 {id:27,name:"Серьги Tears",price:2000,image:"https://i.pinimg.com/736x/14/61/8a/14618af6202e7d4bb8aad9a805830018.jpg",category:"Серьги",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
 {id:28,name:"Колье Femme",price:4000,image:"https://i.pinimg.com/736x/cb/75/30/cb7530bcf67a8b1228f27380af0c2ac8.jpg",category:"Колье",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
-{id:29,name:"Колье Danse de cirque",price:5200,images:["https://i.pinimg.com/736x/08/4a/03/084a0379ba56ff6705977a6e920a3666.jpg","https://i.pinimg.com/736x/af/da/f3/afdaf38d5f440884e12a599cbe443946.jpg","https://i.pinimg.com/736x/b7/ff/d2/b7ffd273aa664490341e90d8893af6a0.jpg"],category:"Колье",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
-];
+{id:29,name:"Колье Danse de cirque",price:5200,image:"https://i.pinimg.com/736x/08/4a/03/084a0379ba56ff6705977a6e920a3666.jpg",images:["https://i.pinimg.com/736x/08/4a/03/084a0379ba56ff6705977a6e920a3666.jpg","https://i.pinimg.com/736x/af/da/f3/afdaf38d5f440884e12a599cbe443946.jpg","https://i.pinimg.com/736x/b7/ff/d2/b7ffd273aa664490341e90d8893af6a0.jpg"],category:"Колье",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
 
 // ================== ФОРМА ==================
 orderForm.innerHTML = `

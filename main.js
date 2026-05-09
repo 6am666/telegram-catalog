@@ -115,6 +115,7 @@ const products = [
 {id:28,name:"Серьги Tears 2.0",price:2200,image:"https://i.pinimg.com/736x/a8/5c/88/a85c883ab1ef98229d414e5de098370d.jpg",category:"Серьги",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
 {id:29,name:"Колье Aquafina",price:4600,image:"https://i.pinimg.com/736x/ee/c1/f6/eec1f63dfac11d778b9f07d2b9dbed14.jpg",category:"Колье",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
 {id:30,name:"Колье Femme",price:4000,image:"https://i.pinimg.com/736x/cb/75/30/cb7530bcf67a8b1228f27380af0c2ac8.jpg",category:"Колье",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
+{id:31,name:"Колье Danse de cirque",price:5200,image:"https://i.pinimg.com/736x/08/4a/03/084a0379ba56ff6705977a6e920a3666.jpg",images:["https://i.pinimg.com/736x/08/4a/03/084a0379ba56ff6705977a6e920a3666.jpg","https://i.pinimg.com/736x/af/da/f3/afdaf38d5f440884e12a599cbe443946.jpg","https://i.pinimg.com/736x/b7/ff/d2/b7ffd273aa664490341e90d8893af6a0.jpg"],category:"Колье",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
 ];
 
 // ================== ФОРМА ==================

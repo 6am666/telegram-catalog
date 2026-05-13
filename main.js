@@ -115,7 +115,7 @@ const products = [
 {id:28,name:"Колье Aquafina",price:4000,image:"https://i.pinimg.com/736x/ee/c1/f6/eec1f63dfac11d778b9f07d2b9dbed14.jpg",category:"Колье",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
 {id:29,name:"Колье Femme",price:4000,image:"https://i.pinimg.com/736x/cb/75/30/cb7530bcf67a8b1228f27380af0c2ac8.jpg",category:"Колье",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
 {id:30,name:"Колье Danse de cirque",price:5200,image:"https://i.pinimg.com/736x/08/4a/03/084a0379ba56ff6705977a6e920a3666.jpg",images:["https://i.pinimg.com/736x/08/4a/03/084a0379ba56ff6705977a6e920a3666.jpg","https://i.pinimg.com/736x/af/da/f3/afdaf38d5f440884e12a599cbe443946.jpg","https://i.pinimg.com/736x/b7/ff/d2/b7ffd273aa664490341e90d8893af6a0.jpg"],category:"Колье",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
-{id:31,name:"Обвес Mesmerizer",price:3200,image:"https://i.pinimg.com/736x/9c/04/02/9c04021243f155e96baf66be42c539e2.jpg",category:"Обвесы",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
+{id:31,name:"Обвес Mesmerizer",price:3200,image:"https://i.pinimg.com/736x/6d/71/03/6d7103a5858f87fa2b19397049cf7c78.jpg",category:"Обвесы",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
 ];
 
 // ================== ФОРМА ==================

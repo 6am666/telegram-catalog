@@ -43,8 +43,8 @@ let currentModalProduct = null;
 
 const productOptionConfig = {
   10: [
-    { label: "Треугольник", imageIndex: 0 },
-    { label: "Круг", imageIndex: 1 }
+    { label: "triangle", imageIndex: 0 },
+    { label: "circle", imageIndex: 1 }
   ],
   14: [
     { label: "Black", imageIndex: 0 },
@@ -550,7 +550,18 @@ function renderProducts(list){
   list.forEach(p=>{
     const card=document.createElement("div"); card.className="product fade-slide";
     const originalProduct = p.originalProduct || p;
-    const img=document.createElement("img"); img.src=originalProduct.image; img.onclick=()=>openModal(originalProduct);
+    const img=document.createElement("img");
+    const optionList = productOptionConfig[originalProduct.id];
+    if(inCartScreen && Array.isArray(optionList) && optionList.length){
+      const optIdx = p.selectedOptionIndex ?? 0;
+      const opt = optionList[optIdx] || optionList[0];
+      const imgIdx = typeof opt?.imageIndex === "number" ? opt.imageIndex : 0;
+      const imgs = getProductImages(originalProduct);
+      img.src = imgs[Math.max(0, Math.min(imgIdx, imgs.length - 1))] || originalProduct.image;
+    } else {
+      img.src=originalProduct.image;
+    }
+    img.onclick=()=>openModal(originalProduct);
     const title=document.createElement("h3"); title.textContent=p.displayName || originalProduct.name;
     const price=document.createElement("p"); price.textContent=p.price+" ₽";
 
@@ -1034,14 +1045,3 @@ orderForm.onsubmit = async (e) => {
     thankModal.onclick = () => {
       document.body.removeChild(thankModal);
       isSubmitting = false;
-    };
-
-    document.body.appendChild(thankModal);
-  }, 10000);
-};
-
-// ================== СТАРТ ==================
-refreshProductList();
-updateCartUI();
-updateOrderSum();
-updateCartCounter();

@@ -59,6 +59,7 @@ const productOptionConfig = {
     { label: "Red", imageIndex: 1 },
     { label: "Pink", imageIndex: 2 },
     { label: "White", imageIndex: 3 }
+  ]
 };
 const selectedProductOptions = {};
 

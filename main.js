@@ -53,7 +53,12 @@ const productOptionConfig = {
   18: [
     { label: "Black", imageIndex: 0 },
     { label: "Red", imageIndex: 1 }
-  ]
+  ],
+  31: [
+    { label: "Black", imageIndex: 0 },
+    { label: "Red", imageIndex: 1 },
+    { label: "Pink", imageIndex: 2 },
+    { label: "White", imageIndex: 3 }
 };
 const selectedProductOptions = {};
 

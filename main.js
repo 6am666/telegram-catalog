@@ -1045,3 +1045,14 @@ orderForm.onsubmit = async (e) => {
     thankModal.onclick = () => {
       document.body.removeChild(thankModal);
       isSubmitting = false;
+    };
+
+    document.body.appendChild(thankModal);
+  }, 10000);
+};
+
+// ================== СТАРТ ==================
+refreshProductList();
+updateCartUI();
+updateOrderSum();
+updateCartCounter();

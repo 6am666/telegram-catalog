@@ -63,6 +63,10 @@ const productOptionConfig = {
   19: [
     { label: "Venus", imageIndex: 0 },
     { label: "Heart", imageIndex: 1 }
+  ],
+  17: [
+    { label: "Pink", imageIndex: 0 },
+    { label: "Green", imageIndex: 1 }
   ]
 };
 const selectedProductOptions = {};

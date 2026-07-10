@@ -67,7 +67,17 @@ const productOptionConfig = {
   17: [
     { label: "Pink", imageIndex: 0 },
     { label: "Green", imageIndex: 1 }
+  ],
+  34: [
+    { label: "Red", imageIndex: 0 },
+    { label: "Black", imageIndex: 1 },
+    { label: "Pink", imageIndex: 2 },
+    { label: "Blue", imageIndex: 3 },
+    { label: "Violet", imageIndex: 4 },
+    { label: "White", imageIndex: 5 },
+    { label: "Yellow", imageIndex: 6 }
   ]
+
 };
 const selectedProductOptions = {};
 
@@ -140,23 +150,7 @@ const products = [
 {id:31,name:"Кулон Entity",price:2500,image:"https://i.pinimg.com/736x/ec/be/7e/ecbe7e840587cb8d63a9d7359376b1ff.jpg",images:["https://i.pinimg.com/736x/ec/be/7e/ecbe7e840587cb8d63a9d7359376b1ff.jpg","https://i.pinimg.com/736x/d7/78/8d/d7788dfea3439c522f44ef410b3d2858.jpg","https://i.pinimg.com/736x/f8/c1/b4/f8c1b491e8ad4c4c6bd4f760335db4e4.jpg","https://i.pinimg.com/736x/a1/47/e9/a147e98f6039ecf365d6163c7a82b967.jpg"],imageTitles:["Silver","Dark","Chrome","Black"],category:"Кулоны",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
 {id:32,name:"Кулон Nana",price:3500,image:"https://i.pinimg.com/736x/c4/67/46/c46746f5b9a2cee0a70efbf50883719f.jpg",category:"Кулоны",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — Предзаказ."]},
 {id:33,name:"Кулон Hachiko",price:3500,image:"https://i.pinimg.com/736x/80/41/57/8041575bf6af0369c108b40bbbfa4ae6.jpg",category:"Кулоны",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — Предзаказ."]},
-{id:34,name:"Кулон Madoka Magica",price:3500,image:"https://i.pinimg.com/736x/f3/70/4a/f3704aac95d018bfeec683ac83524313.jpg",images:[
-"https://i.pinimg.com/736x/f3/70/4a/f3704aac95d018bfeec683ac83524313.jpg",
-"https://i.pinimg.com/736x/34/b4/33/34b433742592b8907969dedfee0817e5.jpg",
-"https://i.pinimg.com/736x/34/0c/d4/340cd4de1ec10e518ae4d34f17417edb.jpg",
-"https://i.pinimg.com/736x/f5/af/b3/f5afb396d0c33aebcf3eaa623092d43c.jpg",
-"https://i.pinimg.com/736x/0f/ea/73/0fea735d4ed9db39acecfe2f00f0d766.jpg",
-"https://i.pinimg.com/736x/ac/66/79/ac667914979e51cd21e6663dfac718ef.jpg",
-"https://i.pinimg.com/736x/bd/03/88/bd03882e0ad7c6055b7567232c3fff8f.jpg"
-],variants:[
-"Red",
-"Black",
-"Pink",
-"Blue",
-"Violet",
-"White",
-"Yellow"
-],category:"Кулоны",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
+{id:34,name:"Кулон Madoka Magica",price:3500,image:"https://i.pinimg.com/736x/f3/70/4a/f3704aac95d018bfeec683ac83524313.jpg",images:["https://i.pinimg.com/736x/f3/70/4a/f3704aac95d018bfeec683ac83524313.jpg","https://i.pinimg.com/736x/34/b4/33/34b433742592b8907969dedfee0817e5.jpg","https://i.pinimg.com/736x/34/0c/d4/340cd4de1ec10e518ae4d34f17417edb.jpg","https://i.pinimg.com/736x/f5/af/b3/f5afb396d0c33aebcf3eaa623092d43c.jpg","https://i.pinimg.com/736x/0f/ea/73/0fea735d4ed9db39acecfe2f00f0d766.jpg","https://i.pinimg.com/736x/ac/66/79/ac667914979e51cd21e6663dfac718ef.jpg","https://i.pinimg.com/736x/bd/03/88/bd03882e0ad7c6055b7567232c3fff8f.jpg"],imageTitles:["Red","Black","Pink","Blue","Violet","White","Yellow"],category:"Кулоны",description:["Материал изделия:","Хирургическая сталь;","Фурнитура из нержавеющей стали.","","Срок изготовления — до 5 рабочих дней."]},
 ];
 
 // ================== ФОРМА ==================

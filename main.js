@@ -69,13 +69,13 @@ const productOptionConfig = {
     { label: "Green", imageIndex: 1 }
   ],
   34: [
-    { label: "Red", imageIndex: 0 },
-    { label: "Black", imageIndex: 1 },
-    { label: "Pink", imageIndex: 2 },
-    { label: "Blue", imageIndex: 3 },
-    { label: "Violet", imageIndex: 4 },
-    { label: "White", imageIndex: 5 },
-    { label: "Yellow", imageIndex: 6 }
+    { label: "R", imageIndex: 0 },
+    { label: "B", imageIndex: 1 },
+    { label: "P", imageIndex: 2 },
+    { label: "B", imageIndex: 3 },
+    { label: "V", imageIndex: 4 },
+    { label: "W", imageIndex: 5 },
+    { label: "Y", imageIndex: 6 }
   ]
 
 };

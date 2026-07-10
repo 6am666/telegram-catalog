@@ -70,7 +70,7 @@ const productOptionConfig = {
   ],
   34: [
     { label: "R", imageIndex: 0 },
-    { label: "B", imageIndex: 1 },
+    { label: "G", imageIndex: 1 },
     { label: "P", imageIndex: 2 },
     { label: "B", imageIndex: 3 },
     { label: "V", imageIndex: 4 },

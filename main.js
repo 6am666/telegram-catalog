@@ -83,7 +83,7 @@ const selectedProductOptions = {};
 
 // ================== ПРОМОКОДЫ ==================
 const promoCodes = {
-  "ValentinesDay": 10 // 10% скидка
+   "MADOKA15": 15 // 15% скидка
 };
 let appliedPromo = null; // текущий примененный промокод
 
